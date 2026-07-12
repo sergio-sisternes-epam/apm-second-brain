@@ -20,6 +20,7 @@ Requirements: jsonschema>=4.0, pyyaml
 """
 
 import json
+import shutil
 import re
 from pathlib import Path
 
@@ -345,6 +346,7 @@ def test_learn_invalid_receipt_no_source_id() -> None:
 # 15. Executable: apm pack dry-run succeeds (smoke test for packability)
 # ---------------------------------------------------------------------------
 
+@pytest.mark.skipif(shutil.which("apm") is None, reason="apm CLI not in PATH")
 def test_apm_pack_dry_run_succeeds() -> None:
     """apm pack --dry-run must succeed for second-brain-learn."""
     import subprocess

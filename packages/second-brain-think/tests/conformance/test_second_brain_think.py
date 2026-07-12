@@ -19,6 +19,7 @@ Requirements: jsonschema>=4.0, pyyaml
 """
 
 import json
+import shutil
 import re
 from pathlib import Path
 
@@ -247,6 +248,7 @@ def test_apm_lock_uses_full_shas() -> None:
 # 11. Executable: apm pack dry-run for second-brain-think succeeds
 # ---------------------------------------------------------------------------
 
+@pytest.mark.skipif(shutil.which("apm") is None, reason="apm CLI not in PATH")
 def test_apm_pack_dry_run_succeeds() -> None:
     """apm pack --dry-run must succeed for second-brain-think."""
     import subprocess
@@ -264,6 +266,7 @@ def test_apm_pack_dry_run_succeeds() -> None:
 # 12. Executable: packed own-primitives contain only think skills
 # ---------------------------------------------------------------------------
 
+@pytest.mark.skipif(shutil.which("apm") is None, reason="apm CLI not in PATH")
 def test_apm_pack_own_primitives_are_think_only() -> None:
     """second-brain-think's own packed primitives (from .apm/) must be think skills only.
 
