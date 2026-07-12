@@ -7,7 +7,7 @@
 # Exit codes:
 #   0  no private-context markers found (clean)
 #   1  one or more markers found (fail)
-#   2  scanner error (bad scan root, find/grep failure)
+#   2  scanner error (bad scan root or find failure)
 #
 # Scoped exclusions:
 #   .github/workflows/  -- workflow files legitimately embed the scanner's own
@@ -16,7 +16,7 @@
 #                          CODEOWNERS, convention files) IS scanned.
 #   apm_modules/        -- CLI dependency cache; never committed.
 
-set -uo pipefail
+set -euo pipefail
 
 DIR="${1:-.}"
 
@@ -30,26 +30,24 @@ fi
 # (e.g. ./.github/workflows/*).  This avoids fragility with trailing slashes
 # or absolute-path prefix mismatches.
 #
-# set -e is intentionally absent here so we can inspect $SCAN_RC directly.
-# grep exits 0 (matches found), 1 (no matches -- not an error), or 2+ (error).
-# We only treat exit 1 as non-fatal; anything higher signals a real failure.
+# Use find -exec grep -ql instead of find -print0 | xargs grep -rl to avoid
+# the xargs exit-code wrapping: xargs exits 123 when grep exits 1 (no matches),
+# making "clean" and "grep error" indistinguishable.  With -exec, each file is
+# tested individually; grep exit codes affect the -exec chain per file, not the
+# overall find exit code.  find exits non-zero only on genuine traversal errors.
 HITS=$(cd "$DIR" && find . \
   -not -path './.github/workflows/*' \
   -not -path './apm_modules/*' \
   -type f \
   \( -name "*.md" -o -name "*.yml" -o -name "*.yaml" \
      -o -name "*.json" -o -name "*.py" -o -name "*.mjs" \) \
-  -print0 \
-| xargs -0r grep -rl \
+  -exec grep -ql \
     -e "epam-agent-forge" \
     -e "Users/sergio_sisternes" \
     -e "EPAM All Rights Reserved" \
-  2>/dev/null) || SCAN_RC=$?
-
-if [ "${SCAN_RC:-0}" -gt 1 ]; then
-  echo "Error: scanner failed with exit code ${SCAN_RC}." >&2
-  exit 2
-fi
+    {} \; \
+  -print \
+  2>/dev/null)
 
 if [ -n "$HITS" ]; then
   echo "Private context found in:"
