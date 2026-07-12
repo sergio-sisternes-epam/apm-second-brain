@@ -78,7 +78,25 @@ jobs:
           else
             apm marketplace check
           fi
-      - name: Dry-run pack
-        run: apm pack --dry-run
-      - name: Verify marketplace.json is committed and current
-        run: apm pack --dry-run --check-clean
+      - name: Compile all packages (dry-run)
+        run: |
+          # Validate each package independently to catch per-package compile errors
+          # that a root-level pack might absorb or skip.
+          find . -mindepth 2 -name "apm.yml" ! -path "*/.apm/*" -exec dirname {} \; \
+            | sort -u \
+            | while read pkg_dir; do
+                echo "--- compiling $pkg_dir ---"
+                (cd "$pkg_dir" && apm pack --dry-run) || exit 1
+              done
+      - name: Pack and verify marketplace.json is current
+        run: |
+          # Write marketplace.json and confirm it matches what was committed.
+          # Using git status is more reliable than --check-clean which only
+          # prints an informational message without a guaranteed non-zero exit.
+          apm pack
+          if [ -n "$(git status --porcelain .claude-plugin/marketplace.json)" ]; then
+            echo "::error::marketplace.json is out of date -- run 'apm pack' and commit the result."
+            git diff .claude-plugin/marketplace.json || true
+            exit 1
+          fi
+          echo "marketplace.json is current."
