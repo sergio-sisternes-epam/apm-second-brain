@@ -7,3 +7,9 @@ Package versions advance independently using the `<package>--v<version>` tag
 convention.
 
 ## [Unreleased]
+
+- Add the `open-knowledge-format` dependency to `karpathy-wiki` through APM.
+- Create and maintain `wiki/concepts/index.md` as the concepts sub-index.
+- Exclude archived tombstones from normal query fallback results.
+- Canonicalise ingest source paths and reject inputs outside approved roots.
+- Fail lint when the concepts sub-index is missing.

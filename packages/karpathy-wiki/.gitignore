@@ -4,3 +4,6 @@ apm_modules/
 
 # APM generated cross-client cache
 .agents/
+
+# APM generated Claude output
+.claude/
