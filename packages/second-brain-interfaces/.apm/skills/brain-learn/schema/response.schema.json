@@ -4,7 +4,7 @@
   "title": "Learn Receipt",
   "description": "Receipt envelope returned by the second-brain.learn.v1 capability.",
   "type": "object",
-  "required": ["correlation_id", "source_id", "status"],
+  "required": ["correlation_id", "status"],
   "additionalProperties": false,
   "properties": {
     "correlation_id": {
@@ -14,7 +14,8 @@
     },
     "source_id": {
       "type": "string",
-      "description": "Provider-assigned identifier for the ingested source. Use this as target_id in a future brain-forget request."
+      "pattern": "^src-[0-9a-f]{8}$",
+      "description": "Provider-assigned stable identifier derived from SHA-256(content)[0:8]. Present when status is 'accepted' or 'duplicate'; absent when status is 'invalid'. Use as target_id in a future brain-forget request."
     },
     "status": {
       "type": "string",
@@ -24,6 +25,18 @@
     "message": {
       "type": "string",
       "description": "Human-readable status detail."
+    }
+  },
+  "if": {
+    "properties": { "status": { "enum": ["accepted", "duplicate"] } },
+    "required": ["status"]
+  },
+  "then": {
+    "required": ["source_id"]
+  },
+  "else": {
+    "properties": {
+      "source_id": false
     }
   }
 }

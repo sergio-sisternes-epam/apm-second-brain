@@ -12,9 +12,10 @@ Thinking is strictly read-only: no wiki writes occur in this package.
 
 - **sb-think-handler** -- Receives a validated think request envelope, queries the
   wiki via kw-wiki-query (index-first retrieval), synthesises an answer with
-  explicit citations (concept_id, title, excerpt), classifies response quality
+  explicit citations (source_id, label, excerpt), classifies response quality
   (answered | partial | unanswered), identifies knowledge gaps, and returns the
   think response envelope from second-brain-interfaces.
+  For quality: answered, at least one citation with a valid source_id is required.
 
 - **sb-think-validate** -- Validates a think request envelope against the
   second-brain-interfaces schema. Returns validation result (valid: true/false,

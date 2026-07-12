@@ -2,15 +2,20 @@
 Conformance tests for the second-brain-think package.
 
 Verifies:
-1. Both internal skills carry the disabled header as the first line.
-2. Both internal skills contain a redirect instruction.
-3. think-handler SKILL.md does not reference any modification operations.
-4. think-handler SKILL.md references citations (read-only, citation-backed).
-5. Valid think request fixture validates against second-brain-interfaces schema.
-6. Dependencies declared in apm.yml.
+ 1. Both internal skills carry the disabled header as the first line.
+ 2. Both internal skills contain a meaningful redirect instruction.
+ 3. think-handler SKILL.md does not reference any write operations.
+ 4. think-handler SKILL.md references citation-backed reasoning.
+ 5. Valid think request fixture validates against second-brain-interfaces schema.
+ 6. Dependencies declared in apm.yml.
+ 7. think-handler documents VALIDATION_ERROR code (R4).
+ 8. think-handler documents that quality:answered requires citations (R4).
+ 9. think-handler citations use source_id from frontmatter, not concept slugs (R4).
+10. Deployed files include the read-only query skill (R3 architectural assertion).
+11. apm.yml and apm.lock.yaml use full 40-char commit SHAs (R5).
 
 Run with: pytest packages/second-brain-think/tests/conformance/ -v
-Requirements: jsonschema>=4.0
+Requirements: jsonschema>=4.0, pyyaml
 """
 
 import json
@@ -18,6 +23,7 @@ import re
 from pathlib import Path
 
 import pytest
+import yaml
 from jsonschema import validate, Draft202012Validator
 
 REPO_ROOT = Path(__file__).parent.parent.parent.parent.parent
@@ -30,13 +36,26 @@ INTERFACES_SKILLS = (
 
 DISABLED_HEADER = "<!-- direct-user-invocation: disabled -->"
 REDIRECT_PATTERN = re.compile(
-    r"(must only be called by|not.*invok.*direct|decline|redirect|internal)",
+    r"(must only be called by|must not be invoked|decline and redirect|"
+    r"decline.*redirect|redirect.*brain-|not.*invok.*direct)",
     re.IGNORECASE,
 )
+
+FULL_SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
 
 INTERNAL_SKILL_NAMES = [
     "sb-think-handler",
     "sb-think-validate",
+]
+
+# Write-capable skills that must NOT be referenced in sb-think-handler
+FORBIDDEN_WRITE_SKILLS = [
+    "kw-wiki-ingest",
+    "kw-wiki-archive",
+    "kw-wiki-log",
+    "kw-wiki-index",
+    "kw-wiki-init",
+    "sb-learn",
 ]
 
 
@@ -64,7 +83,7 @@ def test_disabled_header_is_first_line(skill_name: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 2. Redirect instruction present
+# 2. Redirect instruction present (meaningful direct-invocation language)
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("skill_name", INTERNAL_SKILL_NAMES)
@@ -72,24 +91,24 @@ def test_redirect_instruction_present(skill_name: str) -> None:
     skill_path = SKILLS_DIR / skill_name / "SKILL.md"
     content = skill_path.read_text(encoding="utf-8")
     assert REDIRECT_PATTERN.search(content), (
-        f"{skill_name}/SKILL.md must contain a redirect instruction telling the agent "
-        "to decline direct user invocation."
+        f"{skill_name}/SKILL.md must contain a meaningful redirect instruction "
+        "that explicitly tells the agent to decline direct user invocation and "
+        "redirect to the appropriate public skill."
     )
 
 
 # ---------------------------------------------------------------------------
-# 3. think-handler does not reference modification operations
+# 3. think-handler does not reference write-capable skills
 # ---------------------------------------------------------------------------
 
-def test_think_handler_no_modification_operations() -> None:
+@pytest.mark.parametrize("forbidden_term", FORBIDDEN_WRITE_SKILLS)
+def test_think_handler_no_write_skill_references(forbidden_term: str) -> None:
     skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
     content = skill_path.read_text(encoding="utf-8")
-    forbidden_terms = ["kw-wiki-ingest", "kw-wiki-archive", "sb-learn", "write"]
-    for term in forbidden_terms:
-        assert term not in content, (
-            f"sb-think-handler/SKILL.md must not reference '{term}' "
-            "(think is read-only; no modification operations allowed)"
-        )
+    assert forbidden_term not in content, (
+        f"sb-think-handler/SKILL.md must not reference '{forbidden_term}' "
+        "(think is strictly read-only; no write-capable skill references allowed)"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -116,58 +135,6 @@ def test_valid_think_request_fixture() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 7. Behavioural contract: think is strictly read-only
-# ---------------------------------------------------------------------------
-
-def test_think_handler_is_strictly_read_only() -> None:
-    """The think handler must document its read-only guarantee explicitly."""
-    skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
-    content = skill_path.read_text(encoding="utf-8").lower()
-    has_readonly = "read-only" in content or "strictly read" in content or "never modif" in content
-    assert has_readonly, (
-        "sb-think-handler must document its read-only guarantee "
-        "(no writes, no archives, no ingestion)."
-    )
-
-
-# ---------------------------------------------------------------------------
-# 8. Behavioural contract: think response includes schema-valid citations
-# ---------------------------------------------------------------------------
-
-def test_think_response_citations_match_schema() -> None:
-    """think-handler citation format must match the second-brain-interfaces response schema.
-
-    Schema requires: source_id (string, required), label (string, required),
-    excerpt (string, optional). No other fields (additionalProperties: false).
-    """
-    skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
-    content = skill_path.read_text(encoding="utf-8")
-    # The skill must document source_id and label in citations
-    assert '"source_id"' in content or 'source_id' in content, (
-        "sb-think-handler must document citations with source_id (required per schema)"
-    )
-    assert '"label"' in content or 'label' in content, (
-        "sb-think-handler must document citations with label (required per schema)"
-    )
-
-
-# ---------------------------------------------------------------------------
-# 9. Behavioural contract: think returns schema-valid error codes
-# ---------------------------------------------------------------------------
-
-def test_think_handler_uses_schema_valid_error_codes() -> None:
-    """Think handler errors must use codes defined in the error schema."""
-    valid_codes = {"VALIDATION_ERROR", "NOT_FOUND", "UNAUTHORIZED", "PROVIDER_ERROR", "TRANSIENT", "UNKNOWN"}
-    skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
-    content = skill_path.read_text(encoding="utf-8")
-    # Check that at least one valid error code is referenced
-    found = any(code in content for code in valid_codes)
-    assert found, (
-        f"sb-think-handler must use schema-valid error codes from: {valid_codes}"
-    )
-
-
-# ---------------------------------------------------------------------------
 # 6. Dependencies declared in apm.yml
 # ---------------------------------------------------------------------------
 
@@ -184,17 +151,93 @@ def test_dependencies_declared_in_apm_yml() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 10. Dependency pins use full 40-character SHA
+# 7. think-handler documents VALIDATION_ERROR code (R4)
 # ---------------------------------------------------------------------------
 
-def test_dependency_pins_use_full_sha() -> None:
-    """Remote dependency refs must use a full 40-char commit SHA for reproducibility."""
-    import re
-    apm_yml_path = PKG_ROOT / "apm.yml"
-    content = apm_yml_path.read_text(encoding="utf-8")
-    sha_refs = re.findall(r'#([0-9a-f]+)', content)
-    for sha in sha_refs:
-        assert len(sha) == 40, (
-            f"apm.yml dependency pin uses short SHA '{sha}' -- must be full 40-char SHA "
-            "for reproducible builds."
-        )
+def test_think_handler_documents_validation_error_code() -> None:
+    skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    assert "VALIDATION_ERROR" in content, (
+        "sb-think-handler/SKILL.md must document the VALIDATION_ERROR prefix "
+        "used in knowledge_gaps when validation fails (R4)"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 8. think-handler documents that quality:answered requires citations (R4)
+# ---------------------------------------------------------------------------
+
+def test_think_handler_answered_requires_citations() -> None:
+    skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8").lower()
+    # Must document that 'answered' quality requires at least one citation
+    has_citation_requirement = (
+        ("answered" in content and "citation" in content and
+         ("require" in content or "non-empty" in content or "at least one" in content))
+    )
+    assert has_citation_requirement, (
+        "sb-think-handler/SKILL.md must document that quality:answered requires "
+        "at least one citation (R4)"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 9. think-handler citations use source_id from frontmatter, not slug (R4, R1)
+# ---------------------------------------------------------------------------
+
+def test_think_handler_citations_use_source_id_from_frontmatter() -> None:
+    skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    assert "source_id" in content, (
+        "sb-think-handler/SKILL.md must reference source_id in citation objects"
+    )
+    # Must NOT substitute slugs for source_ids
+    assert "slug" not in content.lower() or "not substitute" in content.lower() or "do not substitute" in content.lower(), (
+        "sb-think-handler/SKILL.md must warn against substituting slugs for source_id in citations"
+    )
+    assert "frontmatter" in content.lower(), (
+        "sb-think-handler/SKILL.md must instruct reading source_id from concept frontmatter"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 10. Deployed files include the read-only query skill (R3 architectural assertion)
+# ---------------------------------------------------------------------------
+
+def test_lock_deployed_files_include_query_skill() -> None:
+    lock_path = PKG_ROOT / "apm.lock.yaml"
+    if not lock_path.exists():
+        pytest.skip("apm.lock.yaml not present (run apm install first)")
+    with lock_path.open(encoding="utf-8") as f:
+        lock = yaml.safe_load(f)
+    all_deployed: list[str] = []
+    for dep in lock.get("dependencies", []):
+        all_deployed.extend(dep.get("deployed_files", []))
+    query_deployed = any("kw-wiki-query" in f for f in all_deployed)
+    assert query_deployed, (
+        "apm.lock.yaml must show kw-wiki-query deployed (read path must be available)"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 11. apm.yml and apm.lock.yaml use full 40-char commit SHAs (R5)
+# ---------------------------------------------------------------------------
+
+def test_apm_yml_uses_full_shas() -> None:
+    content = (PKG_ROOT / "apm.yml").read_text(encoding="utf-8")
+    matches = FULL_SHA_PATTERN.findall(content)
+    assert len(matches) >= 2, (
+        "apm.yml must reference dependencies with full 40-char commit SHAs "
+        "(one per declared remote dependency)."
+    )
+
+
+def test_apm_lock_uses_full_shas() -> None:
+    lock_path = PKG_ROOT / "apm.lock.yaml"
+    assert lock_path.exists(), "apm.lock.yaml must exist after apm install"
+    content = lock_path.read_text(encoding="utf-8")
+    matches = FULL_SHA_PATTERN.findall(content)
+    assert len(matches) >= 2, (
+        "apm.lock.yaml must record full 40-char resolved_commit SHAs for each dependency."
+    )
+

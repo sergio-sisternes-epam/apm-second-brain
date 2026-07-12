@@ -1,36 +1,72 @@
 # second-brain-learn
 
 Provider-side write, learn, and forget implementation for the second-brain package ecosystem.
+Implements the learn and forget capabilities defined in `second-brain-interfaces`.
 
 Part of the [apm-second-brain](../../README.md) public demo monorepo.
 
 ## Purpose
 
-Implements the `second-brain.learn.v1` and `second-brain.forget.v1` capability contracts
-defined in `second-brain-interfaces`. All primitives are internal (model/agent-invokable
-only); higher-level client skills from `second-brain-interfaces` call these.
+This package exposes internal agent skills invoked by the higher-level client
+skills in `second-brain-interfaces`. All skills are **internal**
+(direct-user-invocation disabled). End users interact through the `brain-learn`
+and `brain-forget` public client skills only.
 
-## Skills
+## Internal skills
 
-| Skill | Surface | Purpose |
-|-------|---------|---------|
-| `sb-learn-handler` | Internal | Receives a validated learn request, detects duplicates, writes raw snapshot, ingests into wiki |
-| `sb-forget-handler` | Internal | Receives a validated forget request, validates and resolves target, tombstones concept (v1: no destructive deletion) |
-| `sb-learn-validate` | Internal | Validates a learn or forget request envelope against the interface schema |
+| Skill                | Responsibility                                                   |
+|----------------------|------------------------------------------------------------------|
+| `sb-learn-handler`   | Validates a learn envelope, derives source_id, ingests content.  |
+| `sb-forget-handler`  | Validates a forget envelope, resolves target, archives concept.  |
+| `sb-forget-validate` | Schema + path-safety validation helper for forget requests.      |
+| `sb-learn-validate`  | Schema validation helper for learn requests.                     |
 
-All skills carry `<!-- direct-user-invocation: disabled -->` as their first line.
+## source_id lifecycle
 
-## v1 Constraints
+source_id is a stable content-addressed identifier: `src-<SHA256(content)[0:8]>`.
+It is derived deterministically from the raw content string, written to the
+raw file and concept document YAML frontmatter during ingestion, and returned
+in the learn receipt.
 
-- **Learn**: `source_id` in the receipt equals `correlation_id` -- the stable identifier for future forget requests. Duplicate detection is content-hash-based (O(N) scan over `raw/`).
-- **Forget**: tombstone/archive only. No destructive deletion. Idempotent -- forgetting an already-archived concept returns `status: tombstoned`.
-- **Forget path containment**: concept path inputs are validated against the wiki root before resolution.
+Clients can use source_id as `target_id` in a future `brain-forget` request
+to tombstone the associated concept.
+
+- `accepted` and `duplicate` receipts always carry a `source_id`.
+- `invalid` receipts never include a `source_id`.
+
+## Forget: tombstone-only (v1)
+
+Version 1 forget is archive-only. `kw-wiki-archive` sets concept status to
+`archived` and excludes it from future retrieval. No file is deleted.
+Archived content remains recoverable by a wiki administrator.
+
+target_id is resolved in order: source_id form (`src-[0-9a-f]{8}`) then
+concept-path form (forward-slash delimited path relative to `wiki/concepts/`).
+Absolute paths, parent traversal (`..`), and other unsafe patterns are
+rejected by `sb-forget-validate` before any archive operation.
+
+Already-archived concepts are treated as idempotent: forget returns
+`not_found` with the message "Concept already archived." without error.
 
 ## Dependencies
 
-- `karpathy-wiki` -- wiki operation engine
-- `second-brain-interfaces` -- think/learn/forget schemas and contracts
+- `karpathy-wiki` -- wiki engine skills (ingest, archive, query, etc.)
+- `second-brain-interfaces` -- versioned request/response schemas
+
+## Targets
+
+Declared targets: `claude`, `copilot`.
+Run `apm install` from this directory to regenerate target deployment dirs.
+
+## Running tests
+
+```bash
+pytest packages/second-brain-learn/tests/ -v
+```
+
+Requires: `jsonschema>=4.0`, `pyyaml`
 
 ## Licence
 
 Apache-2.0 -- see [LICENSE](../../LICENSE).
+

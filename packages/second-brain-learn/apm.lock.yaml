@@ -6,7 +6,7 @@ dependencies:
   name: karpathy-wiki
   host: github.com
   resolved_commit: c4a074f18cbe25c1c1c4f12caae732210cd7c860
-  resolved_ref: c4a074f1
+  resolved_ref: c4a074f18cbe25c1c1c4f12caae732210cd7c860
   version: 0.1.0
   virtual_path: packages/karpathy-wiki
   is_virtual: true
@@ -60,7 +60,7 @@ dependencies:
   name: second-brain-interfaces
   host: github.com
   resolved_commit: c4a074f18cbe25c1c1c4f12caae732210cd7c860
-  resolved_ref: c4a074f1
+  resolved_ref: c4a074f18cbe25c1c1c4f12caae732210cd7c860
   version: 0.1.0
   virtual_path: packages/second-brain-interfaces
   is_virtual: true
@@ -126,7 +126,7 @@ dependencies:
   name: open-knowledge-format
   host: github.com
   resolved_commit: c4a074f18cbe25c1c1c4f12caae732210cd7c860
-  resolved_ref: c4a074f1
+  resolved_ref: c4a074f18cbe25c1c1c4f12caae732210cd7c860
   version: 0.1.0
   virtual_path: packages/open-knowledge-format
   is_virtual: true
@@ -500,7 +500,25 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:4a0aa9b926afe9dabb89ef8f8624a4d7cb4b5d25b17a92422f68b9d303391edb
+  content_hash: sha256:0c1a3163a0aa5abc338a1463c25a39c7fb3ed5ccf6b6fb3f600fce39007f3478
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-forget-validate
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-forget-validate/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
 - kind: project-relative
   target: agents
   value: .agents/skills/sb-learn-handler
@@ -518,7 +536,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:81b91f50900f41a7c191ac495241295808431af83033b18e9119ca38ee7b2ed5
+  content_hash: sha256:4502aff3cb4c18031bd3464790b22b36393035b140db456c3573b33c32c62a2b
 - kind: project-relative
   target: agents
   value: .agents/skills/sb-learn-validate
@@ -537,6 +555,15 @@ deployments:
   - .
   active_owner: .
   content_hash: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
+- kind: project-relative
+  target: claude
+  value: .claude/rules/package.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:ecd2b86abe4f6ed94f261e79f9bfb92d93cc394ada998cfcfb67a108c7b648e4
 - kind: project-relative
   target: claude
   value: .claude/skills/brain-forget
@@ -878,7 +905,25 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:4a0aa9b926afe9dabb89ef8f8624a4d7cb4b5d25b17a92422f68b9d303391edb
+  content_hash: sha256:0c1a3163a0aa5abc338a1463c25a39c7fb3ed5ccf6b6fb3f600fce39007f3478
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-forget-validate
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-forget-validate/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
 - kind: project-relative
   target: claude
   value: .claude/skills/sb-learn-handler
@@ -896,7 +941,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:81b91f50900f41a7c191ac495241295808431af83033b18e9119ca38ee7b2ed5
+  content_hash: sha256:4502aff3cb4c18031bd3464790b22b36393035b140db456c3573b33c32c62a2b
 - kind: project-relative
   target: claude
   value: .claude/skills/sb-learn-validate
@@ -915,23 +960,42 @@ deployments:
   - .
   active_owner: .
   content_hash: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
+- kind: project-relative
+  target: copilot
+  value: .github/instructions/package.instructions.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9fa678ef0586af9b557eb9c8f8afe0872509cb717fdc6c5c6928eff0242b7d1d
 local_deployed_files:
 - .agents/skills/sb-forget-handler
 - .agents/skills/sb-forget-handler/SKILL.md
+- .agents/skills/sb-forget-validate
+- .agents/skills/sb-forget-validate/SKILL.md
 - .agents/skills/sb-learn-handler
 - .agents/skills/sb-learn-handler/SKILL.md
 - .agents/skills/sb-learn-validate
 - .agents/skills/sb-learn-validate/SKILL.md
+- .claude/rules/package.md
 - .claude/skills/sb-forget-handler
 - .claude/skills/sb-forget-handler/SKILL.md
+- .claude/skills/sb-forget-validate
+- .claude/skills/sb-forget-validate/SKILL.md
 - .claude/skills/sb-learn-handler
 - .claude/skills/sb-learn-handler/SKILL.md
 - .claude/skills/sb-learn-validate
 - .claude/skills/sb-learn-validate/SKILL.md
+- .github/instructions/package.instructions.md
 local_deployed_file_hashes:
-  .agents/skills/sb-forget-handler/SKILL.md: sha256:4a0aa9b926afe9dabb89ef8f8624a4d7cb4b5d25b17a92422f68b9d303391edb
-  .agents/skills/sb-learn-handler/SKILL.md: sha256:81b91f50900f41a7c191ac495241295808431af83033b18e9119ca38ee7b2ed5
+  .agents/skills/sb-forget-handler/SKILL.md: sha256:0c1a3163a0aa5abc338a1463c25a39c7fb3ed5ccf6b6fb3f600fce39007f3478
+  .agents/skills/sb-forget-validate/SKILL.md: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
+  .agents/skills/sb-learn-handler/SKILL.md: sha256:4502aff3cb4c18031bd3464790b22b36393035b140db456c3573b33c32c62a2b
   .agents/skills/sb-learn-validate/SKILL.md: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
-  .claude/skills/sb-forget-handler/SKILL.md: sha256:4a0aa9b926afe9dabb89ef8f8624a4d7cb4b5d25b17a92422f68b9d303391edb
-  .claude/skills/sb-learn-handler/SKILL.md: sha256:81b91f50900f41a7c191ac495241295808431af83033b18e9119ca38ee7b2ed5
+  .claude/rules/package.md: sha256:ecd2b86abe4f6ed94f261e79f9bfb92d93cc394ada998cfcfb67a108c7b648e4
+  .claude/skills/sb-forget-handler/SKILL.md: sha256:0c1a3163a0aa5abc338a1463c25a39c7fb3ed5ccf6b6fb3f600fce39007f3478
+  .claude/skills/sb-forget-validate/SKILL.md: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
+  .claude/skills/sb-learn-handler/SKILL.md: sha256:4502aff3cb4c18031bd3464790b22b36393035b140db456c3573b33c32c62a2b
   .claude/skills/sb-learn-validate/SKILL.md: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
+  .github/instructions/package.instructions.md: sha256:9fa678ef0586af9b557eb9c8f8afe0872509cb717fdc6c5c6928eff0242b7d1d

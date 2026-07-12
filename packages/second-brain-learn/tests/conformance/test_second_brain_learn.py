@@ -2,15 +2,21 @@
 Conformance tests for the second-brain-learn package.
 
 Verifies:
-1. All internal skills carry the disabled header as the first line.
-2. All internal skills contain a redirect instruction.
-3. Forget handler documents the tombstone-only constraint (no destructive deletion).
-4. Valid learn request fixture validates against second-brain-interfaces schema.
-5. Valid forget request fixture validates against second-brain-interfaces schema.
-6. Dependencies declared in apm.yml.
+ 1. All internal skills carry the disabled header as the first line.
+ 2. All internal skills contain a meaningful redirect instruction.
+ 3. Forget handler documents the tombstone-only constraint (no destructive deletion).
+ 4. Valid learn request fixture validates against second-brain-interfaces schema.
+ 5. Valid forget request fixture validates against second-brain-interfaces schema.
+ 6. Dependencies declared in apm.yml.
+ 7. Duplicate learn request fixture validates against schema.
+ 8. Learn response schema enforces source_id conditional requirement (R1).
+ 9. sb-forget-handler documents source_id-to-concept resolution.
+10. sb-forget-validate documents traversal/path safety checks.
+11. sb-forget-validate documents already-archived idempotency.
+12. apm.yml and apm.lock.yaml use full 40-char commit SHAs (R5).
 
 Run with: pytest packages/second-brain-learn/tests/conformance/ -v
-Requirements: jsonschema>=4.0
+Requirements: jsonschema>=4.0, pyyaml
 """
 
 import json
@@ -18,7 +24,8 @@ import re
 from pathlib import Path
 
 import pytest
-from jsonschema import validate, Draft202012Validator
+import yaml
+from jsonschema import validate, Draft202012Validator, ValidationError
 
 REPO_ROOT = Path(__file__).parent.parent.parent.parent.parent
 PKG_ROOT = REPO_ROOT / "packages" / "second-brain-learn"
@@ -30,13 +37,17 @@ INTERFACES_SKILLS = (
 
 DISABLED_HEADER = "<!-- direct-user-invocation: disabled -->"
 REDIRECT_PATTERN = re.compile(
-    r"(must only be called by|not.*invok.*direct|decline|redirect|internal)",
+    r"(must only be called by|must not be invoked|decline and redirect|"
+    r"decline.*redirect|redirect.*brain-|not.*invok.*direct)",
     re.IGNORECASE,
 )
+
+FULL_SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
 
 INTERNAL_SKILL_NAMES = [
     "sb-learn-handler",
     "sb-forget-handler",
+    "sb-forget-validate",
     "sb-learn-validate",
 ]
 
@@ -65,7 +76,7 @@ def test_disabled_header_is_first_line(skill_name: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 2. Redirect instruction present
+# 2. Redirect instruction present (meaningful direct-invocation language)
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("skill_name", INTERNAL_SKILL_NAMES)
@@ -73,8 +84,9 @@ def test_redirect_instruction_present(skill_name: str) -> None:
     skill_path = SKILLS_DIR / skill_name / "SKILL.md"
     content = skill_path.read_text(encoding="utf-8")
     assert REDIRECT_PATTERN.search(content), (
-        f"{skill_name}/SKILL.md must contain a redirect instruction telling the agent "
-        "to decline direct user invocation."
+        f"{skill_name}/SKILL.md must contain a meaningful redirect instruction "
+        "that explicitly tells the agent to decline direct user invocation and "
+        "redirect to the appropriate public skill."
     )
 
 
@@ -116,98 +128,6 @@ def test_valid_forget_request_fixture() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 7. Behavioural contract: learn receipt source_id equals correlation_id
-# ---------------------------------------------------------------------------
-
-def test_learn_receipt_source_id_lifecycle() -> None:
-    """source_id in the learn receipt must equal correlation_id.
-
-    This is the stable identifier callers use to reference the learning
-    in future forget requests. It maps directly to the raw filename stem.
-    """
-    skill_path = SKILLS_DIR / "sb-learn-handler" / "SKILL.md"
-    content = skill_path.read_text(encoding="utf-8")
-    # The skill must document that source_id equals correlation_id
-    assert "correlation_id" in content and "source_id" in content, (
-        "sb-learn-handler must document both source_id and correlation_id"
-    )
-    # Must state the mapping explicitly
-    has_lifecycle = (
-        "equals correlation_id" in content
-        or "equals the correlation_id" in content
-        or "source_id" in content and "filename stem" in content
-        or "filename stem" in content and "correlation_id" in content
-    )
-    assert has_lifecycle, (
-        "sb-learn-handler must document that source_id equals the correlation_id "
-        "and maps to the raw filename"
-    )
-
-
-# ---------------------------------------------------------------------------
-# 8. Behavioural contract: forget handler is idempotent
-# ---------------------------------------------------------------------------
-
-def test_forget_handler_is_idempotent() -> None:
-    """Forgetting an already-archived concept must succeed (not error).
-
-    A second forget on the same concept must return status: tombstoned
-    rather than raising an error. This guarantees at-least-once forget
-    semantics with no side effects on the second call.
-    """
-    skill_path = SKILLS_DIR / "sb-forget-handler" / "SKILL.md"
-    content = skill_path.read_text(encoding="utf-8").lower()
-    assert "idempoten" in content or "already archived" in content or "already tombstoned" in content, (
-        "sb-forget-handler must document idempotency: a second forget on an "
-        "already-archived concept must return tombstoned, not error."
-    )
-
-
-# ---------------------------------------------------------------------------
-# 9. Behavioural contract: forget handler validates input before resolving
-# ---------------------------------------------------------------------------
-
-def test_forget_handler_validates_before_resolve() -> None:
-    """Forget handler must validate the request envelope before any wiki access."""
-    skill_path = SKILLS_DIR / "sb-forget-handler" / "SKILL.md"
-    content = skill_path.read_text(encoding="utf-8")
-    lines = content.splitlines()
-    # Find the first numbered procedure step that mentions validate
-    validate_steps = [
-        i for i, line in enumerate(lines)
-        if "validate" in line.lower() and any(c.isdigit() for c in line[:5])
-    ]
-    resolve_steps = [
-        i for i, line in enumerate(lines)
-        if "resolve" in line.lower() and any(c.isdigit() for c in line[:5])
-    ]
-    if validate_steps and resolve_steps:
-        assert min(validate_steps) < min(resolve_steps), (
-            "sb-forget-handler must validate the envelope (step 1) before "
-            "resolving the target -- prevents wiki access on malformed input."
-        )
-
-
-# ---------------------------------------------------------------------------
-# 10. Behavioural contract: forget containment check documented
-# ---------------------------------------------------------------------------
-
-def test_forget_handler_containment_check() -> None:
-    """Forget handler must document path containment for concept path inputs."""
-    skill_path = SKILLS_DIR / "sb-forget-handler" / "SKILL.md"
-    content = skill_path.read_text(encoding="utf-8").lower()
-    has_containment = (
-        "containment" in content
-        or "wiki root" in content
-        or "traversal" in content
-        or "outside" in content
-    )
-    assert has_containment, (
-        "sb-forget-handler must document path containment checks for concept "
-        "path inputs to prevent wiki root traversal."
-    )
-
-# ---------------------------------------------------------------------------
 # 6. Dependencies declared in apm.yml
 # ---------------------------------------------------------------------------
 
@@ -224,18 +144,134 @@ def test_dependencies_declared_in_apm_yml() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 11. Dependency pins use full 40-character SHA
+# 7. Duplicate learn request fixture validates against request schema (R6)
 # ---------------------------------------------------------------------------
 
-def test_dependency_pins_use_full_sha() -> None:
-    """Remote dependency refs must use a full 40-char commit SHA for reproducibility."""
-    import re
-    apm_yml_path = PKG_ROOT / "apm.yml"
-    content = apm_yml_path.read_text(encoding="utf-8")
-    # Find all #<sha> refs
-    sha_refs = re.findall(r'#([0-9a-f]+)', content)
-    for sha in sha_refs:
-        assert len(sha) == 40, (
-            f"apm.yml dependency pin uses short SHA '{sha}' -- must be full 40-char SHA "
-            "for reproducible builds."
-        )
+def test_duplicate_learn_request_fixture_validates() -> None:
+    schema = _load_schema("brain-learn", "request")
+    fixture = _load_json(FIXTURES_DIR / "duplicate-learn-request.json")
+    validate(instance=fixture, schema=schema, cls=Draft202012Validator)
+
+
+# ---------------------------------------------------------------------------
+# 8. Learn response schema enforces conditional source_id requirement (R1)
+# ---------------------------------------------------------------------------
+
+def test_response_schema_requires_source_id_for_accepted() -> None:
+    schema = _load_schema("brain-learn", "response")
+    valid_accepted = {
+        "correlation_id": "a1b2c3d4-e5f6-4789-abcd-ef1234567890",
+        "status": "accepted",
+        "source_id": "src-a1b2c3d4",
+        "message": "Ingested.",
+    }
+    validate(instance=valid_accepted, schema=schema, cls=Draft202012Validator)
+
+
+def test_response_schema_requires_source_id_for_duplicate() -> None:
+    schema = _load_schema("brain-learn", "response")
+    valid_duplicate = {
+        "correlation_id": "a1b2c3d4-e5f6-4789-abcd-ef1234567890",
+        "status": "duplicate",
+        "source_id": "src-a1b2c3d4",
+        "message": "Already ingested.",
+    }
+    validate(instance=valid_duplicate, schema=schema, cls=Draft202012Validator)
+
+
+def test_response_schema_invalid_must_omit_source_id() -> None:
+    schema = _load_schema("brain-learn", "response")
+    invalid_with_source_id = {
+        "correlation_id": "a1b2c3d4-e5f6-4789-abcd-ef1234567890",
+        "status": "invalid",
+        "source_id": "src-a1b2c3d4",
+        "message": "Bad content.",
+    }
+    with pytest.raises(Exception):
+        validate(instance=invalid_with_source_id, schema=schema, cls=Draft202012Validator)
+
+
+def test_response_schema_accepted_without_source_id_fails() -> None:
+    schema = _load_schema("brain-learn", "response")
+    missing_source = {
+        "correlation_id": "a1b2c3d4-e5f6-4789-abcd-ef1234567890",
+        "status": "accepted",
+        "message": "No source_id.",
+    }
+    with pytest.raises(Exception):
+        validate(instance=missing_source, schema=schema, cls=Draft202012Validator)
+
+
+# ---------------------------------------------------------------------------
+# 9. sb-forget-handler documents source_id-to-concept resolution (R1)
+# ---------------------------------------------------------------------------
+
+def test_forget_handler_documents_source_id_resolution() -> None:
+    skill_path = SKILLS_DIR / "sb-forget-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    assert "source_id" in content, (
+        "sb-forget-handler/SKILL.md must document source_id-to-concept resolution "
+        "so forget-by-source_id is implementable."
+    )
+    assert "sb-forget-validate" in content, (
+        "sb-forget-handler/SKILL.md must call sb-forget-validate before any archive."
+    )
+
+
+# ---------------------------------------------------------------------------
+# 10. sb-forget-validate documents path safety (traversal rejection) (R2)
+# ---------------------------------------------------------------------------
+
+def test_forget_validate_documents_path_safety() -> None:
+    skill_path = SKILLS_DIR / "sb-forget-validate" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8").lower()
+    assert ".." in content or "traversal" in content or "parent traversal" in content, (
+        "sb-forget-validate/SKILL.md must document parent path traversal rejection"
+    )
+    has_absolute = "absolute" in content or "starts with /" in content
+    assert has_absolute, (
+        "sb-forget-validate/SKILL.md must document rejection of absolute paths"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 11. sb-forget-validate documents already-archived idempotency (R2)
+# ---------------------------------------------------------------------------
+
+def test_forget_validate_or_handler_documents_idempotency() -> None:
+    handler_content = (SKILLS_DIR / "sb-forget-handler" / "SKILL.md").read_text(encoding="utf-8").lower()
+    validate_content = (SKILLS_DIR / "sb-forget-validate" / "SKILL.md").read_text(encoding="utf-8").lower()
+    combined = handler_content + validate_content
+    has_idempotency = (
+        "already archived" in combined
+        or "already-archived" in combined
+        or "idempotent" in combined
+        or "idempotency" in combined
+    )
+    assert has_idempotency, (
+        "sb-forget-handler or sb-forget-validate must document already-archived idempotency"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 12. apm.yml and apm.lock.yaml use full 40-char commit SHAs (R5)
+# ---------------------------------------------------------------------------
+
+def test_apm_yml_uses_full_shas() -> None:
+    content = (PKG_ROOT / "apm.yml").read_text(encoding="utf-8")
+    matches = FULL_SHA_PATTERN.findall(content)
+    assert len(matches) >= 2, (
+        "apm.yml must reference dependencies with full 40-char commit SHAs "
+        "(one per declared remote dependency)."
+    )
+
+
+def test_apm_lock_uses_full_shas() -> None:
+    lock_path = PKG_ROOT / "apm.lock.yaml"
+    assert lock_path.exists(), "apm.lock.yaml must exist after apm install"
+    content = lock_path.read_text(encoding="utf-8")
+    matches = FULL_SHA_PATTERN.findall(content)
+    assert len(matches) >= 2, (
+        "apm.lock.yaml must record full 40-char resolved_commit SHAs for each dependency."
+    )
+

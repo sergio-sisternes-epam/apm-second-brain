@@ -48,55 +48,73 @@ A `second-brain.think.v1` request envelope:
 
    ```json
    {
-     "correlation_id": "<from request, or generated UUID if request malformed>",
-     "code": "VALIDATION_ERROR",
-     "message": "<validation error details as human-readable string>"
+     "correlation_id": "<matches request or empty-uuid if unparseable>",
+     "quality": "unanswered",
+     "answer": "",
+     "citations": [],
+     "knowledge_gaps": ["VALIDATION_ERROR: <joined error messages>"]
    }
    ```
 
-   Stop. Do not proceed to retrieval.
+   Use the prefix `VALIDATION_ERROR:` in `knowledge_gaps[0]` so callers can
+   programmatically detect the failure mode. Stop.
 
 2. **Retrieve concepts**: Call `kw-wiki-query` with:
    - `wiki_root`: the configured wiki root path
    - `query`: the `question` field from the request
 
-   Collect the ranked list of matching concept documents returned by
-   `kw-wiki-query` (index-first retrieval).
+   Collect the ranked list of matching, non-archived concept documents.
 
-3. **Synthesise answer**: Read each retrieved concept document and compose a
+3. **No-match handling**: If `kw-wiki-query` returns zero results, return
+   immediately with `quality: unanswered`, empty `answer`, empty `citations`,
+   and a knowledge gap naming the unresolved question. Do not synthesise a
+   response from general knowledge.
+
+4. **Synthesise answer**: Read each retrieved concept document and compose a
    concise, grounded answer to the question. Base the answer only on content
    present in the retrieved concepts. Do not hallucinate facts.
 
-4. **Build citations**: For each concept used in the answer, include a citation:
+5. **Build citations**: For each concept document used in the answer, read its
+   YAML frontmatter and extract the `source_id:` field (written there by the
+   learn handler during ingestion). Build a citation object:
 
    ```json
    {
-     "source_id": "<concept slug or source_id>",
-     "label": "<concept title>",
-     "excerpt": "<relevant 1-3 sentence excerpt from the concept>"
+     "source_id": "<value of source_id frontmatter field, e.g. src-a1b2c3d4>",
+     "label": "<value of title: frontmatter field>",
+     "excerpt": "<relevant 1-3 sentence excerpt from the concept body>"
    }
    ```
 
-5. **Classify quality**:
-   - `answered`: at least one relevant concept was found and the question is
-     fully addressed.
-   - `partial`: relevant concepts exist but do not fully address the question.
-   - `unanswered`: no relevant concepts were found.
+   Do NOT substitute concept slugs or file paths for `source_id`. If a concept
+   document lacks a `source_id:` frontmatter field, omit that document from
+   citations and note the gap.
 
-6. **Identify knowledge gaps**: List topics or sub-questions that could not be
+6. **Classify quality**:
+   - `answered`: at least one relevant concept was found, the question is fully
+     addressed, and `citations` is non-empty.
+   - `partial`: relevant concepts exist but do not fully address the question;
+     `citations` may be non-empty.
+   - `unanswered`: no relevant non-archived concepts were found, or no
+     synthesised answer is possible.
+
+   **Invariant**: `quality: answered` requires at least one citation.
+   If no concept yields a valid `source_id`, downgrade quality to `partial`.
+
+7. **Identify knowledge gaps**: List topics or sub-questions that could not be
    answered from the wiki content.
 
-7. **Return response envelope**:
+8. **Return response envelope**:
 
 ```json
 {
   "correlation_id": "<matches request>",
   "quality": "answered | partial | unanswered",
-  "answer": "<synthesised answer with inline citation references>",
+  "answer": "<synthesised answer>",
   "citations": [
     {
-      "source_id": "<slug>",
-      "label": "<concept title>",
+      "source_id": "src-a1b2c3d4",
+      "label": "<concept title from frontmatter>",
       "excerpt": "<excerpt>"
     }
   ],
@@ -108,20 +126,18 @@ A `second-brain.think.v1` request envelope:
 
 | Quality       | When to use                                                      |
 |---------------|------------------------------------------------------------------|
-| `answered`    | Retrieved concepts fully address the question.                   |
-| `partial`     | Partial coverage; some aspects of the question remain open.      |
-| `unanswered`  | No concepts retrieved or none relevant to the question.          |
+| `answered`    | Full coverage; at least one citation with real source_id.        |
+| `partial`     | Partial coverage; some aspects remain open.                      |
+| `unanswered`  | No concepts retrieved, zero results, or validation error.        |
 
 ## Error conditions
 
-| Condition            | Error code        | Response                                               |
-|----------------------|-------------------|--------------------------------------------------------|
-| Validation fails     | `VALIDATION_ERROR`| Return error envelope with validation messages         |
-| kw-wiki-query error  | `PROVIDER_ERROR`  | Return `unanswered` quality response with gap note     |
-| Empty question       | `VALIDATION_ERROR`| Caught by validation; return error envelope            |
-| Transient failure    | `TRANSIENT`       | Return error envelope; caller may safely retry         |
-
-Error envelopes must match the `second-brain.error` schema (fields: `correlation_id`, `code`, `message`, optional `detail`).
+| Condition            | Response                                               |
+|----------------------|--------------------------------------------------------|
+| Validation fails     | Return unanswered with VALIDATION_ERROR in gaps        |
+| kw-wiki-query error  | Return `unanswered` with knowledge gap note            |
+| No results           | Return `unanswered`; empty citations                   |
+| No source_id in docs | Downgrade to `partial`; note missing provenance        |
 
 ## References
 

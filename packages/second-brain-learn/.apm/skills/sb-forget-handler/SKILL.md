@@ -43,49 +43,56 @@ A `second-brain.forget.v1` request envelope:
 
 ## Procedure
 
-1. **Validate envelope**: Call `sb-learn-validate` (or an equivalent validation
-   step) to confirm the forget request matches the `second-brain.forget.v1`
-   schema. If validation fails, return a receipt with `status: not_found` and
-   a descriptive error message. Stop.
+1. **Validate envelope**: Call `sb-forget-validate` with the request envelope.
+   If `valid` is false, return a receipt with `status: not_found` and the
+   validation errors joined as a human-readable `message`. Stop.
 
-2. **Containment check for concept path inputs**: If `target_id` looks like a
-   concept path (contains `/` or `.md`), canonicalise the path and confirm it
-   resolves within `wiki/concepts/` of the configured wiki root. Reject any
-   `target_id` that would traverse outside the wiki root (e.g. `../../etc`).
-   Return `status: not_found` if containment fails.
+2. **Resolve target**: Interpret `target_id` using exactly one of these two
+   forms (tried in order):
 
-3. **Resolve target**: Interpret `target_id` as either:
-   - A `source_id` (equals `correlation_id` from a learn receipt). Locate the
-     raw file at `raw/<source_id>.md` and the corresponding concept documents
-     via the wiki index.
-   - A concept path (e.g. `infra/kubernetes/pull-policy`). Locate the concept
-     document directly at `wiki/concepts/<target_id>.md`.
+   a. **source_id form** (pattern `src-[0-9a-f]{8}`): Scan the wiki index for
+      a concept whose frontmatter contains `source_id: <target_id>`. If found,
+      extract the concept slug for use in step 3.
 
-   If neither resolves, return a receipt with `status: not_found`.
+   b. **concept-path form** (all other strings): Treat as a forward-slash
+      delimited path relative to `wiki/concepts/`. The path MUST be validated
+      by `sb-forget-validate` before this step (no `..`, no absolute prefix,
+      no symlink escape). Resolve the concept file at
+      `wiki/concepts/<validated_path>.md`. If found, read the `slug:` or `id:`
+      frontmatter field.
 
-4. **Idempotency check**: Read the concept document's frontmatter. If
-   `status: archived` is already set, the concept is already tombstoned.
-   Return a receipt with `status: tombstoned` and a message noting it was
-   already archived. Do not call `kw-wiki-archive` again (idempotent).
+   If neither resolves to an existing, non-archived concept file, return:
 
-5. **Archive**: Call `kw-wiki-archive` with:
+   ```json
+   {
+     "correlation_id": "<matches request>",
+     "target_id": "<echoes request>",
+     "status": "not_found",
+     "message": "No active concept matched the given target_id."
+   }
+   ```
+
+   **Already-archived idempotency**: If the concept exists but its status is
+   already `archived`, return `status: not_found` with message
+   `"Concept already archived."`.
+
+3. **Archive**: Call `kw-wiki-archive` with:
    - `wiki_root`: the configured wiki root path
-   - `concept_id`: the resolved concept slug (e.g. `kubernetes-pull-policy`)
+   - `concept_id`: the resolved concept slug from step 2
    - `reason`: the `reason` field from the request
 
    `kw-wiki-archive` tombstones the concept (sets status to `archived`,
-   updates the index to exclude it from queries, and appends a log entry)
-   without deleting the file. Do not call `kw-wiki-log` separately after
-   this step -- `kw-wiki-archive` handles logging internally.
+   updates the index to exclude it from queries, and appends a log entry).
+   Do not call `kw-wiki-log` separately -- `kw-wiki-archive` handles logging.
 
-6. **Return receipt**:
+4. **Return receipt**:
 
 ```json
 {
   "correlation_id": "<matches request>",
-  "target_id": "<resolved target identifier>",
+  "target_id": "<resolved concept slug>",
   "status": "tombstoned",
-  "message": "<human-readable confirmation>"
+  "message": "Concept archived. No data deleted."
 }
 ```
 
@@ -94,16 +101,19 @@ A `second-brain.forget.v1` request envelope:
 | Status       | Meaning                                                    |
 |--------------|------------------------------------------------------------|
 | `tombstoned` | Concept archived; excluded from future retrieval.          |
-| `not_found`  | No concept matched the given `target_id`.                  |
+| `not_found`  | No active concept matched the given `target_id`.           |
 
 ## Error conditions
 
 | Condition               | Response                                              |
 |-------------------------|-------------------------------------------------------|
-| Target not found        | Return `status: not_found` with a descriptive message |
+| Validation fails        | Return `status: not_found` with validation message    |
+| Target not found        | Return `status: not_found` with descriptive message   |
+| Concept already archived| Return `status: not_found`, msg: "already archived"  |
 | kw-wiki-archive error   | Propagate error; do not commit partial state          |
 
 ## References
 
-- `kw-wiki-archive` -- tombstone a concept in the OKF wiki (handles index + log internally)
+- `sb-forget-validate` -- schema validation and path safety helper (called first)
+- `kw-wiki-archive` -- tombstone a concept in the OKF wiki (handles index + log)
 - `second-brain-interfaces` -- `second-brain.forget.v1` schema and receipt schema

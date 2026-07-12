@@ -14,6 +14,26 @@ public `brain-learn` skill in the `second-brain-interfaces` package instead.
 Receives a validated `second-brain.learn.v1` request envelope and ingests the
 learning into the Karpathy wiki.
 
+## source_id derivation and lifecycle
+
+`source_id` is derived deterministically as `src-<SHA256(content)[0:8]>` (the
+hex string of the first 8 bytes of the SHA-256 digest of the raw `content`
+field). This derivation is content-addressed: the same content always produces
+the same `source_id`. Consequences:
+
+- **accepted**: source_id is derived and returned. The raw file is written and
+  kw-wiki-ingest is called.
+- **duplicate**: source_id is derived from the same content and returned. No
+  write occurs. The caller receives the same source_id as would have been
+  returned on the original accepted receipt, enabling round-trip forget.
+- **invalid**: source_id is absent from the receipt. Do not invent or return a
+  placeholder.
+
+The source_id is written into the `source_id:` frontmatter field of the raw
+file at `raw/<correlation_id>.md` so that forget can resolve it via the wiki
+index. The concept documents extracted by kw-wiki-ingest also carry this field
+in their frontmatter.
+
 ## Trigger
 
 Called by `brain-learn` after the client has assembled a valid learn request
@@ -43,50 +63,52 @@ A `second-brain.learn.v1` request envelope:
 ## Procedure
 
 1. **Validate envelope**: Call `sb-learn-validate` with the request envelope.
-   If `valid` is false, return a receipt with `status: invalid` and the
-   `errors` joined as a human-readable string in the `message` field. Stop.
+   If `valid` is false, return a receipt with `status: invalid`, omit
+   `source_id`, and join the `errors` as a human-readable string in `message`.
+   Stop.
 
-2. **Validate source_type**: Confirm `source_type` is one of `session`,
-   `document`, or `manual`. If not, return `status: invalid`.
+2. **Derive source_id**: Compute SHA-256 of the raw `content` string. Take the
+   first 8 hex characters. Prepend `src-`. Result: `src-<8 hex chars>`.
 
-3. **Duplicate detection**: Compute a content hash (SHA-256) of `content`.
-   Scan all existing files under `raw/` in the wiki root and compare their
-   content hashes against the computed hash. If any match is found, return a
-   receipt with `status: duplicate` and a human-readable message. Do not
-   re-ingest. (Files in `raw/` are named by `correlation_id`; the hash
-   comparison reads file contents, not filenames.)
+3. **Duplicate detection**: Check whether a file matching the derived
+   `source_id` already exists under `raw/` (by scanning frontmatter or a
+   hash-index if present). If found, return:
 
-   Note: this is an O(N) scan over the `raw/` corpus. For demo-scale wikis
-   this is acceptable. A production implementation would maintain a separate
-   hash index (e.g. `raw/.hash-index.json`) to turn the check into O(1);
-   the interface contract (returns `status: duplicate` on collision) is
-   identical either way.
+   ```json
+   {
+     "correlation_id": "<matches request>",
+     "source_id": "<same derived source_id>",
+     "status": "duplicate",
+     "message": "Content already ingested."
+   }
+   ```
 
-4. **Write raw snapshot**: Write `content` to a file in `raw/` using the
-   `correlation_id` as the filename stem (e.g. `raw/<correlation_id>.md`).
-   This file is the immutable raw source record.
+   Do not re-ingest.
 
-   The `source_id` returned in the receipt is the filename stem of this raw
-   file -- i.e. the `correlation_id`. This is the stable, caller-visible
-   identifier for the learning. It is predictable (UUID-v4 guarantees
-   uniqueness), directly maps to the raw file on disk, and is the value
-   a caller passes as `target_id` in a future forget request.
+   Note: this is an O(N) scan over the `raw/` corpus for demo-scale wikis.
+   A production implementation would maintain `raw/.hash-index.json` for O(1)
+   lookup. The interface contract is identical either way.
+
+4. **Write raw snapshot**: Write a file to `raw/<correlation_id>.md` with
+   YAML frontmatter including `source_id: <derived>` and `content_hash:
+   <SHA-256 hex>`, followed by the `content` body. This persists the source_id
+   for later forget resolution.
 
 5. **Ingest**: Call `kw-wiki-ingest` with:
    - `wiki_root`: the configured wiki root path
    - `source_file`: the raw file written in step 4
 
    `kw-wiki-ingest` handles concept extraction, index rebuild, and log append
-   internally -- do not call `kw-wiki-index` or `kw-wiki-log` again after this step.
+   internally. Do not call `kw-wiki-index` or `kw-wiki-log` again after this.
 
-6. **Return receipt**:
+6. **Return accepted receipt**:
 
 ```json
 {
   "correlation_id": "<matches request>",
-  "source_id": "<equals correlation_id -- the raw filename stem and stable forget target>",
+  "source_id": "src-<8 hex chars>",
   "status": "accepted",
-  "message": "<human-readable confirmation>"
+  "message": "Learning ingested."
 }
 ```
 
@@ -94,16 +116,16 @@ A `second-brain.learn.v1` request envelope:
 
 | Status      | Meaning                                                        |
 |-------------|----------------------------------------------------------------|
-| `accepted`  | Learning ingested successfully.                                |
-| `duplicate` | Content hash matched an existing raw entry; not re-ingested.  |
-| `invalid`   | Envelope failed validation; see `message` for details.        |
+| `accepted`  | Learning ingested; `source_id` present.                        |
+| `duplicate` | Content hash matched an existing entry; `source_id` present.  |
+| `invalid`   | Envelope failed validation; `source_id` absent.               |
 
 ## Error conditions
 
 | Condition              | Response                                               |
 |------------------------|--------------------------------------------------------|
-| Validation fails       | Return `status: invalid` with error details            |
-| Duplicate detected     | Return `status: duplicate`; do not modify wiki         |
+| Validation fails       | Return `status: invalid`, omit `source_id`             |
+| Duplicate detected     | Return `status: duplicate` with existing `source_id`   |
 | kw-wiki-ingest error   | Propagate error; do not commit partial state           |
 
 ## References
