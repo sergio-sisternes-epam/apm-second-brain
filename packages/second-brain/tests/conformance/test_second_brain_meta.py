@@ -74,26 +74,46 @@ def test_apm_yml_declares_learn_and_think():
 
 
 def test_lock_deploys_learn_handlers():
-    """apm.lock.yaml must deploy sb-learn-handler and sb-forget-handler."""
+    """apm.lock.yaml must structurally declare second-brain-learn with required handlers."""
     lock_path = PKG_ROOT / "apm.lock.yaml"
     assert lock_path.exists(), "apm.lock.yaml must exist"
     with open(lock_path) as f:
         lock = yaml.safe_load(f)
-    deployed = lock_path.read_text(encoding="utf-8")
+    deps = lock.get("dependencies", [])
+    dep_names = [str(d.get("name", "") or d.get("virtual_path", "")) for d in deps if isinstance(d, dict)]
+    dep_names_str = " ".join(dep_names)
+    assert "second-brain-learn" in dep_names_str, (
+        f"apm.lock.yaml must list second-brain-learn as a dependency. Found: {dep_names}"
+    )
+    # Verify required handlers appear in deployed_files across all deps
+    all_deployed = " ".join(
+        " ".join(str(f) for f in d.get("deployed_files", []))
+        for d in deps if isinstance(d, dict)
+    )
     for handler in REQUIRED_LEARN_HANDLERS:
-        assert handler in deployed, (
-            f"apm.lock.yaml must deploy {handler} from second-brain-learn"
+        assert handler in all_deployed, (
+            f"apm.lock.yaml deployed_files must include {handler}"
         )
 
 
 def test_lock_deploys_think_handlers():
-    """apm.lock.yaml must deploy sb-think-handler and sb-think-validate."""
+    """apm.lock.yaml must structurally declare second-brain-think with required handlers."""
     lock_path = PKG_ROOT / "apm.lock.yaml"
-    assert lock_path.exists(), "apm.lock.yaml must exist"
-    deployed = lock_path.read_text(encoding="utf-8")
+    with open(lock_path) as f:
+        lock = yaml.safe_load(f)
+    deps = lock.get("dependencies", [])
+    dep_names = [str(d.get("name", "") or d.get("virtual_path", "")) for d in deps if isinstance(d, dict)]
+    dep_names_str = " ".join(dep_names)
+    assert "second-brain-think" in dep_names_str, (
+        f"apm.lock.yaml must list second-brain-think as a dependency. Found: {dep_names}"
+    )
+    all_deployed = " ".join(
+        " ".join(str(f) for f in d.get("deployed_files", []))
+        for d in deps if isinstance(d, dict)
+    )
     for handler in REQUIRED_THINK_HANDLERS:
-        assert handler in deployed, (
-            f"apm.lock.yaml must deploy {handler} from second-brain-think"
+        assert handler in all_deployed, (
+            f"apm.lock.yaml deployed_files must include {handler}"
         )
 
 
