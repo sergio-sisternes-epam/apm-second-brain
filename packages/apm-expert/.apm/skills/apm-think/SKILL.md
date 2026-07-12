@@ -2,10 +2,42 @@
 
 Public capability: `apm-expert.answer.v1`
 
+**Status: SCAFFOLD** -- the OKF corpus has not been built. Until the
+knowledge-build pipeline runs (see `docs/knowledge-build.md`), this skill
+MUST follow the fail-closed path defined below.
+
 Answers questions about the Agent Package Manager by querying the internal
 `apm-knowledge` corpus and synthesising a citation-backed response.
 
-## When to invoke
+## Fail-closed branch (MANDATORY)
+
+Before synthesising any answer, check `corpus_populated` from `apm-knowledge`.
+
+**If `corpus_populated` is `false` OR `passages` is empty:**
+
+```
+## Answer
+
+No answer available. The APM documentation corpus has not yet been populated.
+
+## Sources
+
+[]
+
+## Quality
+
+unanswered
+
+## knowledge_gaps
+
+- APM documentation corpus not yet populated -- run knowledge build pipeline.
+  See docs/knowledge-build.md for the refresh procedure.
+```
+
+Stop here. Do NOT synthesise an answer from model weights. Do NOT fabricate
+citations. Return the fail-closed response verbatim.
+
+## When to invoke (once corpus is built)
 
 Invoke this skill whenever a user or agent asks a question about:
 
@@ -16,21 +48,20 @@ Invoke this skill whenever a user or agent asks a question about:
 - APM marketplace governance and policy
 - Any other topic covered by the APM v0.25.0 documentation
 
-## How it works
+## How it works (corpus populated)
 
 1. Receives the user's question as a natural-language string.
 2. Invokes `apm-knowledge` internally to retrieve relevant corpus passages.
-3. Synthesises a response grounded in those passages.
-4. Attaches source citations and a quality marker to every answer.
+3. Checks `corpus_populated` -- if false or passages empty, returns fail-closed response.
+4. Synthesises a response grounded in the retrieved passages only.
+5. Attaches source citations and a quality marker to every answer.
 
-## Response format
-
-Every response includes:
+## Response format (corpus populated)
 
 ```
 ## Answer
 
-<synthesised answer grounded in corpus passages>
+<synthesised answer grounded in corpus passages only>
 
 ## Sources
 
@@ -39,6 +70,10 @@ Every response includes:
 ## Quality
 
 answered | partial | unanswered
+
+## knowledge_gaps
+
+<populated when quality is partial or unanswered; empty list when answered>
 ```
 
 Quality levels:
@@ -51,9 +86,9 @@ Quality levels:
 
 ## Acknowledging gaps
 
-When quality is `unanswered` or `partial`, include a note directing the
-user to the upstream repository (microsoft/apm) or the official APM
-documentation for the most current information.
+When quality is `unanswered` or `partial`, add a `knowledge_gaps` entry
+directing the user to the upstream repository (microsoft/apm) or the official
+APM documentation for the most current information.
 
 ## Corpus scope
 

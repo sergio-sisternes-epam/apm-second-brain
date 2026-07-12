@@ -1,0 +1,34 @@
+{
+  "agentId": "00000000-0000-0000-0000-000000000001",
+  "displayName": "APM Expert",
+  "owner": "to-be-configured-by-consumer",
+  "project": "to-be-configured-by-consumer",
+  "status": "active",
+  "registeredAt": "2026-01-01T00:00:00Z",
+  "lastValidatedAt": null,
+  "lastValidationError": null,
+  "transports": [
+    {
+      "type": "copilot-app",
+      "projectId": "to-be-configured-by-consumer"
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "apm-expert.answer.v1",
+      "version": "0.1.0",
+      "interactionMode": "conversational"
+    }
+  ],
+  "knowledgeRoots": [
+    {
+      "id": "apm-corpus",
+      "label": "APM Documentation Corpus",
+      "format": "okf-v0.1",
+      "pathBase": "project",
+      "path": "packages/apm-expert/.apm/skills/apm-knowledge/references/knowledge",
+      "default": true
+    }
+  ],
+  "constraints": []
+}
