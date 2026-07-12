@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1",
+  "revision": 5,
+  "agents": [
+    {
+      "agentId": "00000000-0000-0000-0000-000000000001",
+      "displayName": "Synthetic Brain Agent",
+      "owner": "synthetic-team",
+      "project": "synthetic-project-alpha",
+      "transports": [
+        {
+          "type": "copilot-app",
+          "projectId": "synthetic-project-id-001"
+        }
+      ],
+      "capabilities": [
+        {
+          "id": "second-brain.think.v1",
+          "version": "1.0.0",
+          "interactionMode": "query"
+        },
+        {
+          "id": "second-brain.recall.v1",
+          "version": "1.0.0",
+          "interactionMode": "query"
+        }
+      ],
+      "constraints": [],
+      "knowledgeRoots": [
+        {
+          "id": "kr-alpha-wiki",
+          "label": "Alpha Wiki",
+          "format": "okf-v1",
+          "pathBase": "project",
+          "path": "wiki/",
+          "default": true
+        }
+      ],
+      "status": "active",
+      "registeredAt": "2025-01-01T00:00:00.000Z",
+      "lastValidatedAt": "2025-06-01T12:00:00.000Z",
+      "lastValidationError": null
+    },
+    {
+      "agentId": "00000000-0000-0000-0000-000000000002",
+      "displayName": "Synthetic Search Agent",
+      "owner": "synthetic-team",
+      "project": "synthetic-project-beta",
+      "transports": [
+        {
+          "type": "copilot-app",
+          "projectId": "synthetic-project-id-002"
+        }
+      ],
+      "capabilities": [
+        {
+          "id": "search.fulltext.v1",
+          "version": "1.0.0",
+          "interactionMode": "query"
+        }
+      ],
+      "constraints": [],
+      "knowledgeRoots": [
+        {
+          "id": "kr-beta-docs",
+          "label": "Beta Docs",
+          "format": "okf-v1",
+          "pathBase": "project",
+          "path": "docs/",
+          "default": true
+        }
+      ],
+      "status": "stale",
+      "registeredAt": "2025-02-01T00:00:00.000Z",
+      "lastValidatedAt": "2025-03-01T08:00:00.000Z",
+      "lastValidationError": "transport unreachable: synthetic-project-id-002"
+    }
+  ]
+}
