@@ -160,9 +160,12 @@ export function buildGraph(wikiRoot, { includeArchived = false } = {}) {
     // These files are excluded as nodes but their outbound links still count
     // as inbound credit for target concepts (preventing false orphans).
     // Resolve relative to wiki/ (the structural file's own directory).
+    // Apply the same realpath containment check used for concept files so that
+    // a symlinked index.md or log.md cannot read data outside the bundle root.
     const wikiDir = join(wikiRoot, "wiki");
     for (const structFile of ["index.md", "log.md"]) {
         const fp = join(wikiDir, structFile);
+        try { containmentCheck(fp, wikiRoot); } catch { continue; }
         let text;
         try { text = readFileSync(fp, "utf-8"); } catch { continue; }
         const links = extractLinks(text, wikiDir);

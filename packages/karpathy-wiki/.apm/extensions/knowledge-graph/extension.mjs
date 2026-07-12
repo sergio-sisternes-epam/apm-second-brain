@@ -5,7 +5,7 @@
 // Copilot-only in v1. Never modifies the wiki. All actions are read-only.
 
 import { createServer } from "node:http";
-import { statSync, realpathSync } from "node:fs";
+import { statSync } from "node:fs";
 import { join, resolve, relative, normalize } from "node:path";
 import { joinSession, createCanvas, CanvasError } from "@github/copilot-sdk/extension";
 import { buildGraph, applyFilters, computeStatistics, GraphError } from "./graph.mjs";
