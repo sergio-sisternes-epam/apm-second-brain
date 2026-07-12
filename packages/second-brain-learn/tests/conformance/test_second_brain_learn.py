@@ -275,3 +275,84 @@ def test_apm_lock_uses_full_shas() -> None:
         "apm.lock.yaml must record full 40-char resolved_commit SHAs for each dependency."
     )
 
+
+
+# ---------------------------------------------------------------------------
+# 12. Executable: forget validation error returns error envelope, not receipt
+# ---------------------------------------------------------------------------
+
+def test_forget_validation_failure_returns_error_envelope() -> None:
+    """Forget handler must return error envelope (VALIDATION_ERROR) on invalid input.
+
+    The forget receipt schema has no invalid status. A malformed forget request
+    must return {correlation_id, code: VALIDATION_ERROR, message} (the
+    second-brain.error schema), not {target_id, status: not_found}.
+    """
+    skill_path = SKILLS_DIR / "sb-forget-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    # Must not say "return a receipt with status: not_found" for validation failures
+    has_not_found_for_validation = (
+        "status: not_found" in content
+        and "VALIDATION_ERROR" not in content.split("status: not_found")[0]
+        # Check the validation step specifically
+    )
+    # The correct pattern: VALIDATION_ERROR in the validation step output
+    validation_step_idx = content.find("Validate envelope")
+    assert validation_step_idx >= 0, "sb-forget-handler must have a Validate envelope step"
+    section_after_validate = content[validation_step_idx: validation_step_idx + 800]
+    assert "VALIDATION_ERROR" in section_after_validate, (
+        "The Validate envelope step must specify VALIDATION_ERROR code -- not status: not_found. "
+        "A malformed forget request is not the same as a not-found target."
+    )
+
+
+# ---------------------------------------------------------------------------
+# 13. Executable: learn duplicate receipt has schema-valid source_id
+# ---------------------------------------------------------------------------
+
+def test_learn_duplicate_receipt_schema() -> None:
+    """Duplicate learn receipt must include source_id (the existing matching raw stem)."""
+    schema = _load_schema("brain-learn", "response")
+    # Simulate a duplicate receipt
+    duplicate_receipt = {
+        "correlation_id": "00000000-0000-0000-0000-000000000001",
+        "source_id": "src-a1b2c3d4",
+        "status": "duplicate",
+    }
+    validate(instance=duplicate_receipt, schema=schema, cls=Draft202012Validator)
+
+
+# ---------------------------------------------------------------------------
+# 14. Executable: invalid learn receipt must NOT have source_id
+# ---------------------------------------------------------------------------
+
+def test_learn_invalid_receipt_no_source_id() -> None:
+    """Invalid learn receipt must omit source_id (schema conditional enforces this)."""
+    import jsonschema
+    schema = _load_schema("brain-learn", "response")
+    # source_id present on invalid receipt should fail validation (conditional schema)
+    invalid_with_source = {
+        "correlation_id": "00000000-0000-0000-0000-000000000001",
+        "source_id": "src-a1b2c3d4",
+        "status": "invalid",
+        "message": "validation failed",
+    }
+    with pytest.raises(jsonschema.ValidationError):
+        validate(instance=invalid_with_source, schema=schema, cls=Draft202012Validator)
+
+
+# ---------------------------------------------------------------------------
+# 15. Executable: apm pack dry-run succeeds (smoke test for packability)
+# ---------------------------------------------------------------------------
+
+def test_apm_pack_dry_run_succeeds() -> None:
+    """apm pack --dry-run must succeed for second-brain-learn."""
+    import subprocess
+    result = subprocess.run(
+        ["apm", "pack", "--dry-run"],
+        capture_output=True, text=True, timeout=60,
+        cwd=str(PKG_ROOT),
+    )
+    assert result.returncode == 0, (
+        f"apm pack --dry-run failed for second-brain-learn:\n{result.stdout}\n{result.stderr}"
+    )

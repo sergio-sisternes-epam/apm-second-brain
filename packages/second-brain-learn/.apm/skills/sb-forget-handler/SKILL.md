@@ -44,8 +44,18 @@ A `second-brain.forget.v1` request envelope:
 ## Procedure
 
 1. **Validate envelope**: Call `sb-forget-validate` with the request envelope.
-   If `valid` is false, return a receipt with `status: not_found` and the
-   validation errors joined as a human-readable `message`. Stop.
+   If `valid` is false, return a schema-valid error envelope (NOT a forget
+   receipt -- the forget receipt has no invalid status):
+
+   ```json
+   {
+     "correlation_id": "<from request, or generated UUID if request malformed>",
+     "code": "VALIDATION_ERROR",
+     "message": "<validation errors joined as human-readable string>"
+   }
+   ```
+
+   Stop. Do not proceed to target resolution.
 
 2. **Resolve target**: Interpret `target_id` using exactly one of these two
    forms (tried in order):
@@ -105,12 +115,15 @@ A `second-brain.forget.v1` request envelope:
 
 ## Error conditions
 
-| Condition               | Response                                              |
-|-------------------------|-------------------------------------------------------|
-| Validation fails        | Return `status: not_found` with validation message    |
-| Target not found        | Return `status: not_found` with descriptive message   |
-| Concept already archived| Return `status: not_found`, msg: "already archived"  |
-| kw-wiki-archive error   | Propagate error; do not commit partial state          |
+| Condition               | Response type          | code / status              |
+|-------------------------|------------------------|----------------------------|
+| Validation fails        | Error envelope         | `VALIDATION_ERROR`         |
+| Target not found        | Forget receipt         | `status: not_found`        |
+| Concept already archived| Forget receipt         | `status: not_found`, idempotent |
+| kw-wiki-archive error   | Error envelope         | `PROVIDER_ERROR`           |
+
+Error envelopes match `second-brain.error` schema (correlation_id, code, message).
+Forget receipts match `second-brain.forget.v1.response` schema (correlation_id, target_id, status).
 
 ## References
 

@@ -241,3 +241,54 @@ def test_apm_lock_uses_full_shas() -> None:
         "apm.lock.yaml must record full 40-char resolved_commit SHAs for each dependency."
     )
 
+
+
+# ---------------------------------------------------------------------------
+# 11. Executable: apm pack dry-run for second-brain-think succeeds
+# ---------------------------------------------------------------------------
+
+def test_apm_pack_dry_run_succeeds() -> None:
+    """apm pack --dry-run must succeed for second-brain-think."""
+    import subprocess
+    result = subprocess.run(
+        ["apm", "pack", "--dry-run"],
+        capture_output=True, text=True, timeout=60,
+        cwd=str(PKG_ROOT),
+    )
+    assert result.returncode == 0, (
+        f"apm pack --dry-run failed for second-brain-think:\n{result.stdout}\n{result.stderr}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 12. Executable: packed own-primitives contain only think skills
+# ---------------------------------------------------------------------------
+
+def test_apm_pack_own_primitives_are_think_only() -> None:
+    """second-brain-think's own packed primitives (from .apm/) must be think skills only.
+
+    APM 0.25 note: dependency skills (karpathy-wiki, second-brain-interfaces)
+    are always deployed alongside own skills -- this is an APM design constraint
+    (includes: controls own primitives only, not dependency primitives).
+    This test verifies the OWN packaged surface is read-only.
+    """
+    import subprocess
+    result = subprocess.run(
+        ["apm", "pack", "--dry-run"],
+        capture_output=True, text=True, timeout=60,
+        cwd=str(PKG_ROOT),
+    )
+    assert result.returncode == 0, f"apm pack --dry-run failed: {result.stderr}"
+    output = result.stdout
+
+    # Own think skills must be present
+    assert "sb-think-handler/SKILL.md" in output, "sb-think-handler must be in pack output"
+    assert "sb-think-validate/SKILL.md" in output, "sb-think-validate must be in pack output"
+
+    # Own write skills must NOT be present (no own write skills)
+    own_write_skills = ["sb-learn-handler", "sb-forget-handler", "sb-learn-validate"]
+    for skill in own_write_skills:
+        assert skill not in output, (
+            f"Pack output must not contain own write skill: {skill}. "
+            "second-brain-think is a read-only package."
+        )

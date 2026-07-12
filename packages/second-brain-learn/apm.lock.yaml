@@ -500,7 +500,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:0c1a3163a0aa5abc338a1463c25a39c7fb3ed5ccf6b6fb3f600fce39007f3478
+  content_hash: sha256:08c6cb3b0cabe1c000ec4f408a4327773ecc3425c779a7e169cb999049e6c0f5
 - kind: project-relative
   target: agents
   value: .agents/skills/sb-forget-validate
@@ -905,7 +905,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:0c1a3163a0aa5abc338a1463c25a39c7fb3ed5ccf6b6fb3f600fce39007f3478
+  content_hash: sha256:08c6cb3b0cabe1c000ec4f408a4327773ecc3425c779a7e169cb999049e6c0f5
 - kind: project-relative
   target: claude
   value: .claude/skills/sb-forget-validate
@@ -989,12 +989,12 @@ local_deployed_files:
 - .claude/skills/sb-learn-validate/SKILL.md
 - .github/instructions/package.instructions.md
 local_deployed_file_hashes:
-  .agents/skills/sb-forget-handler/SKILL.md: sha256:0c1a3163a0aa5abc338a1463c25a39c7fb3ed5ccf6b6fb3f600fce39007f3478
+  .agents/skills/sb-forget-handler/SKILL.md: sha256:08c6cb3b0cabe1c000ec4f408a4327773ecc3425c779a7e169cb999049e6c0f5
   .agents/skills/sb-forget-validate/SKILL.md: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
   .agents/skills/sb-learn-handler/SKILL.md: sha256:4502aff3cb4c18031bd3464790b22b36393035b140db456c3573b33c32c62a2b
   .agents/skills/sb-learn-validate/SKILL.md: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
   .claude/rules/package.md: sha256:ecd2b86abe4f6ed94f261e79f9bfb92d93cc394ada998cfcfb67a108c7b648e4
-  .claude/skills/sb-forget-handler/SKILL.md: sha256:0c1a3163a0aa5abc338a1463c25a39c7fb3ed5ccf6b6fb3f600fce39007f3478
+  .claude/skills/sb-forget-handler/SKILL.md: sha256:08c6cb3b0cabe1c000ec4f408a4327773ecc3425c779a7e169cb999049e6c0f5
   .claude/skills/sb-forget-validate/SKILL.md: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
   .claude/skills/sb-learn-handler/SKILL.md: sha256:4502aff3cb4c18031bd3464790b22b36393035b140db456c3573b33c32c62a2b
   .claude/skills/sb-learn-validate/SKILL.md: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
