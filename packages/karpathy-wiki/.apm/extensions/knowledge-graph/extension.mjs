@@ -231,13 +231,20 @@ function applyFilters(graph, filters) {
 
     // Focus mode: narrow to the focused node and its direct neighbourhood first,
     // then apply any additional user-level filters on top of that subset.
+    // Guard against stale _focusId values (e.g. after switching to a new wiki
+    // bundle): if the id no longer exists in the current graph, skip focus mode
+    // entirely rather than returning an empty canvas.
     let focusedId = null;
     if (_focusId) {
-        focusedId = _focusId;
-        const outboundIds = new Set(graph.edges.filter((e) => e.from === _focusId && !e.broken).map((e) => e.to));
-        const inboundIds  = new Set(graph.edges.filter((e) => e.to   === _focusId && !e.broken).map((e) => e.from));
-        const neighbourhood = new Set([_focusId, ...outboundIds, ...inboundIds]);
-        nodes = nodes.filter((n) => neighbourhood.has(n.id));
+        const focusNodeExists = graph.nodes.some((n) => n.id === _focusId);
+        if (focusNodeExists) {
+            focusedId = _focusId;
+            const outboundIds = new Set(graph.edges.filter((e) => e.from === _focusId && !e.broken).map((e) => e.to));
+            const inboundIds  = new Set(graph.edges.filter((e) => e.to   === _focusId && !e.broken).map((e) => e.from));
+            const neighbourhood = new Set([_focusId, ...outboundIds, ...inboundIds]);
+            nodes = nodes.filter((n) => neighbourhood.has(n.id));
+        }
+        // Stale _focusId: silently skip focus filtering; the full graph is shown.
     }
 
     if (type) nodes = nodes.filter((n) => n.type === type);
@@ -368,8 +375,8 @@ function renderGraphHtml(graph, filters, stats, wikiRoot) {
     </div>` : ""}
     <div class="filter-bar">
       <span style="font-size:.75rem;font-weight:600">Filters (agent-driven):</span>
-      ${filters && (filters.type || filters.tag || filters.status || filters.onlyOrphans || filters.onlyConnected || filters.text)
-        ? `<span class="badge" style="font-size:.7rem">type:${esc(filters.type||"*")} tag:${esc(filters.tag||"*")} status:${esc(filters.status||"*")} orphan:${filters.onlyOrphans||false} connected:${filters.onlyConnected||false} q:${esc(filters.text||"")}</span>`
+      ${filters && (filters.type || filters.tag || filters.status || filters.directory || filters.onlyOrphans || filters.onlyConnected || filters.text || filters.includeArchived)
+        ? `<span class="badge" style="font-size:.7rem">type:${esc(filters.type||"*")} tag:${esc(filters.tag||"*")} status:${esc(filters.status||"*")} dir:${esc(filters.directory||"*")} orphan:${filters.onlyOrphans||false} connected:${filters.onlyConnected||false} q:${esc(filters.text||"")} archived:${filters.includeArchived||false}</span>`
         : "<span class='muted'>none -- ask the agent to filter</span>"}
     </div>
     <div class="panels">
