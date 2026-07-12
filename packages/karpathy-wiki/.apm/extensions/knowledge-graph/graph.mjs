@@ -112,7 +112,16 @@ export function buildGraph(wikiRoot, { includeArchived = false } = {}) {
     for (const file of files) {
         if (STRUCTURAL_FILES.has(file)) continue;
         const filePath = join(conceptsDir, file);
-        containmentCheck(filePath, wikiRoot);
+
+        // Enforce containment on the real resolved path before reading.
+        // A symlink under concepts/ whose target is outside wikiRoot is skipped
+        // silently rather than crashing the whole graph build.
+        try {
+            containmentCheck(filePath, wikiRoot);
+        } catch (e) {
+            if (e instanceof GraphError) continue;
+            throw e;
+        }
 
         let text;
         try { text = readFileSync(filePath, "utf-8"); } catch { continue; }

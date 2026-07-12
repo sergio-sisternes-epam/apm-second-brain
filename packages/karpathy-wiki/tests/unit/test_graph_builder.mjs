@@ -8,6 +8,8 @@
 import { buildGraph } from "../../.apm/extensions/knowledge-graph/graph.mjs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
+import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_BUNDLE = resolve(__dirname, "../fixtures/archived-bundle");
@@ -122,6 +124,52 @@ assert(
     activeConcept && !activeConcept.isOrphan,
     "active-concept is not an orphan (has inbound from index.md and outbound to linked)"
 );
+
+// ---------------------------------------------------------------------------
+// Test 7: Symlink escaping containment is blocked (regression)
+// ---------------------------------------------------------------------------
+// Skipped on platforms where symlink creation is genuinely unavailable.
+
+console.log("\n[7] Symlink path traversal is blocked");
+{
+    let canSymlink = true;
+    let tmpDir;
+    try {
+        tmpDir = mkdtempSync(join(tmpdir(), "kg-symlink-test-"));
+        const wikiDir = join(tmpDir, "wiki");
+        const conceptsDir = join(wikiDir, "concepts");
+        mkdirSync(conceptsDir, { recursive: true });
+        writeFileSync(join(tmpDir, "SCHEMA.md"), "# Schema");
+        writeFileSync(join(wikiDir, "index.md"), "# Index");
+        const sensitiveFile = join(tmpDir, "secret.txt");
+        writeFileSync(sensitiveFile, "SENSITIVE");
+        symlinkSync(sensitiveFile, join(conceptsDir, "escape.md"));
+    } catch {
+        canSymlink = false;
+    }
+
+    if (!canSymlink) {
+        console.log("  SKIP: symlink creation not available on this platform");
+    } else {
+        const escapeBundleRoot = tmpDir;
+        let graph;
+        let threw = false;
+        try {
+            graph = buildGraph(escapeBundleRoot);
+        } catch {
+            threw = true;
+        }
+        if (!threw) {
+            const hasSensitiveNode = graph.nodes.some(
+                (n) => (n.path && n.path.includes("escape")) || n.id === "escape"
+            );
+            assert(!hasSensitiveNode, "Escaping symlink target is NOT surfaced as a graph node");
+        } else {
+            assert(threw, "buildGraph threw when bundle contained an escaping symlink");
+        }
+        try { rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+    }
+}
 
 // ---------------------------------------------------------------------------
 // Summary
