@@ -1,3 +1,8 @@
-
 # APM dependencies
 apm_modules/
+
+# APM generated cross-client cache
+.agents/
+
+# APM generated output
+.claude/

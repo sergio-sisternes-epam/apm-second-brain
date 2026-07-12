@@ -26,7 +26,9 @@ DISABLED_HEADER = "<!-- direct-user-invocation: disabled -->"
 # ---------------------------------------------------------------------------
 
 def _read(rel: str) -> str:
-    return (PACKAGE_ROOT / rel).read_text(encoding="utf-8")
+    p = PACKAGE_ROOT / rel
+    assert p.exists(), f"Expected file not found: {p}"
+    return p.read_text(encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
