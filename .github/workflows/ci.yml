@@ -97,40 +97,6 @@ jobs:
         run: |
           # Proves that installing the pinned second-brain package in an isolated
           # empty workspace materialises both learn and think dependency trees.
-          # APM CLI is available in this job; uses GITHUB_SHA as the remote ref
-          # so the exact commit under test is installed (not a mutable branch tip).
-          python3 - << 'PYEOF'
-import subprocess, tempfile, sys
-from pathlib import Path
-
-REPO = "sergio-sisternes-epam/apm-second-brain"
-SHA  = "${{ github.sha }}"
-
-with tempfile.TemporaryDirectory() as ws:
-    # Consumer apm.yml pinned to the exact commit under test
-    (Path(ws) / "apm.yml").write_text(
-        "name: consumer-test\n"
-        "version: 0.1.0\n"
-        "dependencies:\n"
-        "  apm:\n"
-        f"    - {REPO}/packages/second-brain#{SHA}\n"
-        "includes: auto\n"
-        "scripts: {}\n"
-    )
-    r = subprocess.run(
-        ["apm", "install", "--target", "claude"],
-        cwd=ws, capture_output=True, text=True, timeout=180,
-    )
-    if r.returncode != 0:
-        print(r.stdout); print(r.stderr, file=sys.stderr)
-        sys.exit(f"apm install failed: {r.returncode}")
-
-    agents = list(Path(ws).rglob("sb-learn-handler"))
-    think  = list(Path(ws).rglob("sb-think-handler"))
-    if not agents:
-        sys.exit("FAIL: sb-learn-handler not found after consumer install")
-    if not think:
-        sys.exit("FAIL: sb-think-handler not found after consumer install")
-    print(f"PASS: sb-learn-handler at {agents[0]}")
-    print(f"PASS: sb-think-handler at {think[0]}")
-PYEOF
+          # APM CLI is installed in this job; GITHUB_SHA pins the exact commit
+          # under test (not a mutable branch tip). Fails CI on any failure.
+          python3 scripts/test-second-brain-consumer-install.py "${{ github.sha }}"
