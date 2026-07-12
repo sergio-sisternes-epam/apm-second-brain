@@ -57,11 +57,15 @@ jobs:
       - name: Run marketplace check
         run: apm marketplace check
 
-      - name: Verify marketplace.json is current
-        run: apm pack --dry-run --check-clean
-
-      - name: Regenerate marketplace.json
-        run: apm pack
+      - name: Pack and check marketplace.json drift
+        run: |
+          apm pack
+          if [ -n "$(git status --porcelain .claude-plugin/marketplace.json)" ]; then
+            echo "::error::marketplace.json is out of date -- run 'apm pack' and commit before tagging."
+            git diff .claude-plugin/marketplace.json || true
+            exit 1
+          fi
+          echo "marketplace.json is current."
 
       - name: Commit updated marketplace.json
         run: |

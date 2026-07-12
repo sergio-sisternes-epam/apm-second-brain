@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    # Include ready_for_review so converting a draft to ready re-triggers CI
+    # even when no new commits are pushed.
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   lint:
@@ -13,21 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check for private context
-        run: |
-          # Fail if any non-workflow file references internal paths or private markers.
-          # The workflow file itself is excluded to avoid false positives from the
-          # scanner's own pattern strings.
-          if grep -rn \
-            -e "epam-agent-forge" \
-            -e "Users/sergio_sisternes" \
-            -e "EPAM All Rights Reserved" \
-            --include="*.md" --include="*.yml" --include="*.yaml" \
-            --include="*.json" --include="*.py" --include="*.mjs" \
-            --exclude="ci.yml" \
-            .; then
-            echo "Private context found -- remove before merging" && exit 1
-          fi
-          echo "Clean"
+        # Delegates to the shared scanner script so CI and conformance tests
+        # exercise exactly the same implementation.
+        run: bash scripts/scan-private-context.sh
 
   test-conformance:
     name: OKF conformance
@@ -40,7 +31,13 @@ jobs:
       - name: Install test dependencies
         run: pip install pytest pyyaml jsonschema
       - name: Run conformance suite
-        run: python3 -m pytest tests/conformance/ -v
+        run: |
+          # Collect root conformance tests plus every package-level conformance dir.
+          DIRS="tests/conformance/"
+          for pkg_tests in packages/*/tests/conformance; do
+            [ -d "$pkg_tests" ] && DIRS="$DIRS $pkg_tests"
+          done
+          python3 -m pytest $DIRS -v
 
   apm-validate:
     name: APM package validation
@@ -60,7 +57,30 @@ jobs:
           else
             apm marketplace check
           fi
-      - name: Dry-run pack
-        run: apm pack --dry-run
-      - name: Verify marketplace.json is committed and current
-        run: apm pack --dry-run --check-clean
+      - name: Dry-run pack each standalone package
+        run: |
+          # Validate each package that has no local-path dependencies.
+          # Packages with local-path deps (e.g. "../other-pkg") cannot be
+          # packed in isolation; they are covered by the root-level apm pack below.
+          find . -mindepth 2 -name "apm.yml" ! -path "*/.apm/*" -exec dirname {} \; \
+            | sort -u \
+            | while read pkg_dir; do
+                if grep -qE '^\s+- \.\.' "$pkg_dir/apm.yml" 2>/dev/null; then
+                  echo "--- skipping $pkg_dir (local-path dependencies; validated by root pack) ---"
+                  continue
+                fi
+                echo "--- dry-run pack: $pkg_dir ---"
+                (cd "$pkg_dir" && apm pack --dry-run) || exit 1
+              done
+      - name: Pack and verify marketplace.json is current
+        run: |
+          # Write marketplace.json and confirm it matches what was committed.
+          # Using git status is more reliable than --check-clean which only
+          # prints an informational message without a guaranteed non-zero exit.
+          apm pack
+          if [ -n "$(git status --porcelain .claude-plugin/marketplace.json)" ]; then
+            echo "::error::marketplace.json is out of date -- run 'apm pack' and commit the result."
+            git diff .claude-plugin/marketplace.json || true
+            exit 1
+          fi
+          echo "marketplace.json is current."
