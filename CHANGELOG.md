@@ -8,6 +8,14 @@ convention.
 
 ## [Unreleased]
 
+### Added
+
+- `karpathy-wiki`: Knowledge Graph Canvas extension -- interactive read-only graph
+  visualisation of a Karpathy wiki OKF bundle, deployed to Copilot target only.
+  Supports search, filtering by type/tag/status/directory, focus mode (narrows
+  to a node and its direct neighbourhood), archived concept exclusion at parse
+  time (includeArchived: true opt-in restores them), and multi-instance isolation.
+
 - Add the `open-knowledge-format` dependency to `karpathy-wiki` through APM.
 - Create and maintain `wiki/concepts/index.md` as the concepts sub-index.
 - Exclude archived tombstones from normal query fallback results.

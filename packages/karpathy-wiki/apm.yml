@@ -12,5 +12,20 @@ dependencies:
   apm:
     - ../open-knowledge-format
   mcp: []
+# Canvas extensions are discovered automatically via `includes: auto` from the
+# .apm/extensions/ directory tree. APM 0.25 has no dedicated `extensions:` field
+# in apm.yml; the canvas experimental feature (apm experimental enable canvas)
+# and the includes: auto setting together handle discovery and deployment to
+# .github/extensions/ (Copilot target only).
+#
+# Install, pack, uninstall, collision, approval, and target-isolation:
+#   - Install: `apm install <pkg>` -- canvas bundle is included automatically
+#   - Approval: `apm approve knowledge-graph` -- required before the canvas loads
+#   - Pack: `apm pack --target copilot` -- deploys extension to .github/extensions/
+#   - Copilot-only target: canvas is intentionally omitted from claude and all
+#     other non-Copilot targets
+#   - Collision: if two packages declare canvases with the same id, the last
+#     installed wins (standard APM last-writer behaviour)
+#   - Uninstall: `apm prune` removes the deployed bundle from .github/extensions/
 includes: auto
 scripts: {}
