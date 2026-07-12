@@ -1,15 +1,18 @@
 name: second-brain-learn
 version: 0.1.0
+license: Apache-2.0
 description: Provider-side write, learn, and forget implementation
 author: Sergio Sisternes
 # Which agent platforms to deploy to.
 # Resolution order: --target flag > this field > auto-detect from filesystem.
 # Accepted values: agent-skills, antigravity, claude, codex, copilot, cursor, gemini, kiro, opencode, windsurf
 targets:
-- claude
-- copilot
+  - claude
+  - copilot
 dependencies:
-  apm: []
+  apm:
+    - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki#c4a074f18cbe25c1c1c4f12caae732210cd7c860
+    - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces#c4a074f18cbe25c1c1c4f12caae732210cd7c860
   mcp: []
 includes: auto
 scripts: {}

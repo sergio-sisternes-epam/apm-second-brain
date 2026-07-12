@@ -70,8 +70,17 @@ jobs:
                   continue
                 fi
                 echo "--- dry-run pack: $pkg_dir ---"
-                (cd "$pkg_dir" && apm pack --dry-run) || exit 1
+                (cd "$pkg_dir" && apm install && apm pack --dry-run) || exit 1
               done
+      - name: Check for manifest drift after apm install
+        run: |
+          # apm install during pack validation must not mutate committed manifests/locks.
+          if [ -n "$(git diff --name-only packages/*/apm.yml packages/*/apm.lock.yaml)" ]; then
+            echo "::error::apm install mutated package manifests or lockfiles. Commit the updated files."
+            git diff packages/*/apm.yml packages/*/apm.lock.yaml
+            exit 1
+          fi
+          echo "No manifest/lock drift detected."
       - name: Pack and verify marketplace.json is current
         run: |
           # Write marketplace.json and confirm it matches what was committed.
