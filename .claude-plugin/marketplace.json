@@ -1,0 +1,57 @@
+{
+  "name": "apm-second-brain",
+  "owner": {
+    "name": "sergio-sisternes-epam",
+    "url": "https://github.com/sergio-sisternes-epam"
+  },
+  "plugins": [
+    {
+      "name": "open-knowledge-format",
+      "description": "OKF v0.1 conformance tooling and bundle validation",
+      "version": "0.1.0",
+      "source": "./packages/open-knowledge-format"
+    },
+    {
+      "name": "karpathy-wiki",
+      "description": "Karpathy persistent-wiki engine over a strict OKF bundle",
+      "version": "0.1.0",
+      "source": "./packages/karpathy-wiki"
+    },
+    {
+      "name": "second-brain-interfaces",
+      "description": "Versioned think, learn, and forget capability contracts",
+      "version": "0.1.0",
+      "source": "./packages/second-brain-interfaces"
+    },
+    {
+      "name": "second-brain-learn",
+      "description": "Provider-side write, learn, and forget implementation",
+      "version": "0.1.0",
+      "source": "./packages/second-brain-learn"
+    },
+    {
+      "name": "second-brain-think",
+      "description": "Provider-side read and citation-backed reasoning",
+      "version": "0.1.0",
+      "source": "./packages/second-brain-think"
+    },
+    {
+      "name": "second-brain",
+      "description": "Dependency-only meta-package installing a complete provider",
+      "version": "0.1.0",
+      "source": "./packages/second-brain"
+    },
+    {
+      "name": "agent-knowledge-network",
+      "description": "Local agent registration, discovery, and capability routing",
+      "version": "0.1.0",
+      "source": "./packages/agent-knowledge-network"
+    },
+    {
+      "name": "apm-expert",
+      "description": "APM documentation expert backed by a vendored OKF corpus",
+      "version": "0.1.0",
+      "source": "./packages/apm-expert"
+    }
+  ]
+}
