@@ -1,0 +1,10 @@
+{
+  "repository": "microsoft/apm",
+  "tag": "v0.25.0",
+  "fullCommitSha": "d73e6ac3645d2b9c5c813095e2e58f020f38f17a",
+  "buildDate": null,
+  "integrityHash": null,
+  "licence": "Apache-2.0",
+  "status": "placeholder",
+  "notes": "Corpus not yet generated. Run the knowledge build pipeline (see docs/knowledge-build.md) to populate this baseline. buildDate and integrityHash will be set by the build pipeline."
+}
