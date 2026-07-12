@@ -219,8 +219,15 @@ function buildGraph(wikiRoot) {
 // -- Filter engine --
 
 function applyFilters(graph, filters) {
-    const { type, tag, status, directory, onlyOrphans, onlyConnected, text: freeText, _focusId } = filters || {};
+    const { type, tag, status, directory, onlyOrphans, onlyConnected, text: freeText, _focusId, includeArchived } = filters || {};
     let nodes = graph.nodes;
+
+    // Archived concepts are hidden from the normal graph view unless the caller
+    // has explicitly opted in via `includeArchived: true`. This prevents stale /
+    // deprecated concepts from cluttering navigation and search results.
+    if (!includeArchived) {
+        nodes = nodes.filter((n) => n.status !== "archived");
+    }
 
     // Focus mode: narrow to the focused node and its direct neighbourhood first,
     // then apply any additional user-level filters on top of that subset.
@@ -532,6 +539,7 @@ const session = await joinSession({
                             onlyOrphans: { type: "boolean", description: "Show only orphan concepts (no inbound or outbound links)." },
                             onlyConnected: { type: "boolean", description: "Show only concepts with at least one link." },
                             text: { type: "string", description: "Free-text search across title, description, path, and tags." },
+                            includeArchived: { type: "boolean", description: "When true, archived concepts appear in the graph alongside active ones. Defaults to false (archived hidden)." },
                         },
                         additionalProperties: false,
                     },

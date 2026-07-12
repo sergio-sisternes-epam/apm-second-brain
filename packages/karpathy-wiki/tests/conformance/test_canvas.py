@@ -160,3 +160,27 @@ def test_extension_exports_default_via_join_session():
     assert "createCanvas" in content, (
         "extension.mjs must call createCanvas() to declare the canvas."
     )
+
+
+# ---------------------------------------------------------------------------
+# 8. extension.mjs excludes archived concepts from the normal graph view
+# ---------------------------------------------------------------------------
+
+def test_archived_concepts_excluded_from_normal_graph():
+    """Regression: applyFilters must hide status=archived nodes by default.
+
+    Implementation evidence: the filter engine guards on ``includeArchived``
+    and filters out nodes whose status is ``"archived"`` unless that flag is
+    explicitly set.  We verify two things from the source:
+    (a) the source contains a check against the ``"archived"`` status string, and
+    (b) the guard references ``includeArchived`` so an explicit opt-in is possible.
+    """
+    content = EXTENSION_PATH.read_text(encoding="utf-8")
+    assert '"archived"' in content or "'archived'" in content, (
+        "extension.mjs must exclude archived concepts from the default graph view. "
+        'Expected a check against the string "archived" in applyFilters.'
+    )
+    assert "includeArchived" in content, (
+        "extension.mjs must expose an includeArchived opt-in flag so callers can "
+        "explicitly request archived concepts when needed."
+    )
