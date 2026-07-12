@@ -1,0 +1,18 @@
+{
+  "schema": "gate2-eval-v1",
+  "description": "Positive eval: model caller invokes internal skill via public skill",
+  "skill": "akn-registry-io",
+  "invocation_type": "model-via-public-skill",
+  "prompt": "Use akn-discover to list all registered agents.",
+  "expected_behaviours": [
+    "invoke_akn_discover",
+    "akn_registry_io_called_internally",
+    "return_agent_list_or_empty"
+  ],
+  "pass_criteria": {
+    "public_skill_invoked": true,
+    "internal_skill_succeeds": true,
+    "no_internal_access_error": true
+  },
+  "runtimes": ["copilot-cli", "claude-code"]
+}
