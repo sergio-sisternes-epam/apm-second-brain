@@ -18,7 +18,6 @@ import re
 from pathlib import Path
 
 import pytest
-import jsonschema
 from jsonschema import validate, Draft202012Validator
 
 REPO_ROOT = Path(__file__).parent.parent.parent.parent.parent

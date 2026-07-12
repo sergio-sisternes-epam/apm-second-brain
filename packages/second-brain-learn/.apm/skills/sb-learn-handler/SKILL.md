@@ -44,15 +44,17 @@ A `second-brain.learn.v1` request envelope:
 
 1. **Validate envelope**: Call `sb-learn-validate` with the request envelope.
    If `valid` is false, return a receipt with `status: invalid` and the
-   `errors` list as the `message`. Stop.
+   `errors` joined as a human-readable string in the `message` field. Stop.
 
 2. **Validate source_type**: Confirm `source_type` is one of `session`,
    `document`, or `manual`. If not, return `status: invalid`.
 
 3. **Duplicate detection**: Compute a content hash (SHA-256) of `content`.
-   Check whether a file with that hash already exists under `raw/` in the wiki
-   root. If a match is found, return a receipt with `status: duplicate` and a
-   human-readable message. Do not re-ingest.
+   Scan all existing files under `raw/` in the wiki root and compare their
+   content hashes against the computed hash. If any match is found, return a
+   receipt with `status: duplicate` and a human-readable message. Do not
+   re-ingest. (Files in `raw/` are named by `correlation_id`; the hash
+   comparison reads file contents, not filenames.)
 
 4. **Write raw snapshot**: Write `content` to a file in `raw/` using the
    `correlation_id` as the filename stem (e.g. `raw/<correlation_id>.md`).
@@ -61,14 +63,10 @@ A `second-brain.learn.v1` request envelope:
    - `wiki_root`: the configured wiki root path
    - `source_file`: the raw file written in step 4
 
-6. **Log**: Call `kw-wiki-log` with:
-   - `event`: `learn`
-   - `source_id`: the assigned source identifier
-   - `summary`: category, confidence level, and content excerpt (first 100 chars)
+   `kw-wiki-ingest` handles concept extraction, index rebuild, and log append
+   internally -- do not call `kw-wiki-index` or `kw-wiki-log` again after this step.
 
-7. **Refresh index**: Call `kw-wiki-index` to rebuild `wiki/index.md`.
-
-8. **Return receipt**:
+6. **Return receipt**:
 
 ```json
 {
@@ -94,12 +92,9 @@ A `second-brain.learn.v1` request envelope:
 | Validation fails       | Return `status: invalid` with error details            |
 | Duplicate detected     | Return `status: duplicate`; do not modify wiki         |
 | kw-wiki-ingest error   | Propagate error; do not commit partial state           |
-| Index rebuild fails    | Log warning; receipt is still returned as `accepted`   |
 
 ## References
 
 - `sb-learn-validate` -- envelope validation helper
-- `kw-wiki-ingest` -- raw source ingestion into OKF wiki
-- `kw-wiki-log` -- append event to `wiki/log.md`
-- `kw-wiki-index` -- rebuild `wiki/index.md`
+- `kw-wiki-ingest` -- raw source ingestion into OKF wiki (handles index + log internally)
 - `second-brain-interfaces` -- `second-brain.learn.v1` schema and receipt schema
