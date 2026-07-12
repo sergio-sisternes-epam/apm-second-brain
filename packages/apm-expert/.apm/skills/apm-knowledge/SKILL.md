@@ -23,7 +23,10 @@ corpus is absent or empty, returns an empty passages list and
 | Tag | v0.25.0 |
 | Full commit SHA | d73e6ac3645d2b9c5c813095e2e58f020f38f17a |
 | Format | OKF (Open Knowledge Format) v0.1 |
-| Baseline dir | `references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/` |
+| Licence | MIT (corpus content); Apache-2.0 (package code) |
+| Active baseline | `references/knowledge/active` (pointer file; `none` = sentinel/unpopulated) |
+| Baseline dir | `references/knowledge/baselines/<tag>-<full-sha>/` |
+| Staging dir | `references/knowledge/staging/` (cleaned up after activation) |
 | Overlay dir | `references/knowledge/overlay/` |
 
 ## Corpus directory structure (write-once baseline + consumer overlay)
@@ -64,14 +67,16 @@ across baseline refreshes.
 
 ## Corpus population check
 
-The `active` pointer file existence and its referenced baseline directory
-determine `corpus_populated`:
+The `active` pointer file determines `corpus_populated`:
 
-- If `active` does not exist, `corpus_populated = false`.
-- If `active` exists but the referenced baseline directory is missing or empty
-  (contains only MANIFEST.json/LICENSE), `corpus_populated = false`.
-- If a baseline directory with at least one `.md` concept file exists,
-  `corpus_populated = true`.
+- If `active` does not exist OR contains the sentinel value `none`,
+  `corpus_populated = false`. This is the expected scaffold state.
+- If `active` contains a valid baseline key, locate
+  `baselines/<key>/concepts/`. If that directory contains at least one `.md`
+  file, `corpus_populated = true`; otherwise `corpus_populated = false`.
+
+**Sentinel value:** the scaffold ships with `active` set to `none`. This
+triggers fail-closed immediately without any further directory checks.
 
 ## Trust boundary -- IMPORTANT
 
@@ -119,12 +124,18 @@ When corpus is populated:
     {
       "id": "<okf-entry-id>",
       "text": "<passage text>",
-      "source": "microsoft/apm@d73e6ac3645d2b9c5c813095e2e58f020f38f17a"
+      "source": "microsoft/apm@d73e6ac3645d2b9c5c813095e2e58f020f38f17a",
+      "origin": "baseline"
     }
   ],
   "knowledge_gaps": []
 }
 ```
+
+Overlay passages use `"origin": "overlay"`. The `source` field for overlay
+passages must NOT claim `microsoft/apm` provenance -- use a consumer-defined
+source identifier instead. This distinguishes vendored baseline content from
+consumer-authored extensions.
 
 ## Error handling
 

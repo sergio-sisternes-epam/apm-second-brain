@@ -7,8 +7,8 @@
 
 ## Status
 
-`active` pointer: `v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a`
-Baseline populated: **No** (placeholder MANIFEST.json and LICENSE only)
+`active` pointer: `none` (sentinel -- corpus not yet built)
+Baseline populated: **No** (MANIFEST.json and LICENSE placeholder only)
 
 ## Provenance
 
@@ -23,10 +23,13 @@ Baseline populated: **No** (placeholder MANIFEST.json and LICENSE only)
 
 ## Licence
 
-The upstream APM documentation is released under the **Apache-2.0** licence.
+The upstream APM documentation is released under the **MIT** licence.
 The vendored corpus inherits that licence. The `LICENSE` file from the
 pinned commit is stored alongside the corpus at
 `baselines/v0.25.0-d73e6ac3.../LICENSE`.
+
+Note: the `apm-expert` package code is Apache-2.0 licensed (separate from
+the corpus content).
 
 ## Trust boundary
 

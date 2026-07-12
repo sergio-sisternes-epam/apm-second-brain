@@ -381,7 +381,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:bb8c0278dd2bf3f148705433827a262fd913b6d2f1d8bda81b602f00e0502c22
+  content_hash: sha256:eef64e05192539c2cdb16f7981fa08c09068bb2568000e04d134150ce9c02c48
 - kind: project-relative
   target: agents
   value: .agents/skills/apm-knowledge/references/knowledge/CORPUS.md
@@ -390,7 +390,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:326b4c82da2d5e0b4793d396fe667bb90093c573532201678d8446ad9c4e7f69
+  content_hash: sha256:77641864710ac1a174d792d8089bf3fcb71e2779e9c99e643a7fb12196a5a56f
 - kind: project-relative
   target: agents
   value: .agents/skills/apm-knowledge/references/knowledge/active
@@ -399,7 +399,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:374503ed069cd8829df82be80ccb8abfd8d0e1a870efa9ec0ad368e910a0512a
+  content_hash: sha256:fcf33dfbe13c2354bf0e1b063f9fb422747a46cee00b7420bceff2b81457b345
 - kind: project-relative
   target: agents
   value: .agents/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/LICENSE
@@ -408,7 +408,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:ea71e09897b727d141876753eb0fb40940f7a4fd755498ba1dd49643410a444a
+  content_hash: sha256:3d6992200848d69f350f29130f4fc850a7945b22d5f908329e4a97c9cc36caaf
 - kind: project-relative
   target: agents
   value: .agents/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/MANIFEST.json
@@ -417,7 +417,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:b56537f914444f0b75b3a5dc09a72b5393e17292862b479f4b9a4fc15421e28c
+  content_hash: sha256:d0ae5133b5b27301a8c1634d5f91fe2ddcf9031d1abf0efae332384a32b011f9
 - kind: project-relative
   target: agents
   value: .agents/skills/apm-knowledge/references/knowledge/overlay/README.md
@@ -426,7 +426,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:60909719dfae50995720b8ea0dad22ba5b93a001e8aa4a3c8c8bddc1ebe642f7
+  content_hash: sha256:85035ed1b86bac6f6582736a1425c23e3b20e7f6ac9df31aa972d1934df77c83
 - kind: project-relative
   target: agents
   value: .agents/skills/apm-think
@@ -885,7 +885,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:35719312d4da640ed6c5e700fee3859581dc3d8a8f5a5a51010e0f123af3efa8
+  content_hash: sha256:73f82db773d17e42ab66b5d603d7d12ac57c43c5d7bed0a689c059d59ee73829
 - kind: project-relative
   target: claude
   value: .claude/rules/package.md
@@ -993,7 +993,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:bb8c0278dd2bf3f148705433827a262fd913b6d2f1d8bda81b602f00e0502c22
+  content_hash: sha256:eef64e05192539c2cdb16f7981fa08c09068bb2568000e04d134150ce9c02c48
 - kind: project-relative
   target: claude
   value: .claude/skills/apm-knowledge/references/knowledge/CORPUS.md
@@ -1002,7 +1002,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:326b4c82da2d5e0b4793d396fe667bb90093c573532201678d8446ad9c4e7f69
+  content_hash: sha256:77641864710ac1a174d792d8089bf3fcb71e2779e9c99e643a7fb12196a5a56f
 - kind: project-relative
   target: claude
   value: .claude/skills/apm-knowledge/references/knowledge/active
@@ -1011,7 +1011,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:374503ed069cd8829df82be80ccb8abfd8d0e1a870efa9ec0ad368e910a0512a
+  content_hash: sha256:fcf33dfbe13c2354bf0e1b063f9fb422747a46cee00b7420bceff2b81457b345
 - kind: project-relative
   target: claude
   value: .claude/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/LICENSE
@@ -1020,7 +1020,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:ea71e09897b727d141876753eb0fb40940f7a4fd755498ba1dd49643410a444a
+  content_hash: sha256:3d6992200848d69f350f29130f4fc850a7945b22d5f908329e4a97c9cc36caaf
 - kind: project-relative
   target: claude
   value: .claude/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/MANIFEST.json
@@ -1029,7 +1029,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:b56537f914444f0b75b3a5dc09a72b5393e17292862b479f4b9a4fc15421e28c
+  content_hash: sha256:d0ae5133b5b27301a8c1634d5f91fe2ddcf9031d1abf0efae332384a32b011f9
 - kind: project-relative
   target: claude
   value: .claude/skills/apm-knowledge/references/knowledge/overlay/README.md
@@ -1038,7 +1038,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:60909719dfae50995720b8ea0dad22ba5b93a001e8aa4a3c8c8bddc1ebe642f7
+  content_hash: sha256:85035ed1b86bac6f6582736a1425c23e3b20e7f6ac9df31aa972d1934df77c83
 - kind: project-relative
   target: claude
   value: .claude/skills/apm-think
@@ -1497,7 +1497,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:35719312d4da640ed6c5e700fee3859581dc3d8a8f5a5a51010e0f123af3efa8
+  content_hash: sha256:73f82db773d17e42ab66b5d603d7d12ac57c43c5d7bed0a689c059d59ee73829
 - kind: project-relative
   target: copilot
   value: .github/instructions/package.instructions.md
@@ -1529,19 +1529,19 @@ local_deployed_files:
 - .claude/skills/apm-think/SKILL.md
 - .github/agents/apm-expert.agent.md
 local_deployed_file_hashes:
-  .agents/skills/apm-knowledge/SKILL.md: sha256:bb8c0278dd2bf3f148705433827a262fd913b6d2f1d8bda81b602f00e0502c22
-  .agents/skills/apm-knowledge/references/knowledge/CORPUS.md: sha256:326b4c82da2d5e0b4793d396fe667bb90093c573532201678d8446ad9c4e7f69
-  .agents/skills/apm-knowledge/references/knowledge/active: sha256:374503ed069cd8829df82be80ccb8abfd8d0e1a870efa9ec0ad368e910a0512a
-  .agents/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/LICENSE: sha256:ea71e09897b727d141876753eb0fb40940f7a4fd755498ba1dd49643410a444a
-  .agents/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/MANIFEST.json: sha256:b56537f914444f0b75b3a5dc09a72b5393e17292862b479f4b9a4fc15421e28c
-  .agents/skills/apm-knowledge/references/knowledge/overlay/README.md: sha256:60909719dfae50995720b8ea0dad22ba5b93a001e8aa4a3c8c8bddc1ebe642f7
+  .agents/skills/apm-knowledge/SKILL.md: sha256:eef64e05192539c2cdb16f7981fa08c09068bb2568000e04d134150ce9c02c48
+  .agents/skills/apm-knowledge/references/knowledge/CORPUS.md: sha256:77641864710ac1a174d792d8089bf3fcb71e2779e9c99e643a7fb12196a5a56f
+  .agents/skills/apm-knowledge/references/knowledge/active: sha256:fcf33dfbe13c2354bf0e1b063f9fb422747a46cee00b7420bceff2b81457b345
+  .agents/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/LICENSE: sha256:3d6992200848d69f350f29130f4fc850a7945b22d5f908329e4a97c9cc36caaf
+  .agents/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/MANIFEST.json: sha256:d0ae5133b5b27301a8c1634d5f91fe2ddcf9031d1abf0efae332384a32b011f9
+  .agents/skills/apm-knowledge/references/knowledge/overlay/README.md: sha256:85035ed1b86bac6f6582736a1425c23e3b20e7f6ac9df31aa972d1934df77c83
   .agents/skills/apm-think/SKILL.md: sha256:274c6ddbe7b804580ed2ccf225293a692f716e95d19d019fecd2f5cfa2f68b4e
-  .claude/agents/apm-expert.md: sha256:35719312d4da640ed6c5e700fee3859581dc3d8a8f5a5a51010e0f123af3efa8
-  .claude/skills/apm-knowledge/SKILL.md: sha256:bb8c0278dd2bf3f148705433827a262fd913b6d2f1d8bda81b602f00e0502c22
-  .claude/skills/apm-knowledge/references/knowledge/CORPUS.md: sha256:326b4c82da2d5e0b4793d396fe667bb90093c573532201678d8446ad9c4e7f69
-  .claude/skills/apm-knowledge/references/knowledge/active: sha256:374503ed069cd8829df82be80ccb8abfd8d0e1a870efa9ec0ad368e910a0512a
-  .claude/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/LICENSE: sha256:ea71e09897b727d141876753eb0fb40940f7a4fd755498ba1dd49643410a444a
-  .claude/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/MANIFEST.json: sha256:b56537f914444f0b75b3a5dc09a72b5393e17292862b479f4b9a4fc15421e28c
-  .claude/skills/apm-knowledge/references/knowledge/overlay/README.md: sha256:60909719dfae50995720b8ea0dad22ba5b93a001e8aa4a3c8c8bddc1ebe642f7
+  .claude/agents/apm-expert.md: sha256:73f82db773d17e42ab66b5d603d7d12ac57c43c5d7bed0a689c059d59ee73829
+  .claude/skills/apm-knowledge/SKILL.md: sha256:eef64e05192539c2cdb16f7981fa08c09068bb2568000e04d134150ce9c02c48
+  .claude/skills/apm-knowledge/references/knowledge/CORPUS.md: sha256:77641864710ac1a174d792d8089bf3fcb71e2779e9c99e643a7fb12196a5a56f
+  .claude/skills/apm-knowledge/references/knowledge/active: sha256:fcf33dfbe13c2354bf0e1b063f9fb422747a46cee00b7420bceff2b81457b345
+  .claude/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/LICENSE: sha256:3d6992200848d69f350f29130f4fc850a7945b22d5f908329e4a97c9cc36caaf
+  .claude/skills/apm-knowledge/references/knowledge/baselines/v0.25.0-d73e6ac3645d2b9c5c813095e2e58f020f38f17a/MANIFEST.json: sha256:d0ae5133b5b27301a8c1634d5f91fe2ddcf9031d1abf0efae332384a32b011f9
+  .claude/skills/apm-knowledge/references/knowledge/overlay/README.md: sha256:85035ed1b86bac6f6582736a1425c23e3b20e7f6ac9df31aa972d1934df77c83
   .claude/skills/apm-think/SKILL.md: sha256:274c6ddbe7b804580ed2ccf225293a692f716e95d19d019fecd2f5cfa2f68b4e
-  .github/agents/apm-expert.agent.md: sha256:35719312d4da640ed6c5e700fee3859581dc3d8a8f5a5a51010e0f123af3efa8
+  .github/agents/apm-expert.agent.md: sha256:73f82db773d17e42ab66b5d603d7d12ac57c43c5d7bed0a689c059d59ee73829

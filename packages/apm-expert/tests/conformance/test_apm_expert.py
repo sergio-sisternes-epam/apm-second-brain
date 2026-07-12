@@ -203,6 +203,8 @@ def test_corpus_active_pointer_exists() -> None:
 def test_corpus_active_pointer_references_valid_baseline() -> None:
     active = (KNOWLEDGE_BASE / "active").read_text().strip()
     assert active, "active pointer must not be empty"
+    if active == "none":
+        return  # sentinel -- corpus not yet built, fail-closed is expected
     baseline_dir = KNOWLEDGE_BASE / "baselines" / active
     assert baseline_dir.exists(), (
         f"Baseline directory referenced by active pointer does not exist: {baseline_dir}"
@@ -211,12 +213,16 @@ def test_corpus_active_pointer_references_valid_baseline() -> None:
 
 def test_corpus_baseline_has_manifest() -> None:
     active = (KNOWLEDGE_BASE / "active").read_text().strip()
+    if active == "none":
+        pytest.skip("Corpus not yet built (active = none) -- skipping manifest check")
     manifest = KNOWLEDGE_BASE / "baselines" / active / "MANIFEST.json"
     assert manifest.exists(), "Active baseline must contain MANIFEST.json"
 
 
 def test_corpus_baseline_manifest_has_provenance_fields() -> None:
     active = (KNOWLEDGE_BASE / "active").read_text().strip()
+    if active == "none":
+        pytest.skip("Corpus not yet built (active = none) -- skipping provenance check")
     manifest = KNOWLEDGE_BASE / "baselines" / active / "MANIFEST.json"
     data = json.loads(manifest.read_text())
     for field in ("repository", "tag", "fullCommitSha", "licence"):
@@ -228,12 +234,15 @@ def test_corpus_baseline_manifest_has_provenance_fields() -> None:
 
 def test_corpus_baseline_has_licence_file() -> None:
     active = (KNOWLEDGE_BASE / "active").read_text().strip()
+    if active == "none":
+        pytest.skip("Corpus not yet built (active = none) -- skipping licence check")
     licence = KNOWLEDGE_BASE / "baselines" / active / "LICENSE"
     assert licence.exists(), "Active baseline must contain a vendored LICENSE file"
     content = licence.read_text()
-    assert "apache" in content.lower() or "Apache" in content, (
-        "Vendored LICENSE must be Apache-2.0"
+    assert "MIT" in content or "mit" in content.lower(), (
+        "Vendored LICENSE must be MIT (microsoft/apm is MIT licensed)"
     )
+
 
 
 def test_corpus_overlay_directory_exists() -> None:
@@ -363,4 +372,175 @@ def test_second_brain_has_no_apm_directory() -> None:
 
 def test_second_brain_lockfile_exists() -> None:
     assert (SECOND_BRAIN_ROOT / "apm.lock.yaml").exists()
+
+
+# ---------------------------------------------------------------------------
+# 8. Fail-closed when active sentinel is "none" (R6b)
+# ---------------------------------------------------------------------------
+
+def test_active_pointer_is_sentinel_in_scaffold_state() -> None:
+    """Scaffold active pointer must be 'none', triggering fail-closed."""
+    active = KNOWLEDGE_BASE / "active"
+    if not active.exists():
+        return  # absent pointer also triggers fail-closed -- acceptable
+    value = active.read_text().strip()
+    # Either "none" sentinel OR a valid, populated baseline key.
+    # In scaffold state it MUST be "none".
+    baseline_dir = KNOWLEDGE_BASE / "baselines" / value
+    if value != "none":
+        concepts = baseline_dir / "concepts"
+        assert concepts.exists() and any(concepts.glob("*.md")), (
+            f"active pointer '{value}' references an unpopulated baseline. "
+            "Set active to 'none' until corpus is built."
+        )
+
+
+def test_apm_knowledge_skill_documents_none_sentinel() -> None:
+    """SKILL.md must document that 'none' is the sentinel for fail-closed."""
+    content = _read(".apm/skills/apm-knowledge/SKILL.md")
+    assert "none" in content, (
+        "apm-knowledge SKILL.md must document the 'none' sentinel value for fail-closed"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 9. second-brain: parse lockfile, verify no own deployed_files (R6b)
+# ---------------------------------------------------------------------------
+
+def test_second_brain_lockfile_has_no_own_deployed_files() -> None:
+    """second-brain lockfile must have no own (local) deployed_files entry."""
+    try:
+        import yaml  # type: ignore
+    except ImportError:
+        pytest.skip("pyyaml not installed -- skipping lockfile parse test")
+
+    lock_path = SECOND_BRAIN_ROOT / "apm.lock.yaml"
+    data = yaml.safe_load(lock_path.read_text())
+    deps = data.get("dependencies", [])
+    for dep in deps:
+        # Local/own entries have is_virtual=False and virtual_path pointing to self
+        if not dep.get("is_virtual", True):
+            assert not dep.get("deployed_files"), (
+                f"second-brain lockfile must have no own deployed_files, "
+                f"found in dep: {dep.get('name')}"
+            )
+
+
+# ---------------------------------------------------------------------------
+# 10. MANIFEST.json provenance equality (R6b)
+# ---------------------------------------------------------------------------
+
+def test_manifest_provenance_fields_match_pinned_values() -> None:
+    active = (KNOWLEDGE_BASE / "active").read_text().strip()
+    if active == "none":
+        pytest.skip("Corpus not yet built -- skipping MANIFEST provenance equality check")
+    manifest = KNOWLEDGE_BASE / "baselines" / active / "MANIFEST.json"
+    data = json.loads(manifest.read_text())
+    assert data["repository"] == "microsoft/apm"
+    assert data["tag"] == "v0.25.0"
+    assert data["fullCommitSha"] == "d73e6ac3645d2b9c5c813095e2e58f020f38f17a"
+    assert data["licence"] == "MIT"
+
+
+def test_manifest_provenance_fields_present_in_placeholder() -> None:
+    """Even in scaffold state, MANIFEST.json must have all required provenance fields."""
+    active_val = (KNOWLEDGE_BASE / "active").read_text().strip()
+    # Use the only baseline we have (scaffold placeholder)
+    baselines = list((KNOWLEDGE_BASE / "baselines").iterdir()) if (KNOWLEDGE_BASE / "baselines").exists() else []
+    for baseline_dir in baselines:
+        manifest = baseline_dir / "MANIFEST.json"
+        if not manifest.exists():
+            continue
+        data = json.loads(manifest.read_text())
+        for field in ("repository", "tag", "fullCommitSha", "licence"):
+            assert field in data, f"MANIFEST.json in {baseline_dir.name} must have '{field}'"
+        assert data.get("fullCommitSha", "").startswith("d73e6ac3"), (
+            "MANIFEST.json fullCommitSha must start with d73e6ac3"
+        )
+        assert data.get("licence") == "MIT", "MANIFEST.json licence must be MIT"
+
+
+# ---------------------------------------------------------------------------
+# 11. Registration fixture -- full schema validation (R6b)
+# ---------------------------------------------------------------------------
+
+def test_sample_registration_fixture_has_knowledge_roots() -> None:
+    data = json.loads(
+        (PACKAGE_ROOT / "tests" / "fixtures" / "sample-registration.json").read_text()
+    )
+    assert "knowledgeRoots" in data, "fixture must contain knowledgeRoots"
+    assert len(data["knowledgeRoots"]) > 0, "knowledgeRoots must be non-empty"
+    kr = data["knowledgeRoots"][0]
+    for field in ("id", "label", "format", "pathBase", "path", "default"):
+        assert field in kr, f"knowledgeRoots[0] must contain '{field}'"
+
+
+def test_sample_registration_fixture_has_status_fields() -> None:
+    data = json.loads(
+        (PACKAGE_ROOT / "tests" / "fixtures" / "sample-registration.json").read_text()
+    )
+    for field in ("status", "registeredAt", "lastValidatedAt", "lastValidationError"):
+        assert field in data, f"fixture must contain '{field}'"
+
+
+# ---------------------------------------------------------------------------
+# 12. Agent file -- dispatcher description field (R5b)
+# ---------------------------------------------------------------------------
+
+def test_agent_file_has_description_field() -> None:
+    content = _read(".apm/agents/apm-expert.agent.md")
+    assert "description:" in content, (
+        "Agent file frontmatter must include a 'description:' field for the dispatcher"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 13. Overlay -- per-passage origin tracking documented (R3b/R7)
+# ---------------------------------------------------------------------------
+
+def test_overlay_readme_documents_origin_field() -> None:
+    overlay_readme = KNOWLEDGE_BASE / "overlay" / "README.md"
+    assert overlay_readme.exists(), "overlay/README.md must exist"
+    content = overlay_readme.read_text()
+    assert "origin:" in content or "origin" in content, (
+        "overlay/README.md must document the origin field for concept frontmatter"
+    )
+
+
+def test_overlay_readme_documents_tombstone_format() -> None:
+    content = (KNOWLEDGE_BASE / "overlay" / "README.md").read_text()
+    assert "tombstone" in content.lower(), "overlay/README.md must document tombstone format"
+
+
+def test_skill_documents_per_passage_origin_tracking() -> None:
+    content = _read(".apm/skills/apm-knowledge/SKILL.md")
+    assert '"origin"' in content or "origin" in content, (
+        "apm-knowledge SKILL.md must document per-passage origin tracking"
+    )
+    assert "overlay" in content.lower(), (
+        "apm-knowledge SKILL.md must distinguish baseline vs overlay passage provenance"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 14. Pre-registration checklist in registration.md (R1-doc)
+# ---------------------------------------------------------------------------
+
+def test_registration_metadata_has_preregistration_checklist() -> None:
+    content = _read(".apm/instructions/registration.md")
+    assert "corpus" in content.lower() and "gate" in content.lower(), (
+        "registration.md must include a pre-registration checklist with build/validate gates"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 15. README has scaffold notice (R1-doc)
+# ---------------------------------------------------------------------------
+
+def test_readme_has_scaffold_notice() -> None:
+    readme = PACKAGE_ROOT / "README.md"
+    content = readme.read_text()
+    assert "SCAFFOLD STATUS" in content or "NOT READY" in content, (
+        "README.md must have a prominent scaffold status notice at the top"
+    )
 

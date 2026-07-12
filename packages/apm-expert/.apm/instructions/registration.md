@@ -1,5 +1,17 @@
 # apm-expert Registration Metadata
 
+> **Pre-registration checklist -- registration MUST NOT proceed until ALL
+> gates below have passed:**
+>
+> - [ ] Corpus built (run `apm run build-corpus` or follow `docs/knowledge-build.md`)
+> - [ ] OKF conformance validated (`apm run validate-corpus` exits 0)
+> - [ ] Integrity hash verified (MANIFEST.json `integrityHash` matches concepts/)
+> - [ ] All conformance tests pass (`pytest packages/apm-expert/tests/ -q`)
+> - [ ] `active` pointer is NOT `none` (corpus is live)
+>
+> Registering before these gates pass results in an agent that returns
+> `quality: unanswered` for every query.
+
 This document describes the registration information a consumer must supply
 when registering the apm-expert agent with the Agent Knowledge Network after
 installing this package.
