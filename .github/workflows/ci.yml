@@ -70,7 +70,7 @@ jobs:
                   continue
                 fi
                 echo "--- dry-run pack: $pkg_dir ---"
-                (cd "$pkg_dir" && apm pack --dry-run) || exit 1
+                (cd "$pkg_dir" && apm install && apm pack --dry-run) || exit 1
               done
       - name: Pack and verify marketplace.json is current
         run: |
