@@ -179,6 +179,7 @@ def test_apm_pack_dry_run_succeeds() -> None:
         cwd=PACKAGE_ROOT,
         capture_output=True,
         text=True,
+        timeout=60,
     )
     assert result.returncode == 0, (
         f"apm pack --dry-run failed with exit code {result.returncode}.\n"
