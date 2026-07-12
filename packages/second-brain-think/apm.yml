@@ -1,15 +1,24 @@
 name: second-brain-think
 version: 0.1.0
+license: Apache-2.0
 description: Provider-side read and citation-backed reasoning
 author: Sergio Sisternes
 # Which agent platforms to deploy to.
 # Resolution order: --target flag > this field > auto-detect from filesystem.
 # Accepted values: agent-skills, antigravity, claude, codex, copilot, cursor, gemini, kiro, opencode, windsurf
 targets:
-- claude
-- copilot
+  - claude
+  - copilot
 dependencies:
-  apm: []
+  apm:
+    - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki#c4a074f18cbe25c1c1c4f12caae732210cd7c860
+    - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces#c4a074f18cbe25c1c1c4f12caae732210cd7c860
   mcp: []
-includes: auto
+# Explicit includes scopes this package's own packed distribution to think skills only.
+# APM 0.25 limitation: dependency skills (karpathy-wiki write skills, brain-learn/brain-forget
+# from second-brain-interfaces) are always included from their own apm.yml includes setting.
+# The deployed .agents/ surface reflects what apm install deployed from dependencies.
+includes:
+  - .apm/skills/sb-think-handler
+  - .apm/skills/sb-think-validate
 scripts: {}

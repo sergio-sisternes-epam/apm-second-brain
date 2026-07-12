@@ -1,0 +1,1001 @@
+lockfile_version: '1'
+generated_at: '2026-07-12T16:00:37.693149+00:00'
+apm_version: 0.25.0
+dependencies:
+- repo_url: sergio-sisternes-epam/apm-second-brain
+  name: karpathy-wiki
+  host: github.com
+  resolved_commit: c4a074f18cbe25c1c1c4f12caae732210cd7c860
+  resolved_ref: c4a074f18cbe25c1c1c4f12caae732210cd7c860
+  version: 0.1.0
+  virtual_path: packages/karpathy-wiki
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .agents/skills/kw-wiki-archive
+  - .agents/skills/kw-wiki-archive/SKILL.md
+  - .agents/skills/kw-wiki-index
+  - .agents/skills/kw-wiki-index/SKILL.md
+  - .agents/skills/kw-wiki-ingest
+  - .agents/skills/kw-wiki-ingest/SKILL.md
+  - .agents/skills/kw-wiki-init
+  - .agents/skills/kw-wiki-init/SKILL.md
+  - .agents/skills/kw-wiki-lint
+  - .agents/skills/kw-wiki-lint/SKILL.md
+  - .agents/skills/kw-wiki-log
+  - .agents/skills/kw-wiki-log/SKILL.md
+  - .agents/skills/kw-wiki-query
+  - .agents/skills/kw-wiki-query/SKILL.md
+  - .claude/skills/kw-wiki-archive
+  - .claude/skills/kw-wiki-archive/SKILL.md
+  - .claude/skills/kw-wiki-index
+  - .claude/skills/kw-wiki-index/SKILL.md
+  - .claude/skills/kw-wiki-ingest
+  - .claude/skills/kw-wiki-ingest/SKILL.md
+  - .claude/skills/kw-wiki-init
+  - .claude/skills/kw-wiki-init/SKILL.md
+  - .claude/skills/kw-wiki-lint
+  - .claude/skills/kw-wiki-lint/SKILL.md
+  - .claude/skills/kw-wiki-log
+  - .claude/skills/kw-wiki-log/SKILL.md
+  - .claude/skills/kw-wiki-query
+  - .claude/skills/kw-wiki-query/SKILL.md
+  deployed_file_hashes:
+    .agents/skills/kw-wiki-archive/SKILL.md: sha256:761164e2a76e9120c72d3568dcf819fd6f834bcaa6c87a29daa3ce1f7aba76f8
+    .agents/skills/kw-wiki-index/SKILL.md: sha256:091efd6121ed88ea5569c2e38f7fb5470f74f1fb8a871993b82ce525f93b5df2
+    .agents/skills/kw-wiki-ingest/SKILL.md: sha256:7b830fbb92a6d662d4b1f65aee053002f6afb1819b8b035e371cfbbf3293c8a0
+    .agents/skills/kw-wiki-init/SKILL.md: sha256:14f6408bada50ce16203b58c6a546fdfad78d93c246d3719648feb81639807a4
+    .agents/skills/kw-wiki-lint/SKILL.md: sha256:4f21164a0eee338f77622d869e5d2018b1a297db7b6c75cff4e512e14cf7ce86
+    .agents/skills/kw-wiki-log/SKILL.md: sha256:92672978fb7a84392b30255158f875cdd43fb8b97bbd160f7867eb15bc79729c
+    .agents/skills/kw-wiki-query/SKILL.md: sha256:9bbf54830e9da26f714d97785852ea4803b56330070b4a6247b71d6a03913325
+    .claude/skills/kw-wiki-archive/SKILL.md: sha256:761164e2a76e9120c72d3568dcf819fd6f834bcaa6c87a29daa3ce1f7aba76f8
+    .claude/skills/kw-wiki-index/SKILL.md: sha256:091efd6121ed88ea5569c2e38f7fb5470f74f1fb8a871993b82ce525f93b5df2
+    .claude/skills/kw-wiki-ingest/SKILL.md: sha256:7b830fbb92a6d662d4b1f65aee053002f6afb1819b8b035e371cfbbf3293c8a0
+    .claude/skills/kw-wiki-init/SKILL.md: sha256:14f6408bada50ce16203b58c6a546fdfad78d93c246d3719648feb81639807a4
+    .claude/skills/kw-wiki-lint/SKILL.md: sha256:4f21164a0eee338f77622d869e5d2018b1a297db7b6c75cff4e512e14cf7ce86
+    .claude/skills/kw-wiki-log/SKILL.md: sha256:92672978fb7a84392b30255158f875cdd43fb8b97bbd160f7867eb15bc79729c
+    .claude/skills/kw-wiki-query/SKILL.md: sha256:9bbf54830e9da26f714d97785852ea4803b56330070b4a6247b71d6a03913325
+  content_hash: sha256:c27d31bc6985977bea6f30147dbdf5d4ed4bac8598013153891420dd472f22fa
+- repo_url: sergio-sisternes-epam/apm-second-brain
+  name: second-brain-interfaces
+  host: github.com
+  resolved_commit: c4a074f18cbe25c1c1c4f12caae732210cd7c860
+  resolved_ref: c4a074f18cbe25c1c1c4f12caae732210cd7c860
+  version: 0.1.0
+  virtual_path: packages/second-brain-interfaces
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .agents/skills/brain-forget
+  - .agents/skills/brain-forget/SKILL.md
+  - .agents/skills/brain-forget/schema/error.schema.json
+  - .agents/skills/brain-forget/schema/request.schema.json
+  - .agents/skills/brain-forget/schema/response.schema.json
+  - .agents/skills/brain-learn
+  - .agents/skills/brain-learn/SKILL.md
+  - .agents/skills/brain-learn/schema/error.schema.json
+  - .agents/skills/brain-learn/schema/request.schema.json
+  - .agents/skills/brain-learn/schema/response.schema.json
+  - .agents/skills/brain-think
+  - .agents/skills/brain-think/SKILL.md
+  - .agents/skills/brain-think/schema/error.schema.json
+  - .agents/skills/brain-think/schema/request.schema.json
+  - .agents/skills/brain-think/schema/response.schema.json
+  - .claude/skills/brain-forget
+  - .claude/skills/brain-forget/SKILL.md
+  - .claude/skills/brain-forget/schema/error.schema.json
+  - .claude/skills/brain-forget/schema/request.schema.json
+  - .claude/skills/brain-forget/schema/response.schema.json
+  - .claude/skills/brain-learn
+  - .claude/skills/brain-learn/SKILL.md
+  - .claude/skills/brain-learn/schema/error.schema.json
+  - .claude/skills/brain-learn/schema/request.schema.json
+  - .claude/skills/brain-learn/schema/response.schema.json
+  - .claude/skills/brain-think
+  - .claude/skills/brain-think/SKILL.md
+  - .claude/skills/brain-think/schema/error.schema.json
+  - .claude/skills/brain-think/schema/request.schema.json
+  - .claude/skills/brain-think/schema/response.schema.json
+  deployed_file_hashes:
+    .agents/skills/brain-forget/SKILL.md: sha256:49e8093eed67f8f5b541c00a92dddd99d5d0d271be308cbeab11da4246d30107
+    .agents/skills/brain-forget/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .agents/skills/brain-forget/schema/request.schema.json: sha256:de937c6d9fe3d0c9c81ca7891b82d745f11323428dff132c8ff680cc786235e2
+    .agents/skills/brain-forget/schema/response.schema.json: sha256:4e8e8b16a87cd55aa07c0b27773f97706c681257403831bdee320e61d6d6bee3
+    .agents/skills/brain-learn/SKILL.md: sha256:2ed4db308b2898a0f0b81a8670bd33f8b8605e956b7db49d594c72317b9f0132
+    .agents/skills/brain-learn/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .agents/skills/brain-learn/schema/request.schema.json: sha256:10410215feafb739da630099ab5aaaa74250aafc16650236d8268ff9734c4c4a
+    .agents/skills/brain-learn/schema/response.schema.json: sha256:15fc8be10df9cef062481e9e8b32772383a8fc33cc532f1dcda4c79ea30eeb7b
+    .agents/skills/brain-think/SKILL.md: sha256:8bc074ce06139994fd80aa1f9f46d9a3cfe2b69de22ac077dccb9558af922d87
+    .agents/skills/brain-think/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .agents/skills/brain-think/schema/request.schema.json: sha256:45856e88e403339acdf41d8540748dd56672348f87a3aaf5814977c83eb6c8e2
+    .agents/skills/brain-think/schema/response.schema.json: sha256:f4648ecdf7906b90bfe2d9f24aee329969c3f072628ba863f8dd561026003f61
+    .claude/skills/brain-forget/SKILL.md: sha256:49e8093eed67f8f5b541c00a92dddd99d5d0d271be308cbeab11da4246d30107
+    .claude/skills/brain-forget/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .claude/skills/brain-forget/schema/request.schema.json: sha256:de937c6d9fe3d0c9c81ca7891b82d745f11323428dff132c8ff680cc786235e2
+    .claude/skills/brain-forget/schema/response.schema.json: sha256:4e8e8b16a87cd55aa07c0b27773f97706c681257403831bdee320e61d6d6bee3
+    .claude/skills/brain-learn/SKILL.md: sha256:2ed4db308b2898a0f0b81a8670bd33f8b8605e956b7db49d594c72317b9f0132
+    .claude/skills/brain-learn/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .claude/skills/brain-learn/schema/request.schema.json: sha256:10410215feafb739da630099ab5aaaa74250aafc16650236d8268ff9734c4c4a
+    .claude/skills/brain-learn/schema/response.schema.json: sha256:15fc8be10df9cef062481e9e8b32772383a8fc33cc532f1dcda4c79ea30eeb7b
+    .claude/skills/brain-think/SKILL.md: sha256:8bc074ce06139994fd80aa1f9f46d9a3cfe2b69de22ac077dccb9558af922d87
+    .claude/skills/brain-think/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .claude/skills/brain-think/schema/request.schema.json: sha256:45856e88e403339acdf41d8540748dd56672348f87a3aaf5814977c83eb6c8e2
+    .claude/skills/brain-think/schema/response.schema.json: sha256:f4648ecdf7906b90bfe2d9f24aee329969c3f072628ba863f8dd561026003f61
+  content_hash: sha256:7d4018ccb602602caa1534535f2b4a4f153eb65ab9a1f6ad764ea01f58c523eb
+- repo_url: sergio-sisternes-epam/apm-second-brain
+  name: open-knowledge-format
+  host: github.com
+  resolved_commit: c4a074f18cbe25c1c1c4f12caae732210cd7c860
+  resolved_ref: c4a074f18cbe25c1c1c4f12caae732210cd7c860
+  version: 0.1.0
+  virtual_path: packages/open-knowledge-format
+  is_virtual: true
+  depth: 2
+  resolved_by: sergio-sisternes-epam/apm-second-brain
+  package_type: apm_package
+  deployed_files:
+  - .agents/skills/okf-bundle-create
+  - .agents/skills/okf-bundle-create/SKILL.md
+  - .agents/skills/okf-bundle-validate
+  - .agents/skills/okf-bundle-validate/SKILL.md
+  - .agents/skills/okf-bundle-validate/okf_validator.py
+  - .agents/skills/okf-import
+  - .agents/skills/okf-import/SKILL.md
+  - .claude/skills/okf-bundle-create
+  - .claude/skills/okf-bundle-create/SKILL.md
+  - .claude/skills/okf-bundle-validate
+  - .claude/skills/okf-bundle-validate/SKILL.md
+  - .claude/skills/okf-bundle-validate/okf_validator.py
+  - .claude/skills/okf-import
+  - .claude/skills/okf-import/SKILL.md
+  deployed_file_hashes:
+    .agents/skills/okf-bundle-create/SKILL.md: sha256:2d36082526d70abcf74687cebcc2edcf493be3b4fa9d5ee539ada07a85099f26
+    .agents/skills/okf-bundle-validate/SKILL.md: sha256:d901db825857529906a0e9701bf9afb0dc14b796b5f70860233658fc3c5905dc
+    .agents/skills/okf-bundle-validate/okf_validator.py: sha256:574a0c5018a02c8f27253e65bdc14bec5bcc816ac5b6e8e7188386fd41425238
+    .agents/skills/okf-import/SKILL.md: sha256:6216ee4e2c78893c1580fae80268602b05b01caefd8194f68953a4d361808d60
+    .claude/skills/okf-bundle-create/SKILL.md: sha256:2d36082526d70abcf74687cebcc2edcf493be3b4fa9d5ee539ada07a85099f26
+    .claude/skills/okf-bundle-validate/SKILL.md: sha256:d901db825857529906a0e9701bf9afb0dc14b796b5f70860233658fc3c5905dc
+    .claude/skills/okf-bundle-validate/okf_validator.py: sha256:574a0c5018a02c8f27253e65bdc14bec5bcc816ac5b6e8e7188386fd41425238
+    .claude/skills/okf-import/SKILL.md: sha256:6216ee4e2c78893c1580fae80268602b05b01caefd8194f68953a4d361808d60
+  content_hash: sha256:d01b1ff2144d16751881bb20b450ca35ac93999d77b6f8141bbfce9ade8c4fb6
+deployments:
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-forget
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-forget/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:49e8093eed67f8f5b541c00a92dddd99d5d0d271be308cbeab11da4246d30107
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-forget/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-forget/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:de937c6d9fe3d0c9c81ca7891b82d745f11323428dff132c8ff680cc786235e2
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-forget/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:4e8e8b16a87cd55aa07c0b27773f97706c681257403831bdee320e61d6d6bee3
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-learn
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-learn/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:2ed4db308b2898a0f0b81a8670bd33f8b8605e956b7db49d594c72317b9f0132
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-learn/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-learn/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:10410215feafb739da630099ab5aaaa74250aafc16650236d8268ff9734c4c4a
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-learn/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:15fc8be10df9cef062481e9e8b32772383a8fc33cc532f1dcda4c79ea30eeb7b
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-think
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-think/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:8bc074ce06139994fd80aa1f9f46d9a3cfe2b69de22ac077dccb9558af922d87
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-think/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-think/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:45856e88e403339acdf41d8540748dd56672348f87a3aaf5814977c83eb6c8e2
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-think/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:f4648ecdf7906b90bfe2d9f24aee329969c3f072628ba863f8dd561026003f61
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-archive
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-archive/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:761164e2a76e9120c72d3568dcf819fd6f834bcaa6c87a29daa3ce1f7aba76f8
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-index
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-index/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:091efd6121ed88ea5569c2e38f7fb5470f74f1fb8a871993b82ce525f93b5df2
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-ingest
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-ingest/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:7b830fbb92a6d662d4b1f65aee053002f6afb1819b8b035e371cfbbf3293c8a0
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-init
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-init/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:14f6408bada50ce16203b58c6a546fdfad78d93c246d3719648feb81639807a4
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-lint
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-lint/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:4f21164a0eee338f77622d869e5d2018b1a297db7b6c75cff4e512e14cf7ce86
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-log
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-log/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:92672978fb7a84392b30255158f875cdd43fb8b97bbd160f7867eb15bc79729c
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-query
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-query/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:9bbf54830e9da26f714d97785852ea4803b56330070b4a6247b71d6a03913325
+- kind: project-relative
+  target: agents
+  value: .agents/skills/okf-bundle-create
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/okf-bundle-create/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: sha256:2d36082526d70abcf74687cebcc2edcf493be3b4fa9d5ee539ada07a85099f26
+- kind: project-relative
+  target: agents
+  value: .agents/skills/okf-bundle-validate
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/okf-bundle-validate/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: sha256:d901db825857529906a0e9701bf9afb0dc14b796b5f70860233658fc3c5905dc
+- kind: project-relative
+  target: agents
+  value: .agents/skills/okf-bundle-validate/okf_validator.py
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: sha256:574a0c5018a02c8f27253e65bdc14bec5bcc816ac5b6e8e7188386fd41425238
+- kind: project-relative
+  target: agents
+  value: .agents/skills/okf-import
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/okf-import/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: sha256:6216ee4e2c78893c1580fae80268602b05b01caefd8194f68953a4d361808d60
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-forget-handler
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-forget-handler/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:0205090c7cf2687b2c7a4970b8229f167bf518d476efa0a3888cfa69224e8569
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-forget-validate
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-forget-validate/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-learn-handler
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-learn-handler/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:5f47b58b7cd5c1ba0418fa398cd5047fd3edfc90754c6d6422ad16c767693ca1
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-learn-validate
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-learn-validate/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
+- kind: project-relative
+  target: claude
+  value: .claude/rules/package.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:ecd2b86abe4f6ed94f261e79f9bfb92d93cc394ada998cfcfb67a108c7b648e4
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-forget
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-forget/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:49e8093eed67f8f5b541c00a92dddd99d5d0d271be308cbeab11da4246d30107
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-forget/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-forget/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:de937c6d9fe3d0c9c81ca7891b82d745f11323428dff132c8ff680cc786235e2
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-forget/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:4e8e8b16a87cd55aa07c0b27773f97706c681257403831bdee320e61d6d6bee3
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-learn
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-learn/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:2ed4db308b2898a0f0b81a8670bd33f8b8605e956b7db49d594c72317b9f0132
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-learn/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-learn/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:10410215feafb739da630099ab5aaaa74250aafc16650236d8268ff9734c4c4a
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-learn/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:15fc8be10df9cef062481e9e8b32772383a8fc33cc532f1dcda4c79ea30eeb7b
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-think
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-think/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:8bc074ce06139994fd80aa1f9f46d9a3cfe2b69de22ac077dccb9558af922d87
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-think/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-think/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:45856e88e403339acdf41d8540748dd56672348f87a3aaf5814977c83eb6c8e2
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-think/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces
+  content_hash: sha256:f4648ecdf7906b90bfe2d9f24aee329969c3f072628ba863f8dd561026003f61
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-archive
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-archive/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:761164e2a76e9120c72d3568dcf819fd6f834bcaa6c87a29daa3ce1f7aba76f8
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-index
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-index/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:091efd6121ed88ea5569c2e38f7fb5470f74f1fb8a871993b82ce525f93b5df2
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-ingest
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-ingest/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:7b830fbb92a6d662d4b1f65aee053002f6afb1819b8b035e371cfbbf3293c8a0
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-init
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-init/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:14f6408bada50ce16203b58c6a546fdfad78d93c246d3719648feb81639807a4
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-lint
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-lint/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:4f21164a0eee338f77622d869e5d2018b1a297db7b6c75cff4e512e14cf7ce86
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-log
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-log/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:92672978fb7a84392b30255158f875cdd43fb8b97bbd160f7867eb15bc79729c
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-query
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-query/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki
+  content_hash: sha256:9bbf54830e9da26f714d97785852ea4803b56330070b4a6247b71d6a03913325
+- kind: project-relative
+  target: claude
+  value: .claude/skills/okf-bundle-create
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/okf-bundle-create/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: sha256:2d36082526d70abcf74687cebcc2edcf493be3b4fa9d5ee539ada07a85099f26
+- kind: project-relative
+  target: claude
+  value: .claude/skills/okf-bundle-validate
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/okf-bundle-validate/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: sha256:d901db825857529906a0e9701bf9afb0dc14b796b5f70860233658fc3c5905dc
+- kind: project-relative
+  target: claude
+  value: .claude/skills/okf-bundle-validate/okf_validator.py
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: sha256:574a0c5018a02c8f27253e65bdc14bec5bcc816ac5b6e8e7188386fd41425238
+- kind: project-relative
+  target: claude
+  value: .claude/skills/okf-import
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/okf-import/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  active_owner: sergio-sisternes-epam/apm-second-brain/packages/open-knowledge-format
+  content_hash: sha256:6216ee4e2c78893c1580fae80268602b05b01caefd8194f68953a4d361808d60
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-forget-handler
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-forget-handler/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:0205090c7cf2687b2c7a4970b8229f167bf518d476efa0a3888cfa69224e8569
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-forget-validate
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-forget-validate/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-learn-handler
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-learn-handler/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:5f47b58b7cd5c1ba0418fa398cd5047fd3edfc90754c6d6422ad16c767693ca1
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-learn-validate
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-learn-validate/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
+- kind: project-relative
+  target: copilot
+  value: .github/instructions/package.instructions.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9fa678ef0586af9b557eb9c8f8afe0872509cb717fdc6c5c6928eff0242b7d1d
+local_deployed_files:
+- .agents/skills/sb-forget-handler
+- .agents/skills/sb-forget-handler/SKILL.md
+- .agents/skills/sb-forget-validate
+- .agents/skills/sb-forget-validate/SKILL.md
+- .agents/skills/sb-learn-handler
+- .agents/skills/sb-learn-handler/SKILL.md
+- .agents/skills/sb-learn-validate
+- .agents/skills/sb-learn-validate/SKILL.md
+- .claude/rules/package.md
+- .claude/skills/sb-forget-handler
+- .claude/skills/sb-forget-handler/SKILL.md
+- .claude/skills/sb-forget-validate
+- .claude/skills/sb-forget-validate/SKILL.md
+- .claude/skills/sb-learn-handler
+- .claude/skills/sb-learn-handler/SKILL.md
+- .claude/skills/sb-learn-validate
+- .claude/skills/sb-learn-validate/SKILL.md
+- .github/instructions/package.instructions.md
+local_deployed_file_hashes:
+  .agents/skills/sb-forget-handler/SKILL.md: sha256:0205090c7cf2687b2c7a4970b8229f167bf518d476efa0a3888cfa69224e8569
+  .agents/skills/sb-forget-validate/SKILL.md: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
+  .agents/skills/sb-learn-handler/SKILL.md: sha256:5f47b58b7cd5c1ba0418fa398cd5047fd3edfc90754c6d6422ad16c767693ca1
+  .agents/skills/sb-learn-validate/SKILL.md: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
+  .claude/rules/package.md: sha256:ecd2b86abe4f6ed94f261e79f9bfb92d93cc394ada998cfcfb67a108c7b648e4
+  .claude/skills/sb-forget-handler/SKILL.md: sha256:0205090c7cf2687b2c7a4970b8229f167bf518d476efa0a3888cfa69224e8569
+  .claude/skills/sb-forget-validate/SKILL.md: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
+  .claude/skills/sb-learn-handler/SKILL.md: sha256:5f47b58b7cd5c1ba0418fa398cd5047fd3edfc90754c6d6422ad16c767693ca1
+  .claude/skills/sb-learn-validate/SKILL.md: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
+  .github/instructions/package.instructions.md: sha256:9fa678ef0586af9b557eb9c8f8afe0872509cb717fdc6c5c6928eff0242b7d1d
