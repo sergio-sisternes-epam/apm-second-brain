@@ -204,8 +204,19 @@ function buildGraph(wikiRoot) {
 // -- Filter engine --
 
 function applyFilters(graph, filters) {
-    const { type, tag, status, directory, onlyOrphans, onlyConnected, text: freeText } = filters || {};
+    const { type, tag, status, directory, onlyOrphans, onlyConnected, text: freeText, _focusId } = filters || {};
     let nodes = graph.nodes;
+
+    // Focus mode: narrow to the focused node and its direct neighbourhood first,
+    // then apply any additional user-level filters on top of that subset.
+    let focusedId = null;
+    if (_focusId) {
+        focusedId = _focusId;
+        const outboundIds = new Set(graph.edges.filter((e) => e.from === _focusId && !e.broken).map((e) => e.to));
+        const inboundIds  = new Set(graph.edges.filter((e) => e.to   === _focusId && !e.broken).map((e) => e.from));
+        const neighbourhood = new Set([_focusId, ...outboundIds, ...inboundIds]);
+        nodes = nodes.filter((n) => neighbourhood.has(n.id));
+    }
 
     if (type) nodes = nodes.filter((n) => n.type === type);
     if (tag) nodes = nodes.filter((n) => n.tags.includes(tag));
@@ -228,7 +239,7 @@ function applyFilters(graph, filters) {
         (e) => nodeIds.has(e.from) && (e.broken || nodeIds.has(e.to))
     );
 
-    return { nodes, edges };
+    return { nodes, edges, focusedId };
 }
 
 // -- Statistics --
@@ -251,19 +262,21 @@ function computeStatistics(graph) {
 
 function renderGraphHtml(graph, filters, stats, wikiRoot) {
     const filteredGraph = applyFilters(graph, filters);
-    const nodeTypes = [...new Set(graph.nodes.map((n) => n.type))].sort();
-    const allTags = [...new Set(graph.nodes.flatMap((n) => n.tags))].sort();
-    const allStatuses = [...new Set(graph.nodes.map((n) => n.status).filter(Boolean))].sort();
+    const { focusedId } = filteredGraph;
 
-    const nodeList = filteredGraph.nodes.map((n) => `
-      <div class="node ${n.isOrphan ? "orphan" : ""}" data-id="${esc(n.id)}" title="${esc(n.description || n.title)}">
+    const nodeList = filteredGraph.nodes.map((n) => {
+        const isFocused = focusedId && n.id === focusedId;
+        return `
+      <div class="node ${n.isOrphan ? "orphan" : ""} ${isFocused ? "focused" : ""}" data-id="${esc(n.id)}" title="${esc(n.description || n.title)}">
         <span class="node-type">${esc(n.type)}</span>
         <span class="node-title">${esc(n.title)}</span>
+        ${isFocused ? '<span class="badge focus-badge">focus</span>' : ""}
         ${n.isOrphan ? '<span class="badge orphan-badge">orphan</span>' : ""}
         ${n.status ? `<span class="badge status-badge">${esc(n.status)}</span>` : ""}
         <span class="node-path">${esc(n.conceptPath)}</span>
         <span class="conn-counts">&#8593;${n.inboundCount} &#8595;${n.outboundCount}</span>
-      </div>`).join("\n");
+      </div>`;
+    }).join("\n");
 
     const edgeList = filteredGraph.edges.map((e) => `
       <tr class="${e.broken ? "broken-edge" : ""}">
@@ -295,6 +308,8 @@ function renderGraphHtml(graph, filters, stats, wikiRoot) {
       .node{padding:.3rem .4rem;border-bottom:1px solid var(--border-color-subtle,#eaeef2);display:flex;flex-wrap:wrap;gap:.3rem;align-items:baseline}
       .node:last-child{border-bottom:none}
       .node.orphan{background:var(--true-color-orange-muted,#fff0d3)}
+      .node.focused{border-left:3px solid var(--true-color-blue-500,#0969da);background:var(--true-color-blue-muted,#ddf4ff)}
+      .focus-badge{background:var(--true-color-blue-500,#0969da);color:#fff}
       .node-type{font-size:.65rem;text-transform:uppercase;color:var(--text-color-muted,#59636e);min-width:3.5rem}
       .node-title{font-weight:600;flex:1}
       .node-path{font-size:.7rem;color:var(--text-color-muted,#59636e);flex-basis:100%}
@@ -324,6 +339,11 @@ function renderGraphHtml(graph, filters, stats, wikiRoot) {
       <div class="stat-chip"><div class="stat-num">${stats.orphanCount}</div>orphans</div>
       ${stats.brokenEdgeCount > 0 ? `<div class="stat-chip" style="background:#fff0d3"><div class="stat-num">${stats.brokenEdgeCount}</div>broken links</div>` : ""}
     </div>
+    ${focusedId ? `<div class="filter-bar" style="background:var(--true-color-blue-muted,#ddf4ff)">
+      <span style="font-size:.75rem;font-weight:600">&#x25CE; Focus:</span>
+      <span class="badge focus-badge">${esc(focusedId)}</span>
+      <span class="muted">showing focused node + direct neighbours &mdash; ask the agent to clear_filters to return to full view</span>
+    </div>` : ""}
     <div class="filter-bar">
       <span style="font-size:.75rem;font-weight:600">Filters (agent-driven):</span>
       ${filters && (filters.type || filters.tag || filters.status || filters.onlyOrphans || filters.onlyConnected || filters.text)
@@ -510,7 +530,7 @@ const session = await joinSession({
                 },
                 {
                     name: "clear_filters",
-                    description: "Reset all active filters and show the full graph.",
+                    description: "Reset all active filters and focus state; show the full graph.",
                     handler: async (ctx) => {
                         const entry = requireEntry(ctx);
                         entry.filters = {};
@@ -545,6 +565,10 @@ const session = await joinSession({
                         const outboundNodes = entry.graph.nodes.filter((n) => outboundIds.has(n.id)).map((n) => ({ id: n.id, title: n.title, path: n.conceptPath }));
                         const inboundNodes = entry.graph.nodes.filter((n) => inboundIds.has(n.id)).map((n) => ({ id: n.id, title: n.title, path: n.conceptPath }));
 
+                        // Set focus filter: canvas narrows to this node + neighbourhood
+                        // and highlights the focused node with a distinct style.
+                        // Call clear_filters to return to the full graph.
+                        entry.filters = { ...entry.filters, _focusId: target.id };
                         broadcastRefresh(entry);
 
                         return {
