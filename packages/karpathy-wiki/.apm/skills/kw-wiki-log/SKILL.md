@@ -23,7 +23,7 @@ Called automatically after any state-changing operation on the wiki.
 | Name | Required | Description |
 |------|----------|-------------|
 | `wiki_root` | yes | Path to the provider-project directory |
-| `event` | yes | Event type: `ingest`, `update`, `archive` |
+| `event` | yes | Event type: `init`, `ingest`, `update`, `archive` |
 | `concept_paths` | yes | List of concept paths affected (relative to `wiki_root`) |
 | `summary` | yes | Human-readable description of what changed |
 

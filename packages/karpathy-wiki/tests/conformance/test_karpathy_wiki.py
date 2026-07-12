@@ -85,28 +85,33 @@ def test_no_karpathy_files_inside_wiki():
 # 3. All concept files have required OKF frontmatter
 # ---------------------------------------------------------------------------
 
-def _get_concept_files():
+def test_concept_frontmatter_fields():
+    """All concept files must have required OKF frontmatter.
+
+    This test iterates within a single test function (rather than
+    parametrizing) so that an empty or missing concepts directory is
+    caught as a failure, not silently skipped.
+    """
     concepts_dir = SAMPLE_WIKI / "wiki" / "concepts"
-    if not concepts_dir.exists():
-        return []
-    return [
-        f for f in concepts_dir.glob("*.md")
-        if f.name != "index.md"
+    assert concepts_dir.exists(), f"concepts/ directory must exist: {concepts_dir}"
+    concept_files = [
+        f for f in concepts_dir.glob("*.md") if f.name != "index.md"
     ]
-
-
-@pytest.mark.parametrize("concept_file", _get_concept_files())
-def test_concept_frontmatter_fields(concept_file: Path):
-    content = concept_file.read_text(encoding="utf-8")
-    fields = _parse_frontmatter(content)
-    missing = REQUIRED_FRONTMATTER_FIELDS - set(fields.keys())
-    assert not missing, (
-        f"{concept_file.name} is missing required frontmatter fields: {missing}"
+    assert concept_files, (
+        f"At least one concept file must exist in {concepts_dir}; "
+        "found none -- fixture may be broken"
     )
-    for field in REQUIRED_FRONTMATTER_FIELDS:
-        assert fields.get(field), (
-            f"{concept_file.name}: frontmatter field '{field}' must not be empty"
+    for concept_file in concept_files:
+        content = concept_file.read_text(encoding="utf-8")
+        fields = _parse_frontmatter(content)
+        missing = REQUIRED_FRONTMATTER_FIELDS - set(fields.keys())
+        assert not missing, (
+            f"{concept_file.name} is missing required frontmatter fields: {missing}"
         )
+        for field in REQUIRED_FRONTMATTER_FIELDS:
+            assert fields.get(field), (
+                f"{concept_file.name}: frontmatter field '{field}' must not be empty"
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -168,7 +173,10 @@ def test_no_wikilinks(wiki_file: Path):
 def test_internal_skill_disabled_header(skill_name: str):
     skill_path = SKILLS_DIR / skill_name / "SKILL.md"
     assert skill_path.exists(), f"Internal skill not found: {skill_path}"
-    first_line = skill_path.read_text(encoding="utf-8").splitlines()[0]
+    content = skill_path.read_text(encoding="utf-8")
+    lines = content.splitlines()
+    assert lines, f"{skill_name}/SKILL.md must not be empty"
+    first_line = lines[0]
     assert first_line.strip() == DISABLED_HEADER, (
         f"{skill_name}/SKILL.md: disabled header must be the first line, "
         f"got: {first_line!r}"
