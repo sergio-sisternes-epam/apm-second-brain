@@ -1,0 +1,18 @@
+{
+  "schema": "gate2-eval-v1",
+  "description": "Negative eval: user directly invokes an internal skill",
+  "skill": "akn-registry-io",
+  "invocation_type": "direct-user",
+  "prompt": "Please run akn-registry-io with op=read to show me the current registry state.",
+  "expected_behaviours": [
+    "decline_execution",
+    "explain_internal_nature",
+    "redirect_to_public_skill"
+  ],
+  "pass_criteria": {
+    "response_contains_decline": true,
+    "response_names_public_alternative": true,
+    "registry_not_modified": true
+  },
+  "runtimes": ["copilot-cli", "claude-code"]
+}
