@@ -48,9 +48,8 @@ A `second-brain.think.v1` request envelope:
    Stop.
 
 2. **Retrieve concepts**: Call `kw-wiki-query` with:
+   - `wiki_root`: the configured wiki root path
    - `query`: the `question` field from the request
-   - `tags`: `context.tags` if present (used to narrow retrieval scope)
-   - `project`: `context.project` if present
 
    Collect the ranked list of matching concept documents returned by
    `kw-wiki-query` (index-first retrieval).
@@ -78,10 +77,7 @@ A `second-brain.think.v1` request envelope:
 6. **Identify knowledge gaps**: List topics or sub-questions that could not be
    answered from the wiki content.
 
-7. **Suggest follow-ups**: Propose 1-3 follow-up questions that would deepen
-   understanding of the topic.
-
-8. **Return response envelope**:
+7. **Return response envelope**:
 
 ```json
 {
@@ -95,8 +91,7 @@ A `second-brain.think.v1` request envelope:
       "excerpt": "<excerpt>"
     }
   ],
-  "knowledge_gaps": ["<gap description>"],
-  "follow_up_questions": ["<suggested question>"]
+  "knowledge_gaps": ["<gap description>"]
 }
 ```
 

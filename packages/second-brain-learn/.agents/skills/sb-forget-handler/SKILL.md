@@ -53,18 +53,15 @@ A `second-brain.forget.v1` request envelope:
 
 2. **Archive**: Call `kw-wiki-archive` with:
    - `wiki_root`: the configured wiki root path
-   - `concept_path`: the resolved concept document path
+   - `concept_id`: the resolved concept slug (e.g. `kubernetes-pull-policy`)
    - `reason`: the `reason` field from the request
 
    `kw-wiki-archive` tombstones the concept (sets status to `archived`,
-   updates the index to exclude it from queries) without deleting the file.
+   updates the index to exclude it from queries, and appends a log entry)
+   without deleting the file. Do not call `kw-wiki-log` separately after
+   this step -- `kw-wiki-archive` handles logging internally.
 
-3. **Log**: Call `kw-wiki-log` with:
-   - `event`: `forget`
-   - `target_id`: the resolved target identifier
-   - `summary`: `reason` field (truncated to 200 chars)
-
-4. **Return receipt**:
+3. **Return receipt**:
 
 ```json
 {
@@ -88,10 +85,8 @@ A `second-brain.forget.v1` request envelope:
 |-------------------------|-------------------------------------------------------|
 | Target not found        | Return `status: not_found` with a descriptive message |
 | kw-wiki-archive error   | Propagate error; do not commit partial state          |
-| Log append fails        | Log warning; receipt is still returned                |
 
 ## References
 
-- `kw-wiki-archive` -- tombstone a concept in the OKF wiki
-- `kw-wiki-log` -- append event to `wiki/log.md`
+- `kw-wiki-archive` -- tombstone a concept in the OKF wiki (handles index + log internally)
 - `second-brain-interfaces` -- `second-brain.forget.v1` schema and receipt schema
