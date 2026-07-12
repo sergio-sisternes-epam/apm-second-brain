@@ -1,3 +1,6 @@
-
 # APM dependencies
 apm_modules/
+
+# APM-generated deployment targets -- source of truth is .apm/
+.agents/
+.claude/
