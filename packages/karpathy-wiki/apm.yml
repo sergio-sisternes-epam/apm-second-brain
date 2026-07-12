@@ -1,0 +1,15 @@
+name: karpathy-wiki
+version: 0.1.0
+description: Karpathy persistent-wiki engine over a strict OKF bundle
+author: Sergio Sisternes
+# Which agent platforms to deploy to.
+# Resolution order: --target flag > this field > auto-detect from filesystem.
+# Accepted values: agent-skills, antigravity, claude, codex, copilot, cursor, gemini, kiro, opencode, windsurf
+targets:
+- claude
+- copilot
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+scripts: {}

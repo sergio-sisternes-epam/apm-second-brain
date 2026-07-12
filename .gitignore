@@ -1,0 +1,34 @@
+# .gitignore for apm-second-brain
+
+# APM dependency cache -- never commit
+apm_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+dist/
+*.egg-info/
+.pytest_cache/
+
+# Node (Canvas extension build output)
+node_modules/
+*.js.map
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
+
+# Test artefacts
+.coverage
+htmlcov/
+*.log
+
+# Live registry -- never commit
+.apm/agent-knowledge-network/registry.json

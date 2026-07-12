@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for private context
+        run: |
+          # Fail if any non-workflow file references internal paths or private markers.
+          # The workflow file itself is excluded to avoid false positives from the
+          # scanner's own pattern strings.
+          if grep -rn \
+            -e "epam-agent-forge" \
+            -e "Users/sergio_sisternes" \
+            -e "EPAM All Rights Reserved" \
+            --include="*.md" --include="*.yml" --include="*.yaml" \
+            --include="*.json" --include="*.py" --include="*.mjs" \
+            --exclude="ci.yml" \
+            .; then
+            echo "Private context found -- remove before merging" && exit 1
+          fi
+          echo "Clean"
+
+  test-conformance:
+    name: OKF conformance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run conformance suite
+        run: python -m pytest tests/conformance/ -v
+        continue-on-error: true  # remove when tests are implemented
+
+  apm-validate:
+    name: APM package validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install APM CLI
+        run: |
+          pip install "apm-cli==0.25.0"
+      - name: Validate packages
+        run: |
+          for pkg in packages/*/; do
+            echo "-- $pkg"
+            (cd "$pkg" && apm targets 2>&1) || true
+          done
+        continue-on-error: true  # remove when all manifests are complete

@@ -1,0 +1,15 @@
+name: open-knowledge-format
+version: 0.1.0
+description: OKF v0.1 conformance tooling and bundle validation
+author: Sergio Sisternes
+# Which agent platforms to deploy to.
+# Resolution order: --target flag > this field > auto-detect from filesystem.
+# Accepted values: agent-skills, antigravity, claude, codex, copilot, cursor, gemini, kiro, opencode, windsurf
+targets:
+- claude
+- copilot
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+scripts: {}

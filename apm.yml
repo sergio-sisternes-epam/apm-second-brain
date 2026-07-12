@@ -1,0 +1,64 @@
+name: apm-second-brain
+version: 0.1.0
+description: >-
+  Public APM demo: OKF knowledge format, Karpathy wiki, second-brain
+  interfaces, local agent discovery, and an APM expert.
+marketplace:
+  owner:
+    name: sergio-sisternes-epam
+    url: https://github.com/sergio-sisternes-epam
+
+  build:
+    tagPattern: "{name}--v{version}"
+
+  outputs:
+    claude: {}
+
+  packages:
+    - name: open-knowledge-format
+      description: OKF v0.1 conformance tooling and bundle validation
+      source: ./packages/open-knowledge-format
+      version: 0.1.0
+      tag_pattern: "{name}--v{version}"
+
+    - name: karpathy-wiki
+      description: Karpathy persistent-wiki engine over a strict OKF bundle
+      source: ./packages/karpathy-wiki
+      version: 0.1.0
+      tag_pattern: "{name}--v{version}"
+
+    - name: second-brain-interfaces
+      description: Versioned think, learn, and forget capability contracts
+      source: ./packages/second-brain-interfaces
+      version: 0.1.0
+      tag_pattern: "{name}--v{version}"
+
+    - name: second-brain-learn
+      description: Provider-side write, learn, and forget implementation
+      source: ./packages/second-brain-learn
+      version: 0.1.0
+      tag_pattern: "{name}--v{version}"
+
+    - name: second-brain-think
+      description: Provider-side read and citation-backed reasoning
+      source: ./packages/second-brain-think
+      version: 0.1.0
+      tag_pattern: "{name}--v{version}"
+
+    - name: second-brain
+      description: Dependency-only meta-package installing a complete provider
+      source: ./packages/second-brain
+      version: 0.1.0
+      tag_pattern: "{name}--v{version}"
+
+    - name: agent-knowledge-network
+      description: Local agent registration, discovery, and capability routing
+      source: ./packages/agent-knowledge-network
+      version: 0.1.0
+      tag_pattern: "{name}--v{version}"
+
+    - name: apm-expert
+      description: APM documentation expert backed by a vendored OKF corpus
+      source: ./packages/apm-expert
+      version: 0.1.0
+      tag_pattern: "{name}--v{version}"

@@ -1,0 +1,57 @@
+name: Bug report
+description: Report a defect in any package
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you for taking the time to report a bug."
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options:
+        - open-knowledge-format
+        - karpathy-wiki
+        - second-brain-interfaces
+        - second-brain-learn
+        - second-brain-think
+        - second-brain
+        - agent-knowledge-network
+        - apm-expert
+        - other / monorepo-level
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Provide a minimal reproducible example using only synthetic/public content.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: input
+    id: apm-version
+    attributes:
+      label: APM CLI version
+      placeholder: "e.g. 0.25.0 (d73e6ac3)"
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime
+      placeholder: "e.g. GitHub Copilot CLI, Claude Code"
+    validations:
+      required: true

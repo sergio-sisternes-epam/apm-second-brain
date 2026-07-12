@@ -1,0 +1,40 @@
+name: Feature request
+description: Suggest a new capability or improvement
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you for suggesting an improvement."
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options:
+        - open-knowledge-format
+        - karpathy-wiki
+        - second-brain-interfaces
+        - second-brain-learn
+        - second-brain-think
+        - second-brain
+        - agent-knowledge-network
+        - apm-expert
+        - other / monorepo-level
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What problem does this feature solve?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

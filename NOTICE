@@ -1,0 +1,42 @@
+apm-second-brain
+Copyright 2026 Contributors
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+---
+
+## Third-Party Attributions
+
+### Open Knowledge Format (OKF) specification
+
+Source:  https://github.com/GoogleCloudPlatform/knowledge-catalog
+Commit:  ee67a5ca27044ebe7c38385f5b6cffc2305a9c1a
+Path:    okf/SPEC.md
+License: Apache-2.0 (https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/LICENSE)
+
+The OKF v0.1 draft specification is used as the canonical format contract for
+the open-knowledge-format package. This project does not modify the upstream
+specification; it implements conformant tooling and documents provenance.
+
+### Agent Package Manager (APM) documentation
+
+Source:  https://github.com/microsoft/apm
+Tag:     v0.25.0
+Commit:  d73e6ac3645d2b9c5c813095e2e58f020f38f17a
+License: MIT (https://github.com/microsoft/apm/blob/main/LICENSE)
+
+The apm-expert package vendors a prebuilt OKF corpus derived from the public
+microsoft/apm documentation tree, root README, and generated CLI reference at
+the pinned commit above. Source code, tests, issues, and pull requests are
+excluded. The MIT licence text is reproduced in packages/apm-expert/NOTICE.
+
+### Karpathy persistent-wiki pattern
+
+Source:  https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+Credit:  Andrej Karpathy
+
+The karpathy-wiki package is inspired by the persistent-wiki pattern described
+in the gist above. No prose from the unlicensed gist is copied into this
+repository; only a link and attribution are retained.
