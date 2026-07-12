@@ -65,31 +65,35 @@ All actions are **read-only**. The canvas never modifies the wiki.
 
 | Action | Description |
 |--------|-------------|
-| `open_graph` | Open or focus the graph with a validated wiki bundle path. |
-| `refresh_graph` | Re-parse all concept files from disk after wiki changes. |
-| `get_statistics` | Return node count, edge count, orphan count, most-connected concepts. |
-| `search_nodes` | Search by title, concept path, description, or tag. |
-| `set_filter` | Set filters: type, tag, status, directory, connected/orphan state, free text. |
-| `clear_filters` | Reset all active filters and show the full graph. |
+| `open_graph` | Open or focus the graph with a validated wiki bundle path. Builds active (non-archived) graph. |
+| `refresh_graph` | Re-parse all concept files from disk after wiki changes. Respects current `includeArchived` state. |
+| `get_statistics` | Return node count, edge count, orphan count, most-connected concepts (active graph only). |
+| `search_nodes` | Search by title, concept path, description, or tag (active graph only). |
+| `set_filter` | Set view filters (type, tag, status, directory, orphan/connected, text) and/or `includeArchived` (boolean; changing it rebuilds the instance graph from disk). |
+| `clear_filters` | Reset all filters including focus state; reset `includeArchived` to false (default archived-excluded view). |
 | `focus_node` | Focus a concept by path; return its inbound and outbound neighbourhood. |
 
 ### Action semantics
 
 **`open_graph` / `refresh_graph`**: Build or rebuild the active graph from disk.
-By default, concepts with `status: archived` in their OKF frontmatter are
-excluded at parse time -- they are absent from the graph data, not merely hidden.
+By default (`includeArchived: false`), concepts with `status: archived` in their
+OKF frontmatter are excluded at parse time -- absent from graph data, not merely
+hidden. `includeArchived` is controlled via `set_filter`, not via `open_graph` or
+`refresh_graph` input parameters.
 
-**`set_filter`**: Narrows the visible graph view without rebuilding from disk,
-except when `includeArchived` changes (see below). `clear_filters` resets ALL
-active filters including focus state, directory prefix, type, tag, status,
-orphan/connected flags, free-text search, and `includeArchived` (which is reset
-to false, restoring the default archived-excluded view).
+**`set_filter`**: Accepts view-level filters (type, tag, status, directory,
+onlyOrphans, onlyConnected, text) plus the instance-level `includeArchived`
+boolean (default: false). View filters narrow the visible graph without
+rebuilding from disk. When `includeArchived` changes, the graph is **rebuilt
+from disk** to add or remove archived concepts at the data level. `clear_filters`
+resets ALL active filters including focus state, directory prefix, type, tag,
+status, orphan/connected flags, free-text search, and resets `includeArchived`
+to false, restoring the default archived-excluded view.
 
-**`includeArchived` (passed to `set_filter`, default: false)**: Controls whether
-archived concepts are included in the graph. When toggled from false to true (or
-true to false), the graph is **rebuilt from disk** to add or remove archived
-concepts at the data level -- this is not a view filter. Archived concepts absent
-from the active graph are also absent from statistics, search results, focus
+**`includeArchived` (field of `set_filter` input, default: false)**: Controls
+whether archived concepts are included in the graph. When toggled, the graph is
+**rebuilt from disk** -- this is not a view filter. Archived concepts absent from
+the active graph are also absent from statistics, search results, focus
 neighbourhood, and orphan calculations.
 
 **`focus_node`**: Narrows the visible graph to the focused concept node and its
