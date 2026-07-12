@@ -1,5 +1,6 @@
 name: apm-expert
 version: 0.1.0
+license: Apache-2.0
 description: APM documentation expert backed by a vendored OKF corpus
 author: Sergio Sisternes
 # Which agent platforms to deploy to.
