@@ -48,6 +48,13 @@ function runGraph(fn) {
     }
 }
 
+// Returns the active (non-archived) graph for the given instance.
+// entry.graph is always the result of buildGraph with the instance's
+// includeArchived flag (default: false).  This accessor makes the
+// active-view contract explicit at every call site so that statistics,
+// search, focus, and edge queries cannot accidentally read raw data.
+function activeGraph(entry) { return entry.graph; }
+
 // ---------------------------------------------------------------------------
 // HTML renderer
 // ---------------------------------------------------------------------------
@@ -189,7 +196,7 @@ async function startServer(entry) {
             return;
         }
         const html = renderGraphHtml(
-            entry.graph, entry.filters, computeStatistics(entry.graph),
+            activeGraph(entry), entry.filters, computeStatistics(activeGraph(entry)),
             entry.wikiRoot, entry.includeArchived
         );
         res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -260,7 +267,7 @@ const session = await joinSession({
                         }
                         entry.graph = runGraph(() => buildGraph(wikiRoot, { includeArchived: false }));
                         broadcastRefresh(entry);
-                        const stats = computeStatistics(entry.graph);
+                        const stats = computeStatistics(activeGraph(entry));
                         return { ok: true, wikiRoot, nodeCount: stats.nodeCount, edgeCount: stats.edgeCount, orphanCount: stats.orphanCount };
                     },
                 },
@@ -271,7 +278,7 @@ const session = await joinSession({
                         const entry = requireEntry(ctx);
                         entry.graph = runGraph(() => buildGraph(entry.wikiRoot, { includeArchived: entry.includeArchived }));
                         broadcastRefresh(entry);
-                        const stats = computeStatistics(entry.graph);
+                        const stats = computeStatistics(activeGraph(entry));
                         return { ok: true, nodeCount: stats.nodeCount, edgeCount: stats.edgeCount };
                     },
                 },
@@ -280,7 +287,7 @@ const session = await joinSession({
                     description: "Return graph statistics: node count, edge count, orphan count, broken link count, and the five most-connected concepts.",
                     handler: async (ctx) => {
                         const entry = requireEntry(ctx);
-                        return computeStatistics(entry.graph);
+                        return computeStatistics(activeGraph(entry));
                     },
                 },
                 {
@@ -297,7 +304,7 @@ const session = await joinSession({
                     handler: async (ctx) => {
                         const entry = requireEntry(ctx);
                         const q = ctx.input.query.toLowerCase();
-                        const results = entry.graph.nodes.filter((n) =>
+                        const results = activeGraph(entry).nodes.filter((n) =>
                             n.title.toLowerCase().includes(q) ||
                             n.description.toLowerCase().includes(q) ||
                             n.conceptPath.toLowerCase().includes(q) ||
@@ -341,7 +348,7 @@ const session = await joinSession({
 
                         entry.filters = { ...entry.filters, ...viewFilters };
                         broadcastRefresh(entry);
-                        const filtered = applyFilters(entry.graph, entry.filters);
+                        const filtered = applyFilters(activeGraph(entry), entry.filters);
                         return { ok: true, visibleNodes: filtered.nodes.length, visibleEdges: filtered.edges.length, activeFilters: entry.filters, includeArchived: entry.includeArchived };
                     },
                 },
@@ -357,7 +364,7 @@ const session = await joinSession({
                             entry.graph = runGraph(() => buildGraph(entry.wikiRoot, { includeArchived: false }));
                         }
                         broadcastRefresh(entry);
-                        return { ok: true, nodeCount: entry.graph.nodes.length, edgeCount: entry.graph.edges.length };
+                        return { ok: true, nodeCount: activeGraph(entry).nodes.length, edgeCount: activeGraph(entry).edges.length };
                     },
                 },
                 {
@@ -373,19 +380,19 @@ const session = await joinSession({
                     },
                     handler: async (ctx) => {
                         const entry = requireEntry(ctx);
-                        const target = entry.graph.nodes.find((n) => n.conceptPath === ctx.input.concept_path);
+                        const target = activeGraph(entry).nodes.find((n) => n.conceptPath === ctx.input.concept_path);
                         if (!target) {
                             return { found: false, message: `No concept found with path: ${ctx.input.concept_path}` };
                         }
 
-                        const outboundEdges = entry.graph.edges.filter((e) => e.from === target.id && !e.broken);
-                        const inboundEdges = entry.graph.edges.filter((e) => e.to === target.id && !e.broken);
+                        const outboundEdges = activeGraph(entry).edges.filter((e) => e.from === target.id && !e.broken);
+                        const inboundEdges = activeGraph(entry).edges.filter((e) => e.to === target.id && !e.broken);
 
                         const outboundIds = new Set(outboundEdges.map((e) => e.to));
                         const inboundIds = new Set(inboundEdges.map((e) => e.from));
 
-                        const outboundNodes = entry.graph.nodes.filter((n) => outboundIds.has(n.id)).map((n) => ({ id: n.id, title: n.title, path: n.conceptPath }));
-                        const inboundNodes = entry.graph.nodes.filter((n) => inboundIds.has(n.id)).map((n) => ({ id: n.id, title: n.title, path: n.conceptPath }));
+                        const outboundNodes = activeGraph(entry).nodes.filter((n) => outboundIds.has(n.id)).map((n) => ({ id: n.id, title: n.title, path: n.conceptPath }));
+                        const inboundNodes = activeGraph(entry).nodes.filter((n) => inboundIds.has(n.id)).map((n) => ({ id: n.id, title: n.title, path: n.conceptPath }));
 
                         // Set focus filter: canvas narrows to this node + neighbourhood
                         // and highlights the focused node with a distinct style.
