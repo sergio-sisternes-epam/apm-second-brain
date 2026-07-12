@@ -1,7 +1,7 @@
 name: apm-expert
 version: 0.1.0
 license: Apache-2.0
-description: APM documentation expert backed by a vendored OKF corpus
+description: APM documentation expert scaffold -- corpus not yet built; see docs/knowledge-build.md
 author: Sergio Sisternes
 # Which agent platforms to deploy to.
 # Resolution order: --target flag > this field > auto-detect from filesystem.
@@ -15,4 +15,38 @@ dependencies:
     - sergio-sisternes-epam/apm-second-brain/packages/agent-knowledge-network#ab00290134a69a59f75700c40439ee9df14e4fcf
   mcp: []
 includes: auto
-scripts: {}
+scripts:
+  build-corpus: |
+    set -euo pipefail
+    EXPECTED="d73e6ac3645d2b9c5c813095e2e58f020f38f17a"
+    TAG="v0.25.0"
+    BASELINE_KEY="${TAG}-${EXPECTED}"
+    KNOWLEDGE_DIR=".apm/skills/apm-knowledge/references/knowledge"
+    BASELINE_DIR="${KNOWLEDGE_DIR}/baselines/${BASELINE_KEY}"
+    STAGING_DIR="${KNOWLEDGE_DIR}/staging/${BASELINE_KEY}-$(date -u +%Y%m%dT%H%M%SZ)"
+    if [ -d "${BASELINE_DIR}/concepts" ] && [ "$(ls -A "${BASELINE_DIR}/concepts" 2>/dev/null)" ]; then
+      echo "Baseline ${BASELINE_KEY} already populated -- no-op."; exit 0; fi
+    git clone --depth 1 --branch "${TAG}" https://github.com/microsoft/apm.git /tmp/apm-src
+    ACTUAL=$(git -C /tmp/apm-src rev-parse HEAD)
+    [ "$ACTUAL" = "$EXPECTED" ] || { echo "SHA mismatch: got $ACTUAL"; exit 1; }
+    mkdir -p "${STAGING_DIR}/concepts"
+    cp /tmp/apm-src/LICENSE "${STAGING_DIR}/LICENSE"
+    apm run okf-bundle-create --source /tmp/apm-src/docs --output "${STAGING_DIR}" --source-id "microsoft/apm@${EXPECTED}" --licence MIT
+    apm run okf-bundle-validate --bundle "${STAGING_DIR}"
+    BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    INTEGRITY=$(find "${STAGING_DIR}/concepts" -type f | sort | xargs sha256sum 2>/dev/null | sha256sum | awk '{print $1}')
+    printf '{"repository":"microsoft/apm","tag":"%s","fullCommitSha":"%s","buildDate":"%s","integrityHash":"%s","licence":"MIT","status":"populated"}\n' "$TAG" "$EXPECTED" "$BUILD_DATE" "$INTEGRITY" > "${STAGING_DIR}/MANIFEST.json"
+    mv "${STAGING_DIR}" "${BASELINE_DIR}"
+    printf '%s' "${BASELINE_KEY}" > "${KNOWLEDGE_DIR}/active.tmp"
+    mv "${KNOWLEDGE_DIR}/active.tmp" "${KNOWLEDGE_DIR}/active"
+    rm -rf /tmp/apm-src
+    echo "Corpus built and activated: ${BASELINE_KEY}"
+  validate-corpus: |
+    set -euo pipefail
+    KNOWLEDGE_DIR=".apm/skills/apm-knowledge/references/knowledge"
+    ACTIVE=$(cat "${KNOWLEDGE_DIR}/active" 2>/dev/null || echo "none")
+    [ "$ACTIVE" = "none" ] && { echo "No active baseline -- run build-corpus first."; exit 1; }
+    BASELINE_DIR="${KNOWLEDGE_DIR}/baselines/${ACTIVE}"
+    [ -d "${BASELINE_DIR}" ] || { echo "Baseline directory not found: ${BASELINE_DIR}"; exit 1; }
+    apm run okf-bundle-validate --bundle "${BASELINE_DIR}"
+    echo "Corpus validation passed for: ${ACTIVE}"
