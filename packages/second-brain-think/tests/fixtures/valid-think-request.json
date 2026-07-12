@@ -1,0 +1,9 @@
+{
+  "capability": "second-brain.think.v1",
+  "correlation_id": "d4e5f6a7-b8c9-0123-defa-234567890123",
+  "question": "What is the recommended approach for attaching a user-assigned managed identity to an Azure Container App?",
+  "context": {
+    "project": "sample-infra-project",
+    "tags": ["azure", "managed-identity", "container-apps"]
+  }
+}

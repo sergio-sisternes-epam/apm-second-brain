@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "second-brain.think.v1.response",
+  "title": "Think Response",
+  "description": "Response envelope for the second-brain.think.v1 capability.",
+  "type": "object",
+  "required": ["correlation_id", "quality", "answer"],
+  "additionalProperties": false,
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Echoes the correlation_id from the originating request."
+    },
+    "quality": {
+      "type": "string",
+      "enum": ["answered", "partial", "unanswered"],
+      "description": "Confidence classification of the response."
+    },
+    "answer": {
+      "type": "string",
+      "description": "Distilled answer text. Empty string when quality is 'unanswered'."
+    },
+    "citations": {
+      "type": "array",
+      "description": "Source references supporting the answer.",
+      "items": {
+        "type": "object",
+        "required": ["source_id", "label"],
+        "additionalProperties": false,
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "description": "Opaque identifier of the ingested source."
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable label for the source."
+          },
+          "excerpt": {
+            "type": "string",
+            "description": "Short representative excerpt from the source."
+          }
+        }
+      }
+    },
+    "knowledge_gaps": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Aspects of the question not covered by available knowledge."
+    }
+  }
+}

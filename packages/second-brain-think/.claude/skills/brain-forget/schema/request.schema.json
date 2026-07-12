@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "second-brain.forget.v1.request",
+  "title": "Forget Request",
+  "description": "Request envelope for the second-brain.forget.v1 capability.",
+  "type": "object",
+  "required": ["capability", "correlation_id", "target_id", "reason"],
+  "additionalProperties": false,
+  "properties": {
+    "capability": {
+      "const": "second-brain.forget.v1",
+      "description": "Capability identifier. Must be exactly 'second-brain.forget.v1'."
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Client-generated UUID v4 used to match this request to its receipt."
+    },
+    "target_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The source_id from a brain-learn receipt, or a concept path (e.g. 'infra/kubernetes/pull-policy')."
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "description": "Human-readable rationale for the tombstone request."
+    }
+  }
+}

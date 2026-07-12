@@ -1,0 +1,14 @@
+{
+  "capability": "second-brain.learn.v1",
+  "correlation_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "source_type": "session",
+  "content": "Azure Container Apps requires the --mi-user-assigned flag when attaching a user-assigned managed identity. The documentation only describes the system-assigned identity path; the user-assigned variant is undocumented and discovered by trial and error with the CLI.",
+  "category": "discovery",
+  "confidence": "verified",
+  "context": {
+    "project": "sample-infra-project",
+    "session": "session-001",
+    "date": "2025-01-15",
+    "tags": ["azure", "managed-identity", "container-apps"]
+  }
+}

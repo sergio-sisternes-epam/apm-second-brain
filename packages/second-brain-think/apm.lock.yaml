@@ -1,0 +1,725 @@
+lockfile_version: '1'
+generated_at: '2026-07-12T16:00:42.376533+00:00'
+apm_version: 0.25.0
+dependencies:
+- repo_url: _local/karpathy-wiki
+  name: karpathy-wiki
+  version: 0.1.0
+  package_type: apm_package
+  deployed_files:
+  - .agents/skills/kw-wiki-archive
+  - .agents/skills/kw-wiki-archive/SKILL.md
+  - .agents/skills/kw-wiki-index
+  - .agents/skills/kw-wiki-index/SKILL.md
+  - .agents/skills/kw-wiki-ingest
+  - .agents/skills/kw-wiki-ingest/SKILL.md
+  - .agents/skills/kw-wiki-init
+  - .agents/skills/kw-wiki-init/SKILL.md
+  - .agents/skills/kw-wiki-lint
+  - .agents/skills/kw-wiki-lint/SKILL.md
+  - .agents/skills/kw-wiki-log
+  - .agents/skills/kw-wiki-log/SKILL.md
+  - .agents/skills/kw-wiki-query
+  - .agents/skills/kw-wiki-query/SKILL.md
+  - .claude/skills/kw-wiki-archive
+  - .claude/skills/kw-wiki-archive/SKILL.md
+  - .claude/skills/kw-wiki-index
+  - .claude/skills/kw-wiki-index/SKILL.md
+  - .claude/skills/kw-wiki-ingest
+  - .claude/skills/kw-wiki-ingest/SKILL.md
+  - .claude/skills/kw-wiki-init
+  - .claude/skills/kw-wiki-init/SKILL.md
+  - .claude/skills/kw-wiki-lint
+  - .claude/skills/kw-wiki-lint/SKILL.md
+  - .claude/skills/kw-wiki-log
+  - .claude/skills/kw-wiki-log/SKILL.md
+  - .claude/skills/kw-wiki-query
+  - .claude/skills/kw-wiki-query/SKILL.md
+  deployed_file_hashes:
+    .agents/skills/kw-wiki-archive/SKILL.md: sha256:30f69d38524897eb32660ad41d5adc3cd6acd172e014b6eaf10cad5d259cf0d1
+    .agents/skills/kw-wiki-index/SKILL.md: sha256:d34f13062ad4aef791af27c43455d5f667aaea29bfb5a9537328d1af5de450d9
+    .agents/skills/kw-wiki-ingest/SKILL.md: sha256:4323ad1e1227b8dba03035f173adffb205bf9e88c75f7b6fdb66fac3c0134e5d
+    .agents/skills/kw-wiki-init/SKILL.md: sha256:2d4802ef83a88737f61f96dafd9f941403a3dba920766dee2e8255d54c0f077d
+    .agents/skills/kw-wiki-lint/SKILL.md: sha256:5fb8c294114d5fcf4791b0685bc6dc4d29a5fc4e2b37f8202bc0137563f30829
+    .agents/skills/kw-wiki-log/SKILL.md: sha256:92672978fb7a84392b30255158f875cdd43fb8b97bbd160f7867eb15bc79729c
+    .agents/skills/kw-wiki-query/SKILL.md: sha256:84ec9b5879ea12dc6becea275d355a43121cb84ef426da090c5e41e70a0100b0
+    .claude/skills/kw-wiki-archive/SKILL.md: sha256:30f69d38524897eb32660ad41d5adc3cd6acd172e014b6eaf10cad5d259cf0d1
+    .claude/skills/kw-wiki-index/SKILL.md: sha256:d34f13062ad4aef791af27c43455d5f667aaea29bfb5a9537328d1af5de450d9
+    .claude/skills/kw-wiki-ingest/SKILL.md: sha256:4323ad1e1227b8dba03035f173adffb205bf9e88c75f7b6fdb66fac3c0134e5d
+    .claude/skills/kw-wiki-init/SKILL.md: sha256:2d4802ef83a88737f61f96dafd9f941403a3dba920766dee2e8255d54c0f077d
+    .claude/skills/kw-wiki-lint/SKILL.md: sha256:5fb8c294114d5fcf4791b0685bc6dc4d29a5fc4e2b37f8202bc0137563f30829
+    .claude/skills/kw-wiki-log/SKILL.md: sha256:92672978fb7a84392b30255158f875cdd43fb8b97bbd160f7867eb15bc79729c
+    .claude/skills/kw-wiki-query/SKILL.md: sha256:84ec9b5879ea12dc6becea275d355a43121cb84ef426da090c5e41e70a0100b0
+  source: local
+  local_path: ../karpathy-wiki
+- repo_url: _local/second-brain-interfaces
+  name: second-brain-interfaces
+  version: 0.1.0
+  package_type: apm_package
+  deployed_files:
+  - .agents/skills/brain-forget
+  - .agents/skills/brain-forget/SKILL.md
+  - .agents/skills/brain-forget/schema/error.schema.json
+  - .agents/skills/brain-forget/schema/request.schema.json
+  - .agents/skills/brain-forget/schema/response.schema.json
+  - .agents/skills/brain-learn
+  - .agents/skills/brain-learn/SKILL.md
+  - .agents/skills/brain-learn/schema/error.schema.json
+  - .agents/skills/brain-learn/schema/request.schema.json
+  - .agents/skills/brain-learn/schema/response.schema.json
+  - .agents/skills/brain-think
+  - .agents/skills/brain-think/SKILL.md
+  - .agents/skills/brain-think/schema/error.schema.json
+  - .agents/skills/brain-think/schema/request.schema.json
+  - .agents/skills/brain-think/schema/response.schema.json
+  - .claude/skills/brain-forget
+  - .claude/skills/brain-forget/SKILL.md
+  - .claude/skills/brain-forget/schema/error.schema.json
+  - .claude/skills/brain-forget/schema/request.schema.json
+  - .claude/skills/brain-forget/schema/response.schema.json
+  - .claude/skills/brain-learn
+  - .claude/skills/brain-learn/SKILL.md
+  - .claude/skills/brain-learn/schema/error.schema.json
+  - .claude/skills/brain-learn/schema/request.schema.json
+  - .claude/skills/brain-learn/schema/response.schema.json
+  - .claude/skills/brain-think
+  - .claude/skills/brain-think/SKILL.md
+  - .claude/skills/brain-think/schema/error.schema.json
+  - .claude/skills/brain-think/schema/request.schema.json
+  - .claude/skills/brain-think/schema/response.schema.json
+  deployed_file_hashes:
+    .agents/skills/brain-forget/SKILL.md: sha256:49e8093eed67f8f5b541c00a92dddd99d5d0d271be308cbeab11da4246d30107
+    .agents/skills/brain-forget/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .agents/skills/brain-forget/schema/request.schema.json: sha256:de937c6d9fe3d0c9c81ca7891b82d745f11323428dff132c8ff680cc786235e2
+    .agents/skills/brain-forget/schema/response.schema.json: sha256:4e8e8b16a87cd55aa07c0b27773f97706c681257403831bdee320e61d6d6bee3
+    .agents/skills/brain-learn/SKILL.md: sha256:2ed4db308b2898a0f0b81a8670bd33f8b8605e956b7db49d594c72317b9f0132
+    .agents/skills/brain-learn/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .agents/skills/brain-learn/schema/request.schema.json: sha256:10410215feafb739da630099ab5aaaa74250aafc16650236d8268ff9734c4c4a
+    .agents/skills/brain-learn/schema/response.schema.json: sha256:15fc8be10df9cef062481e9e8b32772383a8fc33cc532f1dcda4c79ea30eeb7b
+    .agents/skills/brain-think/SKILL.md: sha256:8bc074ce06139994fd80aa1f9f46d9a3cfe2b69de22ac077dccb9558af922d87
+    .agents/skills/brain-think/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .agents/skills/brain-think/schema/request.schema.json: sha256:45856e88e403339acdf41d8540748dd56672348f87a3aaf5814977c83eb6c8e2
+    .agents/skills/brain-think/schema/response.schema.json: sha256:f4648ecdf7906b90bfe2d9f24aee329969c3f072628ba863f8dd561026003f61
+    .claude/skills/brain-forget/SKILL.md: sha256:49e8093eed67f8f5b541c00a92dddd99d5d0d271be308cbeab11da4246d30107
+    .claude/skills/brain-forget/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .claude/skills/brain-forget/schema/request.schema.json: sha256:de937c6d9fe3d0c9c81ca7891b82d745f11323428dff132c8ff680cc786235e2
+    .claude/skills/brain-forget/schema/response.schema.json: sha256:4e8e8b16a87cd55aa07c0b27773f97706c681257403831bdee320e61d6d6bee3
+    .claude/skills/brain-learn/SKILL.md: sha256:2ed4db308b2898a0f0b81a8670bd33f8b8605e956b7db49d594c72317b9f0132
+    .claude/skills/brain-learn/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .claude/skills/brain-learn/schema/request.schema.json: sha256:10410215feafb739da630099ab5aaaa74250aafc16650236d8268ff9734c4c4a
+    .claude/skills/brain-learn/schema/response.schema.json: sha256:15fc8be10df9cef062481e9e8b32772383a8fc33cc532f1dcda4c79ea30eeb7b
+    .claude/skills/brain-think/SKILL.md: sha256:8bc074ce06139994fd80aa1f9f46d9a3cfe2b69de22ac077dccb9558af922d87
+    .claude/skills/brain-think/schema/error.schema.json: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+    .claude/skills/brain-think/schema/request.schema.json: sha256:45856e88e403339acdf41d8540748dd56672348f87a3aaf5814977c83eb6c8e2
+    .claude/skills/brain-think/schema/response.schema.json: sha256:f4648ecdf7906b90bfe2d9f24aee329969c3f072628ba863f8dd561026003f61
+  source: local
+  local_path: ../second-brain-interfaces
+deployments:
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-forget
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-forget/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:49e8093eed67f8f5b541c00a92dddd99d5d0d271be308cbeab11da4246d30107
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-forget/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-forget/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:de937c6d9fe3d0c9c81ca7891b82d745f11323428dff132c8ff680cc786235e2
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-forget/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:4e8e8b16a87cd55aa07c0b27773f97706c681257403831bdee320e61d6d6bee3
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-learn
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-learn/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:2ed4db308b2898a0f0b81a8670bd33f8b8605e956b7db49d594c72317b9f0132
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-learn/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-learn/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:10410215feafb739da630099ab5aaaa74250aafc16650236d8268ff9734c4c4a
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-learn/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:15fc8be10df9cef062481e9e8b32772383a8fc33cc532f1dcda4c79ea30eeb7b
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-think
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-think/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:8bc074ce06139994fd80aa1f9f46d9a3cfe2b69de22ac077dccb9558af922d87
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-think/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-think/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:45856e88e403339acdf41d8540748dd56672348f87a3aaf5814977c83eb6c8e2
+- kind: project-relative
+  target: agents
+  value: .agents/skills/brain-think/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:f4648ecdf7906b90bfe2d9f24aee329969c3f072628ba863f8dd561026003f61
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-archive
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-archive/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:30f69d38524897eb32660ad41d5adc3cd6acd172e014b6eaf10cad5d259cf0d1
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-index
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-index/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:d34f13062ad4aef791af27c43455d5f667aaea29bfb5a9537328d1af5de450d9
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-ingest
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-ingest/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:4323ad1e1227b8dba03035f173adffb205bf9e88c75f7b6fdb66fac3c0134e5d
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-init
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-init/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:2d4802ef83a88737f61f96dafd9f941403a3dba920766dee2e8255d54c0f077d
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-lint
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-lint/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:5fb8c294114d5fcf4791b0685bc6dc4d29a5fc4e2b37f8202bc0137563f30829
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-log
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-log/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:92672978fb7a84392b30255158f875cdd43fb8b97bbd160f7867eb15bc79729c
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-query
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/kw-wiki-query/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:84ec9b5879ea12dc6becea275d355a43121cb84ef426da090c5e41e70a0100b0
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-think-handler
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-think-handler/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a17a64eeded727a5c72ed8f9e36e67bff268a409d6b987ef0b66cb6e47150d69
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-think-validate
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: agents
+  value: .agents/skills/sb-think-validate/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:df72d8065c37c92fb643c34a3d1dd5dccbfe40707f700d671459f75c06261604
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-forget
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-forget/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:49e8093eed67f8f5b541c00a92dddd99d5d0d271be308cbeab11da4246d30107
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-forget/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-forget/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:de937c6d9fe3d0c9c81ca7891b82d745f11323428dff132c8ff680cc786235e2
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-forget/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:4e8e8b16a87cd55aa07c0b27773f97706c681257403831bdee320e61d6d6bee3
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-learn
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-learn/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:2ed4db308b2898a0f0b81a8670bd33f8b8605e956b7db49d594c72317b9f0132
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-learn/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-learn/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:10410215feafb739da630099ab5aaaa74250aafc16650236d8268ff9734c4c4a
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-learn/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:15fc8be10df9cef062481e9e8b32772383a8fc33cc532f1dcda4c79ea30eeb7b
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-think
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-think/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:8bc074ce06139994fd80aa1f9f46d9a3cfe2b69de22ac077dccb9558af922d87
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-think/schema/error.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:3c62b7025b245dd5d352b9b0782b1f80a8adfd6c40cd30551224e6f72188d588
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-think/schema/request.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:45856e88e403339acdf41d8540748dd56672348f87a3aaf5814977c83eb6c8e2
+- kind: project-relative
+  target: claude
+  value: .claude/skills/brain-think/schema/response.schema.json
+  runtime: null
+  scope: project
+  owners:
+  - ../second-brain-interfaces
+  active_owner: ../second-brain-interfaces
+  content_hash: sha256:f4648ecdf7906b90bfe2d9f24aee329969c3f072628ba863f8dd561026003f61
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-archive
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-archive/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:30f69d38524897eb32660ad41d5adc3cd6acd172e014b6eaf10cad5d259cf0d1
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-index
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-index/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:d34f13062ad4aef791af27c43455d5f667aaea29bfb5a9537328d1af5de450d9
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-ingest
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-ingest/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:4323ad1e1227b8dba03035f173adffb205bf9e88c75f7b6fdb66fac3c0134e5d
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-init
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-init/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:2d4802ef83a88737f61f96dafd9f941403a3dba920766dee2e8255d54c0f077d
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-lint
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-lint/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:5fb8c294114d5fcf4791b0685bc6dc4d29a5fc4e2b37f8202bc0137563f30829
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-log
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-log/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:92672978fb7a84392b30255158f875cdd43fb8b97bbd160f7867eb15bc79729c
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-query
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/kw-wiki-query/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ../karpathy-wiki
+  active_owner: ../karpathy-wiki
+  content_hash: sha256:84ec9b5879ea12dc6becea275d355a43121cb84ef426da090c5e41e70a0100b0
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-think-handler
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-think-handler/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a17a64eeded727a5c72ed8f9e36e67bff268a409d6b987ef0b66cb6e47150d69
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-think-validate
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/sb-think-validate/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:df72d8065c37c92fb643c34a3d1dd5dccbfe40707f700d671459f75c06261604
+local_deployed_files:
+- .agents/skills/sb-think-handler
+- .agents/skills/sb-think-handler/SKILL.md
+- .agents/skills/sb-think-validate
+- .agents/skills/sb-think-validate/SKILL.md
+- .claude/skills/sb-think-handler
+- .claude/skills/sb-think-handler/SKILL.md
+- .claude/skills/sb-think-validate
+- .claude/skills/sb-think-validate/SKILL.md
+local_deployed_file_hashes:
+  .agents/skills/sb-think-handler/SKILL.md: sha256:a17a64eeded727a5c72ed8f9e36e67bff268a409d6b987ef0b66cb6e47150d69
+  .agents/skills/sb-think-validate/SKILL.md: sha256:df72d8065c37c92fb643c34a3d1dd5dccbfe40707f700d671459f75c06261604
+  .claude/skills/sb-think-handler/SKILL.md: sha256:a17a64eeded727a5c72ed8f9e36e67bff268a409d6b987ef0b66cb6e47150d69
+  .claude/skills/sb-think-validate/SKILL.md: sha256:df72d8065c37c92fb643c34a3d1dd5dccbfe40707f700d671459f75c06261604

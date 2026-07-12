@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "second-brain.learn.v1.request",
+  "title": "Learn Request",
+  "description": "Request envelope for the second-brain.learn.v1 capability.",
+  "type": "object",
+  "required": ["capability", "correlation_id", "source_type", "content", "category", "confidence"],
+  "additionalProperties": false,
+  "properties": {
+    "capability": {
+      "const": "second-brain.learn.v1",
+      "description": "Capability identifier. Must be exactly 'second-brain.learn.v1'."
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Client-generated UUID v4 used to match this request to its receipt."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["session", "document", "manual"],
+      "description": "Origin of the learning content."
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 16384,
+      "description": "Structured learning text to ingest."
+    },
+    "category": {
+      "type": "string",
+      "enum": ["pattern", "decision", "correction", "discovery", "suggestion", "general"],
+      "description": "Semantic category used for retrieval weighting."
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["verified", "observed", "hypothesis"],
+      "description": "Confidence level of the submitted learning."
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project": {
+          "type": "string",
+          "description": "Logical project name associated with this learning."
+        },
+        "session": {
+          "type": "string",
+          "description": "Session identifier from which the learning originated."
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO-8601 date when the learning was captured."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional topic tags for retrieval."
+        }
+      }
+    }
+  }
+}

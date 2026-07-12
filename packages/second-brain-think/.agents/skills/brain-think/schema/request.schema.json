@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "second-brain.think.v1.request",
+  "title": "Think Request",
+  "description": "Request envelope for the second-brain.think.v1 capability.",
+  "type": "object",
+  "required": ["capability", "correlation_id", "question"],
+  "additionalProperties": false,
+  "properties": {
+    "capability": {
+      "const": "second-brain.think.v1",
+      "description": "Capability identifier. Must be exactly 'second-brain.think.v1'."
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Client-generated UUID v4 used to match this request to its response."
+    },
+    "question": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "description": "Natural-language question to pose to the second brain."
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project": {
+          "type": "string",
+          "description": "Logical project name, used to bias retrieval scope."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional topic tags to narrow retrieval."
+        }
+      }
+    }
+  }
+}
