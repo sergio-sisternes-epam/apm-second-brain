@@ -500,7 +500,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:aa9f12a6180ffd8e16f0495bdcd95a4262629d52f2becbc9e3742838c60cda19
+  content_hash: sha256:fea1e2d812a4a0211acdf17b835dba5c41a0bc64950cffcdc1dff6a756f531f8
 - kind: project-relative
   target: agents
   value: .agents/skills/sb-think-validate
@@ -869,7 +869,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:aa9f12a6180ffd8e16f0495bdcd95a4262629d52f2becbc9e3742838c60cda19
+  content_hash: sha256:fea1e2d812a4a0211acdf17b835dba5c41a0bc64950cffcdc1dff6a756f531f8
 - kind: project-relative
   target: claude
   value: .claude/skills/sb-think-validate
@@ -909,9 +909,9 @@ local_deployed_files:
 - .claude/skills/sb-think-validate/SKILL.md
 - .github/instructions/package.instructions.md
 local_deployed_file_hashes:
-  .agents/skills/sb-think-handler/SKILL.md: sha256:aa9f12a6180ffd8e16f0495bdcd95a4262629d52f2becbc9e3742838c60cda19
+  .agents/skills/sb-think-handler/SKILL.md: sha256:fea1e2d812a4a0211acdf17b835dba5c41a0bc64950cffcdc1dff6a756f531f8
   .agents/skills/sb-think-validate/SKILL.md: sha256:df72d8065c37c92fb643c34a3d1dd5dccbfe40707f700d671459f75c06261604
   .claude/rules/package.md: sha256:c176e1c0b08ea26d1d70c293dcb9a7f510a26207c410e6aa864291963279094b
-  .claude/skills/sb-think-handler/SKILL.md: sha256:aa9f12a6180ffd8e16f0495bdcd95a4262629d52f2becbc9e3742838c60cda19
+  .claude/skills/sb-think-handler/SKILL.md: sha256:fea1e2d812a4a0211acdf17b835dba5c41a0bc64950cffcdc1dff6a756f531f8
   .claude/skills/sb-think-validate/SKILL.md: sha256:df72d8065c37c92fb643c34a3d1dd5dccbfe40707f700d671459f75c06261604
   .github/instructions/package.instructions.md: sha256:5bddf5f315f007d554fb658c4b823d11994a78e1046efc21fa473f7d731e342f
