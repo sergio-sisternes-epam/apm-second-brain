@@ -1,5 +1,5 @@
 lockfile_version: '1'
-generated_at: '2026-07-12T19:09:22.694003+00:00'
+generated_at: '2026-07-12T19:18:20.210675+00:00'
 apm_version: 0.25.0
 dependencies:
 - repo_url: sergio-sisternes-epam/apm-second-brain
@@ -20,7 +20,6 @@ dependencies:
   - .agents/skills/sb-learn-handler/SKILL.md
   - .agents/skills/sb-learn-validate
   - .agents/skills/sb-learn-validate/SKILL.md
-  - .claude/rules/package.md
   - .claude/skills/sb-forget-handler
   - .claude/skills/sb-forget-handler/SKILL.md
   - .claude/skills/sb-forget-validate
@@ -29,18 +28,15 @@ dependencies:
   - .claude/skills/sb-learn-handler/SKILL.md
   - .claude/skills/sb-learn-validate
   - .claude/skills/sb-learn-validate/SKILL.md
-  - .github/instructions/package.instructions.md
   deployed_file_hashes:
     .agents/skills/sb-forget-handler/SKILL.md: sha256:0205090c7cf2687b2c7a4970b8229f167bf518d476efa0a3888cfa69224e8569
     .agents/skills/sb-forget-validate/SKILL.md: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
     .agents/skills/sb-learn-handler/SKILL.md: sha256:5f47b58b7cd5c1ba0418fa398cd5047fd3edfc90754c6d6422ad16c767693ca1
     .agents/skills/sb-learn-validate/SKILL.md: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
-    .claude/rules/package.md: sha256:c176e1c0b08ea26d1d70c293dcb9a7f510a26207c410e6aa864291963279094b
     .claude/skills/sb-forget-handler/SKILL.md: sha256:0205090c7cf2687b2c7a4970b8229f167bf518d476efa0a3888cfa69224e8569
     .claude/skills/sb-forget-validate/SKILL.md: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
     .claude/skills/sb-learn-handler/SKILL.md: sha256:5f47b58b7cd5c1ba0418fa398cd5047fd3edfc90754c6d6422ad16c767693ca1
     .claude/skills/sb-learn-validate/SKILL.md: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
-    .github/instructions/package.instructions.md: sha256:5bddf5f315f007d554fb658c4b823d11994a78e1046efc21fa473f7d731e342f
   content_hash: sha256:d19aa742cecd5eca883f29615f490194b3d3de437286c7f59a4ad701fbcc8ba0
   declared_license: Apache-2.0
 - repo_url: sergio-sisternes-epam/apm-second-brain
@@ -671,7 +667,6 @@ deployments:
   runtime: null
   scope: project
   owners:
-  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-learn
   - sergio-sisternes-epam/apm-second-brain/packages/second-brain-think
   active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-think
   content_hash: sha256:c176e1c0b08ea26d1d70c293dcb9a7f510a26207c410e6aa864291963279094b
@@ -1113,7 +1108,6 @@ deployments:
   runtime: null
   scope: project
   owners:
-  - sergio-sisternes-epam/apm-second-brain/packages/second-brain-learn
   - sergio-sisternes-epam/apm-second-brain/packages/second-brain-think
   active_owner: sergio-sisternes-epam/apm-second-brain/packages/second-brain-think
   content_hash: sha256:5bddf5f315f007d554fb658c4b823d11994a78e1046efc21fa473f7d731e342f
