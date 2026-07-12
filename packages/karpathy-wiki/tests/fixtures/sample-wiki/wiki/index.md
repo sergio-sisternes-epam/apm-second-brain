@@ -6,3 +6,7 @@ okf_version: "0.1"
 ## Concept
 
 * [Example Concept](concepts/example-concept.md) - A synthetic concept used as a fixture for conformance tests.
+
+## Archived
+
+* [Archived Concept](concepts/archived-concept.md) - [archived]

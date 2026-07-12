@@ -1,0 +1,6 @@
+
+# APM dependencies
+apm_modules/
+
+# APM generated cross-client cache
+.agents/

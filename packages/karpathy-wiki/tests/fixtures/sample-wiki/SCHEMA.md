@@ -22,6 +22,10 @@ sample-wiki/
 `SCHEMA.md` and `raw/` must NOT appear inside `wiki/`.
 The `wiki/` directory is a pure OKF v0.1 bundle.
 
+Ingest sources must be canonicalised before use. Only regular files from an
+approved source root may be copied into `raw/`; symlink escapes, path
+traversals, and root escapes are rejected.
+
 ## Concept frontmatter (required fields)
 
 ```yaml
@@ -41,3 +45,8 @@ modified: YYYY-MM-DD
 
 - [event] summary (paths)  # paths suffix optional; omitted for init
 ```
+
+## approved-root ingest rule
+
+Canonical source paths must remain within approved roots before copying into
+`raw/`. The default approved root is `raw/`.

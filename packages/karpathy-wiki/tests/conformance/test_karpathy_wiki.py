@@ -16,6 +16,7 @@ REPO_ROOT = Path(__file__).parent.parent.parent.parent.parent
 PKG_ROOT = REPO_ROOT / "packages" / "karpathy-wiki"
 SAMPLE_WIKI = PKG_ROOT / "tests" / "fixtures" / "sample-wiki"
 SKILLS_DIR = PKG_ROOT / ".apm" / "skills"
+CONCEPTS_DIR = SAMPLE_WIKI / "wiki" / "concepts"
 
 DISABLED_HEADER = "<!-- direct-user-invocation: disabled -->"
 LOG_DATE_PATTERN = re.compile(r"^## \d{4}-\d{2}-\d{2}$", re.MULTILINE)
@@ -57,6 +58,10 @@ def _parse_frontmatter(content: str) -> dict:
     return fields if closed else {}
 
 
+def _read_skill(skill_name: str) -> str:
+    return (SKILLS_DIR / skill_name / "SKILL.md").read_text(encoding="utf-8")
+
+
 # ---------------------------------------------------------------------------
 # 1. SCHEMA.md exists alongside wiki/, not inside it
 # ---------------------------------------------------------------------------
@@ -89,6 +94,13 @@ def test_no_karpathy_files_inside_wiki():
     )
 
 
+def test_concepts_index_present():
+    assert CONCEPTS_DIR.exists(), f"concepts/ directory must exist: {CONCEPTS_DIR}"
+    assert (CONCEPTS_DIR / "index.md").exists(), (
+        "wiki/concepts/index.md must be present in sample-wiki"
+    )
+
+
 # ---------------------------------------------------------------------------
 # 3. All concept files have required OKF frontmatter
 # ---------------------------------------------------------------------------
@@ -100,7 +112,7 @@ def test_concept_frontmatter_fields():
     parametrizing) so that an empty or missing concepts directory is
     caught as a failure, not silently skipped.
     """
-    concepts_dir = SAMPLE_WIKI / "wiki" / "concepts"
+    concepts_dir = CONCEPTS_DIR
     assert concepts_dir.exists(), f"concepts/ directory must exist: {concepts_dir}"
     concept_files = [
         f for f in concepts_dir.glob("*.md") if f.name != "index.md"
@@ -138,6 +150,14 @@ def test_log_md_present():
     )
 
 
+def test_archived_concept_tombstone_preserved():
+    archived = CONCEPTS_DIR / "archived-concept.md"
+    assert archived.exists(), "archived concept tombstone must be present"
+    fields = _parse_frontmatter(archived.read_text(encoding="utf-8"))
+    assert fields.get("status") == "archived"
+    assert fields.get("source") == "../../raw/sample-source.md"
+
+
 # ---------------------------------------------------------------------------
 # 5. log.md uses newest-first ISO date groups
 # ---------------------------------------------------------------------------
@@ -151,6 +171,12 @@ def test_log_md_date_groups_format_and_order():
     assert dates == sorted(dates, reverse=True), (
         f"log.md date headings must be newest-first, got: {dates}"
     )
+
+
+def test_root_index_lists_archived_section():
+    content = (SAMPLE_WIKI / "wiki" / "index.md").read_text(encoding="utf-8")
+    assert "## Archived" in content
+    assert "Archived Concept" in content
 
 
 # ---------------------------------------------------------------------------
@@ -171,6 +197,46 @@ def test_no_wikilinks(wiki_file: Path):
     assert not matches, (
         f"{wiki_file.relative_to(SAMPLE_WIKI)} contains wikilinks: {matches}"
     )
+
+
+def test_init_creates_concepts_index():
+    content = _read_skill("kw-wiki-init")
+    assert "wiki/concepts/index.md" in content
+    assert "* No concept entries yet." in content
+
+
+def test_index_rebuilds_concepts_catalogue():
+    content = _read_skill("kw-wiki-index")
+    assert "wiki/concepts/index.md" in content
+    assert "generated concept catalogue" in content
+
+
+def test_query_skips_index_and_archived_tombstones():
+    content = _read_skill("kw-wiki-query")
+    assert "excluding `index.md`" in content
+    assert "status: archived" in content
+    assert "archive-focused" in content
+
+
+def test_ingest_canonicalises_source_paths():
+    content = _read_skill("kw-wiki-ingest")
+    assert "Canonicalise `source_file`" in content
+    assert "approved source roots" in content
+    assert "non-regular inputs" in content
+    assert "symlink escapes" in content
+
+
+def test_archive_preserves_provenance_and_hides_tombstones_from_fallback():
+    content = _read_skill("kw-wiki-archive")
+    lowered = content.lower()
+    assert "preserves provenance" in lowered
+    assert "excluded from normal fallback queries" in lowered
+
+
+def test_lint_requires_concepts_index():
+    content = _read_skill("kw-wiki-lint")
+    assert "wiki/concepts/index.md" in content
+    assert "kw-concepts-index-missing" in content
 
 
 # ---------------------------------------------------------------------------

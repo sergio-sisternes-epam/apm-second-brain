@@ -46,6 +46,10 @@ Files in `raw/` are **never modified** after being written. They serve as
 provenance anchors. Concept files in `wiki/concepts/` may link to them using
 relative paths (e.g. `../../raw/source.md`).
 
+Ingest sources must be canonicalised before use. Only regular files from an
+approved source root may be copied into `raw/`; symlink escapes, path
+traversals, and root escapes are rejected.
+
 ---
 
 ## wiki/ -- OKF bundle constraints
@@ -54,9 +58,10 @@ Every `.md` file inside `wiki/` must conform to OKF v0.1:
 
 1. **index.md** (bundle root): frontmatter with `okf_version: "0.1"`;
    body lists all active concepts as Markdown list entries.
-2. **log.md**: no frontmatter; `## YYYY-MM-DD` date headings in
+2. **concepts/index.md**: no frontmatter; generated concept catalogue listing
+   active concepts and archived tombstones separately.
+3. **log.md**: no frontmatter; `## YYYY-MM-DD` date headings in
    newest-first (descending) order.
-3. **concepts/index.md**: no frontmatter; lists all concept files.
 4. **concepts/<slug>.md**: YAML frontmatter with required fields (see below).
 
 Use standard Markdown links (`[text](path)`) throughout. Wikilinks (`[[...]]`)
@@ -146,6 +151,8 @@ The Karpathy persistent-wiki pattern emphasises:
 4. **Append-only log**: every state change is recorded in `log.md`.
 5. **Tombstone, not delete**: `kw-wiki-archive` preserves provenance.
 6. **OKF conformance**: the wiki bundle is a pure OKF v0.1 artefact.
+7. **Approved-root ingest**: canonical source paths must stay inside approved
+   roots before they are copied into `raw/`.
 
 See: [Karpathy "How I use LLMs"](https://karpathy.beehiiv.com/p/how-i-use-llms)
 for the original pattern description.
