@@ -58,21 +58,38 @@ def main():
             print(r.stderr, file=sys.stderr)
             sys.exit(f"apm install failed with exit code {r.returncode}")
 
-        # Assert both learn and think handler dirs materialised
-        all_dirs = [p.name for p in Path(ws).rglob("*") if p.is_dir()]
+        # Assert exact canonical deployed paths for --target claude.
+        # APM 0.25 deploys claude-target skills to .claude/skills/<name>/SKILL.md.
+        # Using exact paths (not rglob across all dirs) prevents apm_modules/
+        # or other non-target directories from satisfying the assertion.
+        ws_path = Path(ws)
+        learn_skill = ws_path / ".claude" / "skills" / "sb-learn-handler" / "SKILL.md"
+        think_skill = ws_path / ".claude" / "skills" / "sb-think-handler" / "SKILL.md"
 
-        learn_found = any("sb-learn-handler" in d for d in all_dirs)
-        think_found = any("sb-think-handler" in d for d in all_dirs)
+        if not learn_skill.is_file():
+            sys.exit(
+                f"FAIL: sb-learn-handler/SKILL.md not found at expected claude target path.\n"
+                f"  Expected: {learn_skill}\n"
+                f"  .claude/skills/ contents: {sorted(p.name for p in (ws_path / '.claude' / 'skills').iterdir()) if (ws_path / '.claude' / 'skills').exists() else 'directory not found'}"
+            )
+        if not think_skill.is_file():
+            sys.exit(
+                f"FAIL: sb-think-handler/SKILL.md not found at expected claude target path.\n"
+                f"  Expected: {think_skill}\n"
+                f"  .claude/skills/ contents: {sorted(p.name for p in (ws_path / '.claude' / 'skills').iterdir()) if (ws_path / '.claude' / 'skills').exists() else 'directory not found'}"
+            )
 
-        if not learn_found:
-            print(f"FAIL: sb-learn-handler not found. Dirs: {all_dirs[:20]}", file=sys.stderr)
-            sys.exit(1)
-        if not think_found:
-            print(f"FAIL: sb-think-handler not found. Dirs: {all_dirs[:20]}", file=sys.stderr)
-            sys.exit(1)
+        # Also verify the paths are regular files inside the workspace
+        # (not symlinks escaping the workspace).
+        assert learn_skill.resolve().is_relative_to(ws_path.resolve()), (
+            f"sb-learn-handler/SKILL.md resolves outside workspace: {learn_skill.resolve()}"
+        )
+        assert think_skill.resolve().is_relative_to(ws_path.resolve()), (
+            f"sb-think-handler/SKILL.md resolves outside workspace: {think_skill.resolve()}"
+        )
 
-        print("PASS: sb-learn-handler found after consumer install")
-        print("PASS: sb-think-handler found after consumer install")
+        print(f"PASS: sb-learn-handler/SKILL.md at {learn_skill.relative_to(ws_path)}")
+        print(f"PASS: sb-think-handler/SKILL.md at {think_skill.relative_to(ws_path)}")
 
 
 if __name__ == "__main__":
