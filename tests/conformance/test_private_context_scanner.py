@@ -1,63 +1,44 @@
 """
 Conformance test: private-context scanner policy.
 
-Verifies the scoping rules that the CI Lint job enforces:
-  - .github/workflows/ is EXCLUDED  (workflow files embed the pattern strings)
-  - all other .github/ content IS scanned (.github/ISSUE_TEMPLATE/, CODEOWNERS, etc.)
-  - apm_modules/ is EXCLUDED (CLI dependency cache, never committed)
-
-The scanner logic is mirrored here so that a change to ci.yml that
-accidentally widens or narrows the scope is caught before the workflow
-is pushed to the remote.
+Verifies the scoping rules that the CI Lint job enforces by executing the
+production scanner script (scripts/scan-private-context.sh) against temporary
+directory trees.  Testing the real script -- not a Python reimplementation --
+means CI workflow changes that drift from the intended policy are caught here.
 
 Regression (b): private marker in .github/ISSUE_TEMPLATE/ is detected;
                  same marker in .github/workflows/ is NOT flagged.
 """
 
+from __future__ import annotations
+
+import subprocess
 from pathlib import Path
 
 import pytest
 
-# Private-context patterns that match the CI Lint step.
-# Strings are split with adjacent-literal concatenation so the scanner's own
-# grep cannot false-positive on this test file.
+# Locate the shared scanner script relative to the repo root.
+# Conformance tests are run from the repo root (pytest tests/conformance/).
+REPO_ROOT = Path(__file__).parent.parent.parent
+SCANNER = REPO_ROOT / "scripts" / "scan-private-context.sh"
+
+# Private-context patterns that match the scanner.
+# Strings are split with adjacent-literal concatenation so the scanner itself
+# cannot false-positive on this test file.
 PRIVATE_PATTERNS = [
     "epam-agent" "-forge",
     "Users/" "sergio_sisternes",
     "EPAM All Rights" " Reserved",
 ]
 
-# File extensions that the scanner targets (must match ci.yml exactly).
-SCANNED_EXTENSIONS = {".md", ".yml", ".yaml", ".json", ".py", ".mjs"}
 
-
-def _run_scanner(root: Path) -> list[str]:
-    """
-    Simulate the CI find | xargs grep scanner.
-
-    Returns repo-relative paths of files that contain a private-context marker,
-    excluding .github/workflows/ and apm_modules/ -- exactly as ci.yml does.
-    """
-    hits: list[str] = []
-    for f in sorted(root.rglob("*")):
-        if not f.is_file():
-            continue
-        if f.suffix not in SCANNED_EXTENSIONS:
-            continue
-        rel = f.relative_to(root)
-        parts = rel.parts
-        # Exclusions that mirror the find -not -path filters in ci.yml.
-        if len(parts) >= 2 and parts[0] == ".github" and parts[1] == "workflows":
-            continue
-        if parts[0] == "apm_modules":
-            continue
-        try:
-            content = f.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            continue
-        if any(pattern in content for pattern in PRIVATE_PATTERNS):
-            hits.append(str(rel))
-    return hits
+def _run_scanner(root: Path) -> subprocess.CompletedProcess:
+    """Execute the production scanner script against *root* and return the result."""
+    return subprocess.run(
+        ["bash", str(SCANNER), str(root)],
+        capture_output=True,
+        text=True,
+    )
 
 
 @pytest.fixture()
@@ -70,15 +51,23 @@ def mock_repo(tmp_path: Path) -> Path:
     return tmp_path
 
 
+def test_scanner_script_exists() -> None:
+    """Guard: the shared scanner script must be present and executable."""
+    assert SCANNER.is_file(), f"Scanner script not found: {SCANNER}"
+
+
 def test_scanner_detects_marker_in_issue_template(mock_repo: Path) -> None:
     """Regression (b-1): a private marker in .github/ISSUE_TEMPLATE/ must be flagged."""
     template = mock_repo / ".github" / "ISSUE_TEMPLATE" / "bug_report.md"
     template.write_text(f"<!-- This references {PRIVATE_PATTERNS[0]} -->\n")
 
-    hits = _run_scanner(mock_repo)
+    result = _run_scanner(mock_repo)
 
-    assert ".github/ISSUE_TEMPLATE/bug_report.md" in hits, (
-        "Scanner must detect private-context markers inside .github/ISSUE_TEMPLATE/"
+    assert result.returncode == 1, (
+        "Scanner must exit 1 when a private-context marker is found in .github/ISSUE_TEMPLATE/"
+    )
+    assert "ISSUE_TEMPLATE" in result.stdout, (
+        "Scanner output must name the offending file"
     )
 
 
@@ -90,10 +79,11 @@ def test_scanner_does_not_flag_workflows(mock_repo: Path) -> None:
         f'grep -e "{PRIVATE_PATTERNS[0]}" -e "{PRIVATE_PATTERNS[1]}" .\n'
     )
 
-    hits = _run_scanner(mock_repo)
+    result = _run_scanner(mock_repo)
 
-    assert ".github/workflows/ci.yml" not in hits, (
-        "Scanner must NOT flag .github/workflows/ -- those files embed the patterns legitimately"
+    assert result.returncode == 0, (
+        "Scanner must NOT flag .github/workflows/ -- those files embed the patterns legitimately.\n"
+        f"stdout: {result.stdout}"
     )
 
 
@@ -102,19 +92,23 @@ def test_scanner_does_not_flag_apm_modules(mock_repo: Path) -> None:
     cached = mock_repo / "apm_modules" / "some-pkg" / "README.md"
     cached.write_text(f"Published by {PRIVATE_PATTERNS[0]}\n")
 
-    hits = _run_scanner(mock_repo)
+    result = _run_scanner(mock_repo)
 
-    assert not any(h.startswith("apm_modules/") for h in hits), (
-        "Scanner must not traverse apm_modules/"
+    assert result.returncode == 0, (
+        "Scanner must not traverse apm_modules/.\n"
+        f"stdout: {result.stdout}"
     )
 
 
 def test_scanner_clean_repo_returns_no_hits(mock_repo: Path) -> None:
-    """A repo with no private markers produces an empty hit list."""
+    """A repo with no private markers produces a clean result."""
     (mock_repo / "README.md").write_text("# Public demo project\n")
     (mock_repo / "packages" / "foo" / ".apm").mkdir(parents=True)
     (mock_repo / "packages" / "foo" / ".apm" / "apm.yml").write_text("name: foo\n")
 
-    hits = _run_scanner(mock_repo)
+    result = _run_scanner(mock_repo)
 
-    assert hits == [], f"Expected no hits on a clean repo, got: {hits}"
+    assert result.returncode == 0, (
+        f"Expected clean result, got:\n{result.stdout}"
+    )
+    assert "Clean" in result.stdout
