@@ -1,5 +1,6 @@
 name: second-brain-think
 version: 0.1.0
+license: Apache-2.0
 description: Provider-side read and citation-backed reasoning
 author: Sergio Sisternes
 # Which agent platforms to deploy to.
@@ -10,8 +11,8 @@ targets:
   - copilot
 dependencies:
   apm:
-    - ../karpathy-wiki
-    - ../second-brain-interfaces
+    - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki#c4a074f1
+    - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces#c4a074f1
   mcp: []
 includes: auto
 scripts: {}

@@ -4,3 +4,8 @@ apm_modules/
 # APM-generated deployment targets -- source of truth is .apm/
 .agents/
 .claude/
+
+# APM-generated compiled context -- generated from .apm/ source via apm compile
+AGENTS.md
+CLAUDE.md
+GEMINI.md
