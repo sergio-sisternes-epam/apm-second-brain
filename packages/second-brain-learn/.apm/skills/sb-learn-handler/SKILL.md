@@ -56,6 +56,12 @@ A `second-brain.learn.v1` request envelope:
    re-ingest. (Files in `raw/` are named by `correlation_id`; the hash
    comparison reads file contents, not filenames.)
 
+   Note: this is an O(N) scan over the `raw/` corpus. For demo-scale wikis
+   this is acceptable. A production implementation would maintain a separate
+   hash index (e.g. `raw/.hash-index.json`) to turn the check into O(1);
+   the interface contract (returns `status: duplicate` on collision) is
+   identical either way.
+
 4. **Write raw snapshot**: Write `content` to a file in `raw/` using the
    `correlation_id` as the filename stem (e.g. `raw/<correlation_id>.md`).
 
