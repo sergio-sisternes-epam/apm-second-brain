@@ -28,8 +28,8 @@ function canonicalWikiRoot(inputPath) {
         throw new CanvasError("invalid_path", "wiki_path must be a non-empty string.");
     }
     const resolved = resolve(inputPath);
-    // Verify the resolved path actually points to a wiki bundle
-    // (contains a wiki/ sub-directory with an index.md)
+    // Validate that this is a genuine OKF wiki bundle: wiki/ directory,
+    // wiki/index.md (required structural file), and SCHEMA.md alongside wiki/.
     const wikiDir = join(resolved, "wiki");
     let stat;
     try { stat = statSync(wikiDir); } catch {
@@ -37,6 +37,12 @@ function canonicalWikiRoot(inputPath) {
     }
     if (!stat.isDirectory()) {
         throw new CanvasError("not_found", `wiki/ exists but is not a directory: ${resolved}`);
+    }
+    try { statSync(join(wikiDir, "index.md")); } catch {
+        throw new CanvasError("not_found", `wiki/index.md missing -- not a valid OKF bundle: ${resolved}`);
+    }
+    try { statSync(join(resolved, "SCHEMA.md")); } catch {
+        throw new CanvasError("not_found", `SCHEMA.md missing alongside wiki/ -- not a valid OKF bundle: ${resolved}`);
     }
     return resolved;
 }
@@ -128,18 +134,29 @@ function buildGraph(wikiRoot) {
 
         const links = extractLinks(text, conceptsDir);
         for (const { label, target } of links) {
+            // Only include links whose resolved target is inside wiki/concepts/
+            // to avoid false "broken" edges for raw/ or other non-concept files.
+            const rel = relative(conceptsDir, target);
+            if (rel.startsWith("..")) continue;
             rawLinks.push({ fromPath: filePath, toPath: target, label });
         }
     }
 
     // Also scan wiki/index.md and wiki/log.md for links to concepts
-    // (those files are excluded as nodes but their outbound links still count)
+    // (those files are excluded as nodes but their outbound links still count).
+    // These files live in wiki/ so links like "concepts/<slug>.md" must be
+    // resolved relative to wiki/, not wiki/concepts/.
+    const wikiDir = join(wikiRoot, "wiki");
     for (const structFile of ["index.md", "log.md"]) {
-        const fp = join(wikiRoot, "wiki", structFile);
+        const fp = join(wikiDir, structFile);
         let text;
         try { text = readFileSync(fp, "utf-8"); } catch { continue; }
-        const links = extractLinks(text, join(wikiRoot, "wiki", "concepts"));
+        // Resolve links relative to wiki/ (structural file's own directory)
+        const links = extractLinks(text, wikiDir);
         for (const { label, target } of links) {
+            // Only keep links that land inside wiki/concepts/
+            const rel = relative(conceptsDir, target);
+            if (rel.startsWith("..")) continue;
             rawLinks.push({ fromPath: fp, toPath: target, label });
         }
     }
@@ -528,10 +545,6 @@ const session = await joinSession({
                         const outboundNodes = entry.graph.nodes.filter((n) => outboundIds.has(n.id)).map((n) => ({ id: n.id, title: n.title, path: n.conceptPath }));
                         const inboundNodes = entry.graph.nodes.filter((n) => inboundIds.has(n.id)).map((n) => ({ id: n.id, title: n.title, path: n.conceptPath }));
 
-                        // Set filter to neighbourhood
-                        const neighbourIds = new Set([target.id, ...outboundIds, ...inboundIds]);
-                        // We do not mutate entry.filters here; focus is ephemeral
-                        entry.filters = { ...entry.filters, _focusId: target.id };
                         broadcastRefresh(entry);
 
                         return {
