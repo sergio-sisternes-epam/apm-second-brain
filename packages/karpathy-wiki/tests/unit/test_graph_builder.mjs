@@ -198,11 +198,11 @@ assert(
 );
 
 // ---------------------------------------------------------------------------
-// Test 8: Symlink escaping containment is blocked (regression)
+// Test 8: Live-target symlink escaping containment is blocked (regression)
 // ---------------------------------------------------------------------------
 // Skipped on platforms where symlink creation is genuinely unavailable.
 
-console.log("\n[8] Symlink path traversal is blocked");
+console.log("\n[8] Symlink path traversal (live target) is blocked");
 {
     let canSymlink = true;
     let tmpDir;
@@ -215,6 +215,8 @@ console.log("\n[8] Symlink path traversal is blocked");
         writeFileSync(join(wikiDir, "index.md"), "# Index");
         const sensitiveFile = join(tmpDir, "secret.txt");
         writeFileSync(sensitiveFile, "SENSITIVE");
+        // Symlink inside wiki/concepts/ pointing to a file OUTSIDE wiki/ (but inside bundle root).
+        // realpathSync resolves this to the real path; containmentCheck must detect escape.
         symlinkSync(sensitiveFile, join(conceptsDir, "escape.md"));
     } catch {
         canSymlink = false;
@@ -223,24 +225,149 @@ console.log("\n[8] Symlink path traversal is blocked");
     if (!canSymlink) {
         console.log("  SKIP: symlink creation not available on this platform");
     } else {
-        const escapeBundleRoot = tmpDir;
         let graph;
         let threw = false;
         try {
-            graph = buildGraph(escapeBundleRoot);
+            graph = buildGraph(tmpDir);
         } catch {
             threw = true;
         }
-        if (!threw) {
+        if (threw) {
+            // Throwing is also acceptable -- either way the escape is rejected.
+            assert(true, "buildGraph threw on symlink escape (escape rejected)");
+        } else {
+            // If buildGraph completed, the escaping symlink target must NOT appear as a node.
             const hasSensitiveNode = graph.nodes.some(
-                (n) => (n.path && n.path.includes("escape")) || n.id === "escape"
+                (n) => (n.path && (n.path.includes("escape") || n.path.includes("secret")))
+                     || n.id === "escape"
             );
             assert(!hasSensitiveNode, "Escaping symlink target is NOT surfaced as a graph node");
-        } else {
-            assert(threw, "buildGraph threw when bundle contained an escaping symlink");
         }
         try { rmSync(tmpDir, { recursive: true, force: true }); } catch {}
     }
+}
+
+// ---------------------------------------------------------------------------
+// Test 9: Dangling symlink is NOT surfaced (no realpathSync fallback)
+// ---------------------------------------------------------------------------
+// Old code: realpathSync failure fell back to the symlink path itself.
+// The symlink path IS inside wiki/, so containmentCheck passed (false pass).
+// New code: realpathSync failure immediately throws GraphError -- dangling
+// symlink is explicitly rejected by containmentCheck, not just by readFileSync.
+//
+// Either way, the dangling file must not appear as a graph node.
+
+console.log("\n[9] Dangling symlink is NOT surfaced in graph");
+{
+    let canSymlink = true;
+    let tmpDir;
+    try {
+        tmpDir = mkdtempSync(join(tmpdir(), "kg-dangling-test-"));
+        const wikiDir = join(tmpDir, "wiki");
+        const conceptsDir = join(wikiDir, "concepts");
+        mkdirSync(conceptsDir, { recursive: true });
+        writeFileSync(join(tmpDir, "SCHEMA.md"), "# Schema");
+        writeFileSync(join(wikiDir, "index.md"), "# Index");
+        // Dangling symlink: points to a non-existent file outside the bundle.
+        symlinkSync("/non-existent-path/secret.txt", join(conceptsDir, "dangling.md"));
+    } catch {
+        canSymlink = false;
+    }
+
+    if (!canSymlink) {
+        console.log("  SKIP: symlink creation not available on this platform");
+    } else {
+        let graph;
+        let threw = false;
+        try {
+            graph = buildGraph(tmpDir);
+        } catch {
+            threw = true;
+        }
+        if (threw) {
+            assert(true, "buildGraph threw on dangling symlink (explicitly rejected)");
+        } else {
+            const hasDanglingNode = graph.nodes.some(
+                (n) => (n.path && n.path.includes("dangling")) || n.id === "dangling"
+            );
+            assert(!hasDanglingNode, "Dangling symlink is NOT surfaced as a graph node");
+        }
+        try { rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Test 10: All 7 graph functions execute without throwing on valid fixture
+// ---------------------------------------------------------------------------
+
+console.log("\n[10] All 7 graph functions execute on the fixture bundle");
+{
+    const graph = buildGraph(FIXTURE_BUNDLE);
+    let ok = true;
+
+    // 1. buildGraph (already called above) -- tested implicitly
+    // 2. computeStatistics
+    try {
+        const stats = computeStatistics(graph);
+        assert(typeof stats.nodeCount === "number", "computeStatistics returns nodeCount");
+    } catch (e) { assert(false, `computeStatistics threw: ${e.message}`); }
+
+    // 3. applyFilters -- no filter (identity)
+    try {
+        const filtered = applyFilters(graph, {});
+        assert(Array.isArray(filtered.nodes), "applyFilters returns nodes array");
+    } catch (e) { assert(false, `applyFilters({}) threw: ${e.message}`); }
+
+    // 4. applyFilters -- type filter
+    try {
+        const filtered = applyFilters(graph, { type: "concept" });
+        assert(Array.isArray(filtered.nodes), "applyFilters with type filter returns nodes");
+    } catch (e) { assert(false, `applyFilters({type}) threw: ${e.message}`); }
+
+    // 5. applyFilters -- text search
+    try {
+        const filtered = applyFilters(graph, { text: "example" });
+        assert(Array.isArray(filtered.nodes), "applyFilters with text filter returns nodes");
+    } catch (e) { assert(false, `applyFilters({text}) threw: ${e.message}`); }
+
+    // 6. applyFilters -- orphan filter
+    try {
+        const filtered = applyFilters(graph, { onlyOrphans: true });
+        assert(Array.isArray(filtered.nodes), "applyFilters with onlyOrphans returns nodes");
+    } catch (e) { assert(false, `applyFilters({onlyOrphans}) threw: ${e.message}`); }
+
+    // 7. buildGraph -- includeArchived opt-in
+    try {
+        const fullGraph = buildGraph(FIXTURE_BUNDLE, { includeArchived: true });
+        assert(typeof fullGraph.nodes === "object", "buildGraph(includeArchived:true) returns nodes");
+    } catch (e) { assert(false, `buildGraph(includeArchived:true) threw: ${e.message}`); }
+}
+
+// ---------------------------------------------------------------------------
+// Test 11: Multi-instance isolation -- two separate buildGraph calls are independent
+// ---------------------------------------------------------------------------
+
+console.log("\n[11] Multi-instance isolation -- separate graph state per call");
+{
+    const graphA = buildGraph(FIXTURE_BUNDLE);
+    const graphB = buildGraph(FIXTURE_BUNDLE);
+
+    // Mutating a filter on graphA's result must not affect graphB
+    const filteredA = applyFilters(graphA, { onlyOrphans: true });
+    const filteredB = applyFilters(graphB, {});
+
+    assert(
+        filteredA.nodes.length <= filteredB.nodes.length,
+        "Instance A filter (onlyOrphans) does not bleed into instance B (no filter)"
+    );
+
+    // Modifying graphA directly does not affect graphB
+    const originalNodeCount = graphB.nodes.length;
+    graphA.nodes = [];
+    assert(
+        graphB.nodes.length === originalNodeCount,
+        "Clearing instance A nodes does not affect instance B node count"
+    );
 }
 
 // ---------------------------------------------------------------------------

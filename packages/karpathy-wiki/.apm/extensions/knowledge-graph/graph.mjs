@@ -29,9 +29,15 @@ const MD_LINK_RE = /\[([^\]]*)\]\(([^)]+)\)/g;
 // ---------------------------------------------------------------------------
 
 function containmentCheck(filePath, root) {
+    // Both paths MUST resolve via realpathSync. If either throws (dangling symlink,
+    // non-existent path) we reject immediately -- no fallback to unresolved strings.
     let realFile, realRoot;
-    try { realFile = realpathSync(filePath); } catch { realFile = filePath; }
-    try { realRoot = realpathSync(root); } catch { realRoot = root; }
+    try { realRoot = realpathSync(root); } catch (e) {
+        throw new GraphError("path_traversal", `Cannot resolve wiki root: ${root}: ${e.message}`);
+    }
+    try { realFile = realpathSync(filePath); } catch (e) {
+        throw new GraphError("path_traversal", `Cannot resolve file path: ${filePath}: ${e.message}`);
+    }
     const rel = relative(realRoot, realFile);
     if (rel.startsWith("..") || normalize(rel) === "..") {
         throw new GraphError("path_traversal", `File path escapes wiki root: ${filePath}`);

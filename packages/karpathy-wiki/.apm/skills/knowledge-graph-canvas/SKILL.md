@@ -73,6 +73,34 @@ All actions are **read-only**. The canvas never modifies the wiki.
 | `clear_filters` | Reset all active filters and show the full graph. |
 | `focus_node` | Focus a concept by path; return its inbound and outbound neighbourhood. |
 
+### Action semantics
+
+**`open_graph` / `refresh_graph`**: Build or rebuild the active graph from disk.
+By default, concepts with `status: archived` in their OKF frontmatter are
+excluded at parse time -- they are absent from the graph data, not merely hidden.
+Pass `includeArchived: true` to include archived concepts alongside active ones
+(useful for auditing or reviewing archived knowledge).
+
+**`focus_node`**: Narrows the visible graph to the focused concept node and its
+direct neighbourhood (concepts it links to and concepts that link to it). All
+other nodes are dimmed or hidden. The focused node is highlighted with a blue
+border and a "focus" badge. Calling `clear_filters` restores the full active
+graph and clears the focus state.
+
+**`set_filter` / `clear_filters`**: Filters narrow the graph view without
+rebuilding it from disk. `clear_filters` resets ALL active filters including
+focus state, directory prefix, type, tag, status, orphan/connected flags, and
+free-text search. After `clear_filters` the full active (non-archived) graph
+is visible.
+
+**`get_statistics`**: Returns counts and rankings computed over the active graph
+only. Archived concepts (excluded at parse time unless `includeArchived: true`)
+are not counted in node totals, orphan counts, or most-connected rankings.
+
+**Multi-instance isolation**: Each canvas instance is bound to a single wiki
+bundle path for its lifetime. Filter state, focus state, and graph data are
+instance-local and do not bleed between instances targeting different wikis.
+
 ### Filter fields for `set_filter`
 
 | Field | Type | Description |
