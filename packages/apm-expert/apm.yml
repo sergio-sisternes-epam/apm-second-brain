@@ -6,10 +6,12 @@ author: Sergio Sisternes
 # Resolution order: --target flag > this field > auto-detect from filesystem.
 # Accepted values: agent-skills, antigravity, claude, codex, copilot, cursor, gemini, kiro, opencode, windsurf
 targets:
-- claude
-- copilot
+  - claude
+  - copilot
 dependencies:
-  apm: []
+  apm:
+    - sergio-sisternes-epam/apm-second-brain/packages/second-brain#dc0b2d921b35b75b637ad59fca393c723081573e
+    - sergio-sisternes-epam/apm-second-brain/packages/agent-knowledge-network#ab00290134a69a59f75700c40439ee9df14e4fcf
   mcp: []
 includes: auto
 scripts: {}

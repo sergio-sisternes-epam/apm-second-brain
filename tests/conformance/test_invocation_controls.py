@@ -53,6 +53,7 @@ PUBLIC_SKILLS: frozenset[str] = frozenset(
         "packages/second-brain-interfaces/.apm/skills/brain-learn/SKILL.md",
         "packages/second-brain-interfaces/.apm/skills/brain-think/SKILL.md",
         "packages/karpathy-wiki/.apm/skills/knowledge-graph-canvas/SKILL.md",
+        "packages/apm-expert/.apm/skills/apm-think/SKILL.md",
     ]
 )
 
