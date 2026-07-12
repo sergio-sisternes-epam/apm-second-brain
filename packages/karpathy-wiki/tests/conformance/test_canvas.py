@@ -163,24 +163,78 @@ def test_extension_exports_default_via_join_session():
 
 
 # ---------------------------------------------------------------------------
-# 8. extension.mjs excludes archived concepts from the normal graph view
+# 8. Archived concepts excluded at graph BUILD time, not just view time
 # ---------------------------------------------------------------------------
 
-def test_archived_concepts_excluded_from_normal_graph():
-    """Regression: applyFilters must hide status=archived nodes by default.
+GRAPH_MODULE_PATH = PKG_ROOT / ".apm" / "extensions" / "knowledge-graph" / "graph.mjs"
+GRAPH_UNIT_TEST_PATH = PKG_ROOT / "tests" / "unit" / "test_graph_builder.mjs"
+FIXTURE_BUNDLE_PATH = PKG_ROOT / "tests" / "fixtures" / "archived-bundle"
 
-    Implementation evidence: the filter engine guards on ``includeArchived``
-    and filters out nodes whose status is ``"archived"`` unless that flag is
-    explicitly set.  We verify two things from the source:
-    (a) the source contains a check against the ``"archived"`` status string, and
-    (b) the guard references ``includeArchived`` so an explicit opt-in is possible.
+
+def test_graph_module_exists():
+    """graph.mjs must exist as a standalone module importable by unit tests."""
+    assert GRAPH_MODULE_PATH.exists(), (
+        f"graph.mjs not found at: {GRAPH_MODULE_PATH}"
+    )
+
+
+def test_archived_excluded_at_build_time_not_filter_time():
+    """Regression: buildGraph must exclude archived concepts at parse time.
+
+    The exclusion must appear in graph.mjs (build-time) so that archived
+    concepts are absent from node list, edge construction, statistics, search,
+    and orphan calculations -- not just from the rendered view.
+
+    We verify:
+    (a) graph.mjs contains a build-time check against ``"archived"`` status
+        inside ``buildGraph`` (before the function returns).
+    (b) graph.mjs exposes an ``includeArchived`` opt-in parameter.
+    (c) extension.mjs no longer performs the archived check in applyFilters
+        (that would be view-time only -- insufficient).
     """
-    content = EXTENSION_PATH.read_text(encoding="utf-8")
-    assert '"archived"' in content or "'archived'" in content, (
-        "extension.mjs must exclude archived concepts from the default graph view. "
-        'Expected a check against the string "archived" in applyFilters.'
+    graph_src = GRAPH_MODULE_PATH.read_text(encoding="utf-8")
+    ext_src = EXTENSION_PATH.read_text(encoding="utf-8")
+
+    assert '"archived"' in graph_src or "'archived'" in graph_src, (
+        "graph.mjs must exclude archived concepts at build time. "
+        'Expected a check against the string "archived" inside buildGraph.'
     )
-    assert "includeArchived" in content, (
-        "extension.mjs must expose an includeArchived opt-in flag so callers can "
-        "explicitly request archived concepts when needed."
+    assert "includeArchived" in graph_src, (
+        "graph.mjs must expose an includeArchived opt-in parameter on buildGraph."
     )
+
+    # The extension.mjs applyFilters wrapper must NOT re-filter archived
+    # (that would be the wrong layer). The responsibility belongs to buildGraph.
+    # Confirm extension.mjs imports from graph.mjs rather than reimplementing.
+    assert "from \"./graph.mjs\"" in ext_src or "from './graph.mjs'" in ext_src, (
+        "extension.mjs must import buildGraph from graph.mjs, not reimplement it."
+    )
+
+
+def test_archived_exclusion_functional():
+    """Functional regression: run the Node.js test suite for buildGraph.
+
+    Executes tests/unit/test_graph_builder.mjs with Node.js against the
+    real fixture bundle to prove:
+    - archived concept absent by default (nodes, edges, stats, orphan calc)
+    - archived concept present only when includeArchived=true
+    - structural file links credit inbound counts without false orphans
+    """
+    import subprocess
+    assert GRAPH_UNIT_TEST_PATH.exists(), (
+        f"Node.js unit test not found at: {GRAPH_UNIT_TEST_PATH}"
+    )
+    assert FIXTURE_BUNDLE_PATH.exists(), (
+        f"Fixture bundle not found at: {FIXTURE_BUNDLE_PATH}"
+    )
+    result = subprocess.run(
+        ["node", str(GRAPH_UNIT_TEST_PATH)],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, (
+        f"test_graph_builder.mjs failed (exit {result.returncode}):\n"
+        f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+    )
+

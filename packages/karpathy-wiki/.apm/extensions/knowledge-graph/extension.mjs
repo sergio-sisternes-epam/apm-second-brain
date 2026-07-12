@@ -5,31 +5,23 @@
 // Copilot-only in v1. Never modifies the wiki. All actions are read-only.
 
 import { createServer } from "node:http";
-import { readFileSync, readdirSync, statSync, realpathSync } from "node:fs";
-import { join, resolve, relative, normalize, extname, basename } from "node:path";
+import { statSync, realpathSync } from "node:fs";
+import { join, resolve, relative, normalize } from "node:path";
 import { joinSession, createCanvas, CanvasError } from "@github/copilot-sdk/extension";
+import { buildGraph, applyFilters, computeStatistics, GraphError } from "./graph.mjs";
 
-// -- Graph model types --
-//
-// Node: { id, title, type, description, tags, status, path, isOrphan }
-// Edge: { from, to, label, broken }
-
-const STRUCTURAL_FILES = new Set(["index.md", "log.md"]);
-const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---/;
-const MD_LINK_RE = /\[([^\]]*)\]\(([^)]+)\)/g;
-
-// Per-instance state: { wikiRoot, graph, filters, server, clients }
+// Per-instance state: { wikiRoot, graph, filters, includeArchived, server, clients, url }
 const instances = new Map();
 
-// -- Path safety --
+// ---------------------------------------------------------------------------
+// Path safety (CanvasError-throwing wrappers; pure containment is in graph.mjs)
+// ---------------------------------------------------------------------------
 
 function canonicalWikiRoot(inputPath) {
     if (!inputPath || typeof inputPath !== "string") {
         throw new CanvasError("invalid_path", "wiki_path must be a non-empty string.");
     }
     const resolved = resolve(inputPath);
-    // Validate that this is a genuine OKF wiki bundle: wiki/ directory,
-    // wiki/index.md (required structural file), and SCHEMA.md alongside wiki/.
     const wikiDir = join(resolved, "wiki");
     let stat;
     try { stat = statSync(wikiDir); } catch {
@@ -47,249 +39,20 @@ function canonicalWikiRoot(inputPath) {
     return resolved;
 }
 
-function assertContained(filePath, root) {
-    // Canonicalise both paths to their real targets before comparing,
-    // so symlinks under wikiRoot cannot escape the bundle boundary.
-    let realFile, realRoot;
-    try { realFile = realpathSync(filePath); } catch { realFile = filePath; }
-    try { realRoot = realpathSync(root); } catch { realRoot = root; }
-    const rel = relative(realRoot, realFile);
-    if (rel.startsWith("..") || normalize(rel) === "..") {
-        throw new CanvasError("path_traversal", `File path escapes wiki root: ${filePath}`);
+// Convert GraphError (from pure graph.mjs functions) to CanvasError.
+function runGraph(fn) {
+    try { return fn(); }
+    catch (e) {
+        if (e instanceof GraphError) throw new CanvasError(e.code, e.message);
+        throw e;
     }
 }
 
-// -- OKF frontmatter parser --
+// ---------------------------------------------------------------------------
+// HTML renderer
+// ---------------------------------------------------------------------------
 
-function parseFrontmatter(text) {
-    const match = FRONTMATTER_RE.exec(text);
-    if (!match) return null;
-    const block = match[1];
-    const fields = {};
-    for (const line of block.split("\n")) {
-        const colon = line.indexOf(":");
-        if (colon < 1) continue;
-        const key = line.slice(0, colon).trim();
-        let val = line.slice(colon + 1).trim();
-        // Strip YAML inline list brackets if present
-        if (val.startsWith("[") && val.endsWith("]")) {
-            val = val.slice(1, -1).split(",").map((s) => s.trim().replace(/^['"]|['"]$/g, ""));
-        }
-        fields[key] = val;
-    }
-    return fields;
-}
-
-// -- Markdown link extractor --
-
-function extractLinks(text, sourceDir) {
-    const links = [];
-    let m;
-    // Reset lastIndex before use (global regex reuse safety)
-    MD_LINK_RE.lastIndex = 0;
-    while ((m = MD_LINK_RE.exec(text)) !== null) {
-        const href = m[2].split("#")[0].trim(); // strip anchors
-        if (!href || href.startsWith("http://") || href.startsWith("https://") || href.startsWith("mailto:")) {
-            continue;
-        }
-        if (!href.endsWith(".md")) continue;
-        const target = resolve(sourceDir, href);
-        links.push({ label: m[1], target });
-    }
-    return links;
-}
-
-// -- Graph builder --
-
-function buildGraph(wikiRoot) {
-    const conceptsDir = join(wikiRoot, "wiki", "concepts");
-    let files;
-    try {
-        files = readdirSync(conceptsDir).filter((f) => f.endsWith(".md"));
-    } catch {
-        throw new CanvasError("not_found", `concepts/ directory not found under wiki/: ${wikiRoot}`);
-    }
-
-    const nodes = new Map(); // path -> node
-    const rawLinks = [];     // { fromPath, toPath, label }
-
-    for (const file of files) {
-        if (STRUCTURAL_FILES.has(file)) continue;
-        const filePath = join(conceptsDir, file);
-        assertContained(filePath, wikiRoot);
-
-        let text;
-        try { text = readFileSync(filePath, "utf-8"); } catch { continue; }
-
-        const fm = parseFrontmatter(text);
-        if (!fm || !fm.id || !fm.title || !fm.type) continue; // skip invalid
-
-        const node = {
-            id: fm.id,
-            title: fm.title,
-            type: fm.type,
-            description: fm.description || "",
-            tags: Array.isArray(fm.tags) ? fm.tags : (fm.tags ? [fm.tags] : []),
-            status: fm.status || "",
-            path: relative(wikiRoot, filePath),
-            conceptPath: relative(join(wikiRoot, "wiki", "concepts"), filePath).replace(/\.md$/, ""),
-            isOrphan: true,  // resolved after edge building
-        };
-        nodes.set(filePath, node);
-
-        const links = extractLinks(text, conceptsDir);
-        for (const { label, target } of links) {
-            // Only include links whose resolved target is inside wiki/concepts/
-            // to avoid false "broken" edges for raw/ or other non-concept files.
-            const rel = relative(conceptsDir, target);
-            if (rel.startsWith("..")) continue;
-            rawLinks.push({ fromPath: filePath, toPath: target, label });
-        }
-    }
-
-    // Also scan wiki/index.md and wiki/log.md for links to concepts
-    // (those files are excluded as nodes but their outbound links still count).
-    // These files live in wiki/ so links like "concepts/<slug>.md" must be
-    // resolved relative to wiki/, not wiki/concepts/.
-    const wikiDir = join(wikiRoot, "wiki");
-    for (const structFile of ["index.md", "log.md"]) {
-        const fp = join(wikiDir, structFile);
-        let text;
-        try { text = readFileSync(fp, "utf-8"); } catch { continue; }
-        // Resolve links relative to wiki/ (structural file's own directory)
-        const links = extractLinks(text, wikiDir);
-        for (const { label, target } of links) {
-            // Only keep links that land inside wiki/concepts/
-            const rel = relative(conceptsDir, target);
-            if (rel.startsWith("..")) continue;
-            rawLinks.push({ fromPath: fp, toPath: target, label });
-        }
-    }
-
-    // Build edges
-    const edges = [];
-    const inboundCount = new Map();
-    const outboundCount = new Map();
-    for (const n of nodes.values()) {
-        inboundCount.set(n.id, 0);
-        outboundCount.set(n.id, 0);
-    }
-
-    for (const { fromPath, toPath, label } of rawLinks) {
-        const fromNode = nodes.get(fromPath);
-        const toNode = nodes.get(toPath);
-        const broken = !toNode;
-
-        // Structural file source (index.md, log.md): no concept fromNode.
-        // Their outbound links still count as inbound credit for target concepts,
-        // preventing concepts reachable only from structural files from being
-        // marked as orphans. We do NOT add a visible graph edge.
-        if (!fromNode) {
-            if (!broken) {
-                inboundCount.set(toNode.id, (inboundCount.get(toNode.id) || 0) + 1);
-            }
-            continue;
-        }
-
-        edges.push({
-            from: fromNode.id,
-            to: toNode ? toNode.id : relative(wikiRoot, toPath),
-            label,
-            broken,
-        });
-
-        if (!broken) {
-            outboundCount.set(fromNode.id, (outboundCount.get(fromNode.id) || 0) + 1);
-            inboundCount.set(toNode.id, (inboundCount.get(toNode.id) || 0) + 1);
-        }
-    }
-
-    // Mark orphans: concepts with no inbound and no outbound edges
-    for (const node of nodes.values()) {
-        const inb = inboundCount.get(node.id) || 0;
-        const out = outboundCount.get(node.id) || 0;
-        node.isOrphan = inb === 0 && out === 0;
-        node.inboundCount = inb;
-        node.outboundCount = out;
-    }
-
-    return { nodes: [...nodes.values()], edges };
-}
-
-// -- Filter engine --
-
-function applyFilters(graph, filters) {
-    const { type, tag, status, directory, onlyOrphans, onlyConnected, text: freeText, _focusId, includeArchived } = filters || {};
-    let nodes = graph.nodes;
-
-    // Archived concepts are hidden from the normal graph view unless the caller
-    // has explicitly opted in via `includeArchived: true`. This prevents stale /
-    // deprecated concepts from cluttering navigation and search results.
-    if (!includeArchived) {
-        nodes = nodes.filter((n) => n.status !== "archived");
-    }
-
-    // Focus mode: narrow to the focused node and its direct neighbourhood first,
-    // then apply any additional user-level filters on top of that subset.
-    // Guard against stale _focusId values (e.g. after switching to a new wiki
-    // bundle): if the id no longer exists in the current graph, skip focus mode
-    // entirely rather than returning an empty canvas.
-    let focusedId = null;
-    if (_focusId) {
-        const focusNodeExists = graph.nodes.some((n) => n.id === _focusId);
-        if (focusNodeExists) {
-            focusedId = _focusId;
-            const outboundIds = new Set(graph.edges.filter((e) => e.from === _focusId && !e.broken).map((e) => e.to));
-            const inboundIds  = new Set(graph.edges.filter((e) => e.to   === _focusId && !e.broken).map((e) => e.from));
-            const neighbourhood = new Set([_focusId, ...outboundIds, ...inboundIds]);
-            nodes = nodes.filter((n) => neighbourhood.has(n.id));
-        }
-        // Stale _focusId: silently skip focus filtering; the full graph is shown.
-    }
-
-    if (type) nodes = nodes.filter((n) => n.type === type);
-    if (tag) nodes = nodes.filter((n) => n.tags.includes(tag));
-    if (status) nodes = nodes.filter((n) => n.status === status);
-    if (directory) nodes = nodes.filter((n) => n.path.startsWith(directory));
-    if (onlyOrphans) nodes = nodes.filter((n) => n.isOrphan);
-    if (onlyConnected) nodes = nodes.filter((n) => !n.isOrphan);
-    if (freeText) {
-        const q = freeText.toLowerCase();
-        nodes = nodes.filter((n) =>
-            n.title.toLowerCase().includes(q) ||
-            n.description.toLowerCase().includes(q) ||
-            n.conceptPath.toLowerCase().includes(q) ||
-            n.tags.some((t) => t.toLowerCase().includes(q))
-        );
-    }
-
-    const nodeIds = new Set(nodes.map((n) => n.id));
-    const edges = graph.edges.filter(
-        (e) => nodeIds.has(e.from) && (e.broken || nodeIds.has(e.to))
-    );
-
-    return { nodes, edges, focusedId };
-}
-
-// -- Statistics --
-
-function computeStatistics(graph) {
-    const nodeCount = graph.nodes.length;
-    const edgeCount = graph.edges.length;
-    const orphanCount = graph.nodes.filter((n) => n.isOrphan).length;
-    const brokenEdgeCount = graph.edges.filter((e) => e.broken).length;
-
-    const byConnections = [...graph.nodes]
-        .sort((a, b) => (b.inboundCount + b.outboundCount) - (a.inboundCount + a.outboundCount))
-        .slice(0, 5)
-        .map((n) => ({ title: n.title, path: n.conceptPath, inbound: n.inboundCount, outbound: n.outboundCount }));
-
-    return { nodeCount, edgeCount, orphanCount, brokenEdgeCount, mostConnected: byConnections };
-}
-
-// -- HTML renderer --
-
-function renderGraphHtml(graph, filters, stats, wikiRoot) {
+function renderGraphHtml(graph, filters, stats, wikiRoot, includeArchived) {
     const filteredGraph = applyFilters(graph, filters);
     const { focusedId } = filteredGraph;
 
@@ -360,6 +123,7 @@ function renderGraphHtml(graph, filters, stats, wikiRoot) {
     <header>
       <h1>Knowledge Graph</h1>
       <span class="muted">${esc(wikiRoot)}</span>
+      ${includeArchived ? '<span class="badge" style="background:#fff0d3;color:#814101">showing archived</span>' : ""}
     </header>
     <div class="readonly-note">Read-only view -- the canvas never modifies your wiki.</div>
     <div class="stats">
@@ -375,8 +139,8 @@ function renderGraphHtml(graph, filters, stats, wikiRoot) {
     </div>` : ""}
     <div class="filter-bar">
       <span style="font-size:.75rem;font-weight:600">Filters (agent-driven):</span>
-      ${filters && (filters.type || filters.tag || filters.status || filters.directory || filters.onlyOrphans || filters.onlyConnected || filters.text || filters.includeArchived)
-        ? `<span class="badge" style="font-size:.7rem">type:${esc(filters.type||"*")} tag:${esc(filters.tag||"*")} status:${esc(filters.status||"*")} dir:${esc(filters.directory||"*")} orphan:${filters.onlyOrphans||false} connected:${filters.onlyConnected||false} q:${esc(filters.text||"")} archived:${filters.includeArchived||false}</span>`
+      ${filters && (filters.type || filters.tag || filters.status || filters.directory || filters.onlyOrphans || filters.onlyConnected || filters.text)
+        ? `<span class="badge" style="font-size:.7rem">type:${esc(filters.type||"*")} tag:${esc(filters.tag||"*")} status:${esc(filters.status||"*")} dir:${esc(filters.directory||"*")} orphan:${filters.onlyOrphans||false} connected:${filters.onlyConnected||false} q:${esc(filters.text||"")}</span>`
         : "<span class='muted'>none -- ask the agent to filter</span>"}
     </div>
     <div class="panels">
@@ -411,7 +175,9 @@ function esc(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
-// -- HTTP server per instance --
+// ---------------------------------------------------------------------------
+// HTTP server per instance
+// ---------------------------------------------------------------------------
 
 async function startServer(entry) {
     const server = createServer((req, res) => {
@@ -422,7 +188,10 @@ async function startServer(entry) {
             req.on("close", () => entry.clients.delete(res));
             return;
         }
-        const html = renderGraphHtml(entry.graph, entry.filters, computeStatistics(entry.graph), entry.wikiRoot);
+        const html = renderGraphHtml(
+            entry.graph, entry.filters, computeStatistics(entry.graph),
+            entry.wikiRoot, entry.includeArchived
+        );
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.end(html);
     });
@@ -444,7 +213,9 @@ function requireEntry(ctx) {
     return entry;
 }
 
-// -- Session + Canvas --
+// ---------------------------------------------------------------------------
+// Session + Canvas
+// ---------------------------------------------------------------------------
 
 const session = await joinSession({
     canvases: [
@@ -479,13 +250,15 @@ const session = await joinSession({
                         const wikiRoot = canonicalWikiRoot(ctx.input.wiki_path);
                         let entry = instances.get(ctx.instanceId);
                         if (!entry) {
-                            entry = { wikiRoot, graph: null, filters: {}, clients: new Set(), server: null, url: null };
+                            entry = { wikiRoot, graph: null, filters: {}, includeArchived: false, clients: new Set(), server: null, url: null };
                             instances.set(ctx.instanceId, entry);
                             await startServer(entry);
                         } else {
                             entry.wikiRoot = wikiRoot;
+                            entry.filters = {};
+                            entry.includeArchived = false;
                         }
-                        entry.graph = buildGraph(wikiRoot);
+                        entry.graph = runGraph(() => buildGraph(wikiRoot, { includeArchived: false }));
                         broadcastRefresh(entry);
                         const stats = computeStatistics(entry.graph);
                         return { ok: true, wikiRoot, nodeCount: stats.nodeCount, edgeCount: stats.edgeCount, orphanCount: stats.orphanCount };
@@ -496,7 +269,7 @@ const session = await joinSession({
                     description: "Re-parse all concept files from disk and refresh the graph view. Use after adding, editing, or removing concepts.",
                     handler: async (ctx) => {
                         const entry = requireEntry(ctx);
-                        entry.graph = buildGraph(entry.wikiRoot);
+                        entry.graph = runGraph(() => buildGraph(entry.wikiRoot, { includeArchived: entry.includeArchived }));
                         broadcastRefresh(entry);
                         const stats = computeStatistics(entry.graph);
                         return { ok: true, nodeCount: stats.nodeCount, edgeCount: stats.edgeCount };
@@ -535,7 +308,7 @@ const session = await joinSession({
                 },
                 {
                     name: "set_filter",
-                    description: "Apply one or more filters to the graph view. All filter fields are optional and additive.",
+                    description: "Apply one or more filters to the graph view. Setting includeArchived rebuilds the graph to include or exclude archived concepts at the data level.",
                     inputSchema: {
                         type: "object",
                         properties: {
@@ -546,24 +319,43 @@ const session = await joinSession({
                             onlyOrphans: { type: "boolean", description: "Show only orphan concepts (no inbound or outbound links)." },
                             onlyConnected: { type: "boolean", description: "Show only concepts with at least one link." },
                             text: { type: "string", description: "Free-text search across title, description, path, and tags." },
-                            includeArchived: { type: "boolean", description: "When true, archived concepts appear in the graph alongside active ones. Defaults to false (archived hidden)." },
+                            includeArchived: { type: "boolean", description: "When true, rebuilds the graph including archived concepts. When false (default), archived concepts are absent from nodes, edges, statistics, search, and orphan calculations." },
                         },
                         additionalProperties: false,
                     },
                     handler: async (ctx) => {
                         const entry = requireEntry(ctx);
-                        entry.filters = { ...entry.filters, ...ctx.input };
+                        const { includeArchived: newIncludeArchived, ...viewFilters } = ctx.input;
+
+                        // includeArchived is an instance-level flag that triggers a graph
+                        // rebuild, not a view-level filter. When it changes, archived concepts
+                        // enter or leave the graph data entirely (nodes, edges, stats, search).
+                        if (newIncludeArchived !== undefined) {
+                            const next = !!newIncludeArchived;
+                            if (next !== entry.includeArchived) {
+                                entry.includeArchived = next;
+                                delete entry.filters._focusId; // stale focus; clear on rebuild
+                                entry.graph = runGraph(() => buildGraph(entry.wikiRoot, { includeArchived: entry.includeArchived }));
+                            }
+                        }
+
+                        entry.filters = { ...entry.filters, ...viewFilters };
                         broadcastRefresh(entry);
                         const filtered = applyFilters(entry.graph, entry.filters);
-                        return { ok: true, visibleNodes: filtered.nodes.length, visibleEdges: filtered.edges.length, activeFilters: entry.filters };
+                        return { ok: true, visibleNodes: filtered.nodes.length, visibleEdges: filtered.edges.length, activeFilters: entry.filters, includeArchived: entry.includeArchived };
                     },
                 },
                 {
                     name: "clear_filters",
-                    description: "Reset all active filters and focus state; show the full graph.",
+                    description: "Reset all active filters and focus state; show the full active-concept graph (archived remain hidden).",
                     handler: async (ctx) => {
                         const entry = requireEntry(ctx);
                         entry.filters = {};
+                        if (entry.includeArchived) {
+                            // Rebuild without archived when resetting to default view.
+                            entry.includeArchived = false;
+                            entry.graph = runGraph(() => buildGraph(entry.wikiRoot, { includeArchived: false }));
+                        }
                         broadcastRefresh(entry);
                         return { ok: true, nodeCount: entry.graph.nodes.length, edgeCount: entry.graph.edges.length };
                     },
@@ -618,13 +410,15 @@ const session = await joinSession({
                 const wikiRoot = canonicalWikiRoot(wikiPath);
                 let entry = instances.get(ctx.instanceId);
                 if (!entry) {
-                    entry = { wikiRoot, graph: null, filters: {}, clients: new Set(), server: null, url: null };
+                    entry = { wikiRoot, graph: null, filters: {}, includeArchived: false, clients: new Set(), server: null, url: null };
                     instances.set(ctx.instanceId, entry);
                     await startServer(entry);
                 } else {
                     entry.wikiRoot = wikiRoot;
+                    entry.filters = {};
+                    entry.includeArchived = false;
                 }
-                entry.graph = buildGraph(wikiRoot);
+                entry.graph = runGraph(() => buildGraph(wikiRoot, { includeArchived: false }));
                 return { title: "Knowledge Graph", url: entry.url, status: "ready" };
             },
             onClose: async (ctx) => {
