@@ -5,7 +5,7 @@
 //
 // Exit 0 = all assertions passed. Exit 1 = at least one failure.
 
-import { buildGraph } from "../../.apm/extensions/knowledge-graph/graph.mjs";
+import { buildGraph, computeStatistics, applyFilters } from "../../.apm/extensions/knowledge-graph/graph.mjs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync } from "node:fs";
@@ -126,11 +126,69 @@ assert(
 );
 
 // ---------------------------------------------------------------------------
-// Test 7: Symlink escaping containment is blocked (regression)
+// Test 7a: computeStatistics excludes archived from counts
+// ---------------------------------------------------------------------------
+
+console.log("\n[7a] computeStatistics excludes archived from node/edge/orphan counts");
+const defaultStats = computeStatistics(defaultGraph);
+assert(
+    defaultStats.nodeCount === 2,
+    `computeStatistics.nodeCount is 2 (not 3) -- archived excluded (got ${defaultStats.nodeCount})`
+);
+assert(
+    defaultStats.mostConnected.every((c) => c.path !== "archived"),
+    "archived concept does not appear in mostConnected list"
+);
+
+// ---------------------------------------------------------------------------
+// Test 7b: Search (simulated) does not surface archived concept
+// ---------------------------------------------------------------------------
+
+console.log("\n[7b] Simulated search does not surface archived concept");
+const q = "archived";
+const searchResults = defaultGraph.nodes.filter((n) =>
+    n.title.toLowerCase().includes(q) ||
+    (n.description && n.description.toLowerCase().includes(q)) ||
+    n.conceptPath.toLowerCase().includes(q) ||
+    n.tags.some((t) => t.toLowerCase().includes(q))
+);
+assert(
+    searchResults.length === 0,
+    `Search for "${q}" returns 0 results from default graph (got ${searchResults.length})`
+);
+
+// ---------------------------------------------------------------------------
+// Test 7c: Focus lookup does not find archived concept by path
+// ---------------------------------------------------------------------------
+
+console.log("\n[7c] Focus lookup on archived concept path returns undefined from default graph");
+const focusTarget = defaultGraph.nodes.find((n) => n.conceptPath === "archived");
+assert(
+    focusTarget === undefined,
+    "focus_node('archived') finds nothing in default graph -- archived not a node"
+);
+
+// ---------------------------------------------------------------------------
+// Test 7d: computeStatistics with includeArchived:true shows all 3 nodes
+// ---------------------------------------------------------------------------
+
+console.log("\n[7d] computeStatistics with includeArchived:true includes archived");
+const fullStats = computeStatistics(fullGraph);
+assert(
+    fullStats.nodeCount === 3,
+    `computeStatistics.nodeCount is 3 when includeArchived=true (got ${fullStats.nodeCount})`
+);
+assert(
+    fullGraph.nodes.some((n) => n.conceptPath === "archived"),
+    "archived concept is findable in full graph (includeArchived=true)"
+);
+
+// ---------------------------------------------------------------------------
+// Test 8: Symlink escaping containment is blocked (regression)
 // ---------------------------------------------------------------------------
 // Skipped on platforms where symlink creation is genuinely unavailable.
 
-console.log("\n[7] Symlink path traversal is blocked");
+console.log("\n[8] Symlink path traversal is blocked");
 {
     let canSymlink = true;
     let tmpDir;
