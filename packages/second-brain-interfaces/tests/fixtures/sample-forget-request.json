@@ -1,0 +1,6 @@
+{
+  "capability": "second-brain.forget.v1",
+  "correlation_id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+  "target_id": "src-a1b2c3d4",
+  "reason": "The referenced pattern was superseded by updated tooling defaults in v2.0. Keeping it would cause incorrect recommendations."
+}

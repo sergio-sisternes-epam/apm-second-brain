@@ -1,0 +1,9 @@
+{
+  "capability": "second-brain.think.v1",
+  "correlation_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "question": "What is the recommended pull policy for Kubernetes deployments using a mutable image tag?",
+  "context": {
+    "project": "sample-project",
+    "tags": ["kubernetes", "deployment", "images"]
+  }
+}

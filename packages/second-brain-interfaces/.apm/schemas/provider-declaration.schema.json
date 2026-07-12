@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "second-brain.provider-declaration",
+  "title": "Provider Declaration",
+  "description": "Schema a provider must conform to when registering itself with the second-brain ecosystem.",
+  "type": "object",
+  "required": ["provider_id", "display_name", "capabilities", "transport"],
+  "additionalProperties": false,
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$",
+      "description": "Unique, lowercase kebab-case provider identifier."
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Human-readable name for the provider."
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Capabilities this provider implements.",
+      "items": {
+        "type": "object",
+        "required": ["id", "version", "interaction_mode"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "second-brain.think.v1",
+              "second-brain.learn.v1",
+              "second-brain.forget.v1"
+            ],
+            "description": "Capability identifier."
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^v[0-9]+$",
+            "description": "Capability version string, e.g. 'v1'."
+          },
+          "interaction_mode": {
+            "type": "string",
+            "enum": ["synchronous", "asynchronous"],
+            "description": "Whether the provider responds synchronously or asynchronously (polling via correlation_id)."
+          }
+        }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "description": "Transport configuration. The interface layer is transport-neutral; concrete details live in provider implementations.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["copilot-cross-session", "github-issues", "http", "local-function", "custom"],
+          "description": "Transport mechanism. 'copilot-cross-session' and 'github-issues' are the canonical second-brain transports; 'http', 'local-function', and 'custom' are available for alternative providers."
+        },
+        "config": {
+          "type": "object",
+          "description": "Transport-specific configuration. Shape is defined by the concrete adapter, not this interface schema.",
+          "additionalProperties": true
+        }
+      }
+    },
+    "knowledge_roots": {
+      "type": "array",
+      "description": "Named retrieval scopes the provider exposes.",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "format"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Opaque identifier for the knowledge root."
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable label."
+          },
+          "format": {
+            "type": "string",
+            "enum": ["markdown", "json", "plain-text", "vector-index"],
+            "description": "Storage format of the knowledge root."
+          },
+          "path": {
+            "type": "string",
+            "description": "Relative path within the provider's storage (e.g. 'wiki/entries/')."
+          },
+          "default": {
+            "type": "boolean",
+            "description": "Whether this root is searched by default when no explicit scope is given."
+          }
+        }
+      }
+    }
+  }
+}
