@@ -5,7 +5,7 @@
 // Copilot-only in v1. Never modifies the wiki. All actions are read-only.
 
 import { createServer } from "node:http";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, realpathSync } from "node:fs";
 import { join, resolve, relative, normalize, extname, basename } from "node:path";
 import { joinSession, createCanvas, CanvasError } from "@github/copilot-sdk/extension";
 
@@ -48,7 +48,12 @@ function canonicalWikiRoot(inputPath) {
 }
 
 function assertContained(filePath, root) {
-    const rel = relative(root, filePath);
+    // Canonicalise both paths to their real targets before comparing,
+    // so symlinks under wikiRoot cannot escape the bundle boundary.
+    let realFile, realRoot;
+    try { realFile = realpathSync(filePath); } catch { realFile = filePath; }
+    try { realRoot = realpathSync(root); } catch { realRoot = root; }
+    const rel = relative(realRoot, realFile);
     if (rel.startsWith("..") || normalize(rel) === "..") {
         throw new CanvasError("path_traversal", `File path escapes wiki root: ${filePath}`);
     }
@@ -174,7 +179,17 @@ function buildGraph(wikiRoot) {
         const fromNode = nodes.get(fromPath);
         const toNode = nodes.get(toPath);
         const broken = !toNode;
-        if (!fromNode) continue; // structural file source; skip
+
+        // Structural file source (index.md, log.md): no concept fromNode.
+        // Their outbound links still count as inbound credit for target concepts,
+        // preventing concepts reachable only from structural files from being
+        // marked as orphans. We do NOT add a visible graph edge.
+        if (!fromNode) {
+            if (!broken) {
+                inboundCount.set(toNode.id, (inboundCount.get(toNode.id) || 0) + 1);
+            }
+            continue;
+        }
 
         edges.push({
             from: fromNode.id,

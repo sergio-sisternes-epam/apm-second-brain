@@ -69,14 +69,23 @@ def test_canvas_skill_does_not_claim_claude_code_support():
     for line in lines:
         low = line.lower()
         if "claude code" in low:
-            # Acceptable mentions: "not available", "unavailable", "only", "instead", "no"
-            acceptable = any(word in low for word in [
-                "not", "unavailable", "cannot", "only available", "instead",
-                "non-copilot", "no ", "explain"
+            # Accept ONLY lines that explicitly deny canvas support for Claude Code.
+            # Phrases like "only available" or "explain" are deliberately excluded
+            # because they can appear in positive-sounding contexts.
+            genuinely_negative = any(phrase in low for phrase in [
+                "not supported",
+                "not available",
+                "unavailable",
+                "cannot",
+                "not in claude",
+                "non-copilot",
+                "no canvas",
+                "(not supported",
             ])
-            assert acceptable, (
+            assert genuinely_negative, (
                 f"Canvas skill mentions Claude Code in a way that may imply support. "
-                f"Only mention it to state it is unavailable. Offending line: {line!r}"
+                f"Only mention it to state explicitly that it is unavailable. "
+                f"Offending line: {line!r}"
             )
 
 
