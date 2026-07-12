@@ -15,7 +15,7 @@
     "source_id": {
       "type": "string",
       "pattern": "^src-[0-9a-f]{64}$",
-      "description": "Provider-assigned stable identifier full SHA-256 hex digest of content (64 hex chars; 256 bits of entropy). Present when status is 'accepted' or 'duplicate'; absent when status is 'invalid'. Use as target_id in a future brain-forget request."
+      "description": "Provider-assigned stable identifier full SHA-256 hex digest of content (64 hex chars; full 256-bit SHA-256 digest). Present when status is 'accepted' or 'duplicate'; absent when status is 'invalid'. Use as target_id in a future brain-forget request."
     },
     "status": {
       "type": "string",

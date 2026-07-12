@@ -451,3 +451,86 @@ def test_forget_handler_documents_multi_source_conservative_tombstone() -> None:
     assert "conservative" in content or "as a whole" in content, (
         "sb-forget-handler must document that multi-source concepts are tombstoned as a whole in v1"
     )
+
+
+# ---------------------------------------------------------------------------
+# 20. No stale claim that kw-wiki-ingest writes source_id to concept frontmatter
+# ---------------------------------------------------------------------------
+
+def test_learn_handler_no_stale_ingest_writes_source_id() -> None:
+    """sb-learn-handler must NOT claim kw-wiki-ingest writes source_id to concepts.
+
+    kw-wiki-ingest (at pinned c4a074f) writes only id/title/type/created/modified.
+    The post-ingest annotation step (step 6) is what writes source_ids array.
+    """
+    skill_path = SKILLS_DIR / "sb-learn-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    # Must explicitly state kw-wiki-ingest does NOT write source_id
+    has_correct_claim = (
+        "does NOT write source_id" in content
+        or "does not write source_id" in content.lower()
+    )
+    assert has_correct_claim, (
+        "sb-learn-handler must explicitly state kw-wiki-ingest does NOT write "
+        "source_id into concept frontmatter"
+    )
+    # Must not say 'concept documents... also carry this field' (stale claim)
+    stale_lines = [
+        l for l in content.splitlines()
+        if "kw-wiki-ingest also carry" in l.lower()
+        or ("concept documents" in l.lower() and "carry this field" in l.lower())
+    ]
+    assert not stale_lines, f"Stale claim found: {stale_lines}"
+
+
+# ---------------------------------------------------------------------------
+# 21. Step 6 requires Markdown link parsing (not substring matching)
+# ---------------------------------------------------------------------------
+
+def test_learn_handler_step6_requires_link_parsing() -> None:
+    """Step 6 must require parsing Markdown link destinations, not substring matching."""
+    skill_path = SKILLS_DIR / "sb-learn-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    # Must document exact-match / link parsing requirement
+    has_link_parsing = (
+        "markdown link" in content.lower()
+        or "parse markdown" in content.lower()
+        or "link destination" in content.lower()
+    )
+    assert has_link_parsing, (
+        "Step 6 must document Markdown link parsing for provenance annotation"
+    )
+    # Must explicitly forbid substring matching
+    forbids_substring = (
+        "substring matching" in content.lower()
+        and ("not sufficient" in content.lower() or "must not" in content.lower())
+    )
+    assert forbids_substring, (
+        "Step 6 must explicitly state that substring matching is NOT sufficient"
+    )
+    # Must require canonicalisation
+    has_canonical = (
+        "canonicalis" in content.lower()
+        or "realpath" in content.lower()
+        or "canonical" in content.lower()
+    )
+    assert has_canonical, (
+        "Step 6 must require canonicalising resolved paths before comparison"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 22. Schema wording uses 'digest' not 'entropy'
+# ---------------------------------------------------------------------------
+
+def test_source_id_schema_uses_digest_not_entropy() -> None:
+    """Schema description must say 'SHA-256 digest', not 'bits of entropy'."""
+    schema = _load_schema("brain-learn", "response")
+    desc = schema.get("properties", {}).get("source_id", {}).get("description", "")
+    assert "entropy" not in desc, (
+        "source_id schema must not use 'entropy' -- content hashes are not entropy. "
+        "Use 'full 256-bit SHA-256 digest' instead."
+    )
+    assert "digest" in desc.lower(), (
+        "source_id schema description must mention 'digest'"
+    )

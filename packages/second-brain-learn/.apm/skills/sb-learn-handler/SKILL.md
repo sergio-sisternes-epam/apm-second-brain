@@ -17,7 +17,7 @@ learning into the Karpathy wiki.
 ## source_id derivation and lifecycle
 
 `source_id` is derived deterministically as `src-<SHA256(content)-full-hex-64-chars>` (the
-hex string of the full 256-bit of the SHA-256 digest of the raw `content`
+hex string of the full 256-bit SHA-256 digest of the raw `content`
 field). This derivation is content-addressed: the same content always produces
 the same `source_id`. Consequences:
 
@@ -30,9 +30,15 @@ the same `source_id`. Consequences:
   placeholder.
 
 The source_id is written into the `source_id:` frontmatter field of the raw
-file at `raw/<correlation_id>.md` so that forget can resolve it via the wiki
-index. The concept documents extracted by kw-wiki-ingest also carry this field
-in their frontmatter.
+file at `raw/<correlation_id>.md` for duplicate identity checking. The raw file
+is the immutable source record.
+
+**kw-wiki-ingest does NOT write source_id into concept frontmatter.** The
+concept documents it creates carry only `id`, `title`, `type`, `created`,
+`modified`, and a body link to the raw file. The post-ingest provenance
+annotation (step 6 below) is what writes the plural `source_ids:` array into
+concept frontmatter. Forget scans individual concept files to find this array;
+it does not rely on the wiki index, which does not carry provenance metadata.
 
 ## Trigger
 
@@ -102,25 +108,46 @@ A `second-brain.learn.v1` request envelope:
    internally. Do not call `kw-wiki-index` or `kw-wiki-log` again after this.
 
 6. **Annotate concept provenance**: After `kw-wiki-ingest` completes, enumerate
-   all concept files under `wiki/concepts/`. For each concept whose Markdown body
-   contains a link to `raw/<correlation_id>.md` (the raw file written in step 4),
-   append or update a `source_ids` YAML frontmatter array:
+   all concept files under `wiki/concepts/`. For each concept file, determine
+   whether it links to the raw snapshot written in step 4 using the following
+   exact-match procedure:
+
+   a. **Parse Markdown links**: Extract all Markdown link destinations from the
+      concept body (pattern `[text](destination)`). Ignore image links, external
+      URLs, and anchors.
+   b. **Resolve relative paths**: For each link destination that is a relative
+      file path (does not start with `http://`, `https://`, `/`, or `#`),
+      resolve it relative to the concept file's own directory. For example, a
+      concept at `wiki/concepts/sub/concept.md` with link `../../raw/abc123.md`
+      resolves to `raw/abc123.md` relative to `wiki_root`.
+   c. **Canonicalise**: Apply `realpathSync` / `os.path.realpath` to the
+      resolved path to eliminate `..` traversals and symlinks. Do the same for
+      the expected raw snapshot path (`raw/<correlation_id>.md` under
+      `wiki_root`).
+   d. **Exact comparison**: The concept links to this raw snapshot if and only if
+      its canonicalised resolved path equals the canonicalised expected path.
+      Substring matching against concept body text is NOT sufficient and MUST NOT
+      be used.
+   e. **Non-file links**: Absolute URLs, anchors, and any destination that fails
+      canonicalisation are silently ignored.
+
+   For each concept that passes the exact-match check, append or update a
+   `source_ids` YAML frontmatter array:
 
    ```yaml
    source_ids:
      - src-<64 hex chars>   # derived source_id from step 2
    ```
 
-   Rules:
+   Deduplication rules:
    - If `source_ids` is absent, add it containing the new source_id.
    - If `source_ids` is present, append the new source_id only if not already
-     present (deduplicate). Preserve all existing source_ids.
+     present. Preserve all existing source_ids.
    - If a concept is updated from a second ingest, add the new source_id to the
      existing array (multi-source concept accumulates provenance).
    - Update the `modified` frontmatter field to today's date.
-   - This annotation enables forget-by-source_id and citation source mapping.
-   - The `source_ids` field is a provider implementation detail written into
-     concept frontmatter; it is not part of the OKF v0.1 specification.
+   - The `source_ids` field is a provider implementation detail; it is not part
+     of the OKF v0.1 specification.
 
 7. **Return accepted receipt**:
 

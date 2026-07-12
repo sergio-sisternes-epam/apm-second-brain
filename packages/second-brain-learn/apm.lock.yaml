@@ -536,7 +536,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:598bc2ca17882827d36c290fa7da59ec52e587f91cd879d048b300e807a9f874
+  content_hash: sha256:da0b844b01568f567dc2e09597785a8c67990ab1d95941844930a51d3c5a85f1
 - kind: project-relative
   target: agents
   value: .agents/skills/sb-learn-validate
@@ -941,7 +941,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:598bc2ca17882827d36c290fa7da59ec52e587f91cd879d048b300e807a9f874
+  content_hash: sha256:da0b844b01568f567dc2e09597785a8c67990ab1d95941844930a51d3c5a85f1
 - kind: project-relative
   target: claude
   value: .claude/skills/sb-learn-validate
@@ -991,11 +991,11 @@ local_deployed_files:
 local_deployed_file_hashes:
   .agents/skills/sb-forget-handler/SKILL.md: sha256:0205090c7cf2687b2c7a4970b8229f167bf518d476efa0a3888cfa69224e8569
   .agents/skills/sb-forget-validate/SKILL.md: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
-  .agents/skills/sb-learn-handler/SKILL.md: sha256:598bc2ca17882827d36c290fa7da59ec52e587f91cd879d048b300e807a9f874
+  .agents/skills/sb-learn-handler/SKILL.md: sha256:da0b844b01568f567dc2e09597785a8c67990ab1d95941844930a51d3c5a85f1
   .agents/skills/sb-learn-validate/SKILL.md: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
   .claude/rules/package.md: sha256:ecd2b86abe4f6ed94f261e79f9bfb92d93cc394ada998cfcfb67a108c7b648e4
   .claude/skills/sb-forget-handler/SKILL.md: sha256:0205090c7cf2687b2c7a4970b8229f167bf518d476efa0a3888cfa69224e8569
   .claude/skills/sb-forget-validate/SKILL.md: sha256:8bc7471eb0fdb496950b5df514e8b982d81fad1bd7e69bbb8acefb922e89b205
-  .claude/skills/sb-learn-handler/SKILL.md: sha256:598bc2ca17882827d36c290fa7da59ec52e587f91cd879d048b300e807a9f874
+  .claude/skills/sb-learn-handler/SKILL.md: sha256:da0b844b01568f567dc2e09597785a8c67990ab1d95941844930a51d3c5a85f1
   .claude/skills/sb-learn-validate/SKILL.md: sha256:617cecdaafd60e4bd6f88c7696d46893cdbc77881f218af3d7484c128c4f6145
   .github/instructions/package.instructions.md: sha256:9fa678ef0586af9b557eb9c8f8afe0872509cb717fdc6c5c6928eff0242b7d1d
