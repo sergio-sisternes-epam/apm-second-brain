@@ -21,6 +21,13 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 # Each entry is a path relative to REPO_ROOT.
 INTERNAL_SKILLS = [
     "packages/agent-knowledge-network/.apm/skills/akn-registry-io/SKILL.md",
+    "packages/karpathy-wiki/.apm/skills/kw-wiki-init/SKILL.md",
+    "packages/karpathy-wiki/.apm/skills/kw-wiki-ingest/SKILL.md",
+    "packages/karpathy-wiki/.apm/skills/kw-wiki-query/SKILL.md",
+    "packages/karpathy-wiki/.apm/skills/kw-wiki-index/SKILL.md",
+    "packages/karpathy-wiki/.apm/skills/kw-wiki-log/SKILL.md",
+    "packages/karpathy-wiki/.apm/skills/kw-wiki-lint/SKILL.md",
+    "packages/karpathy-wiki/.apm/skills/kw-wiki-archive/SKILL.md",
 ]
 
 DISABLED_HEADER = "<!-- direct-user-invocation: disabled -->"
