@@ -7,6 +7,7 @@
 # Exit codes:
 #   0  no private-context markers found (clean)
 #   1  one or more markers found (fail)
+#   2  scanner error (bad scan root, find/grep failure)
 #
 # Scoped exclusions:
 #   .github/workflows/  -- workflow files legitimately embed the scanner's own
@@ -15,13 +16,26 @@
 #                          CODEOWNERS, convention files) IS scanned.
 #   apm_modules/        -- CLI dependency cache; never committed.
 
-set -euo pipefail
+set -uo pipefail
 
 DIR="${1:-.}"
 
-HITS=$(find "$DIR" \
-  -not -path "$DIR/.github/workflows/*" \
-  -not -path "$DIR/apm_modules/*" \
+# Validate scan root.
+if [ ! -d "$DIR" ]; then
+  echo "Error: scan root does not exist or is not a directory: $DIR" >&2
+  exit 2
+fi
+
+# Run the scan from inside DIR so all -path exclusions are root-relative
+# (e.g. ./.github/workflows/*).  This avoids fragility with trailing slashes
+# or absolute-path prefix mismatches.
+#
+# set -e is intentionally absent here so we can inspect $SCAN_RC directly.
+# grep exits 0 (matches found), 1 (no matches -- not an error), or 2+ (error).
+# We only treat exit 1 as non-fatal; anything higher signals a real failure.
+HITS=$(cd "$DIR" && find . \
+  -not -path './.github/workflows/*' \
+  -not -path './apm_modules/*' \
   -type f \
   \( -name "*.md" -o -name "*.yml" -o -name "*.yaml" \
      -o -name "*.json" -o -name "*.py" -o -name "*.mjs" \) \
@@ -30,7 +44,12 @@ HITS=$(find "$DIR" \
     -e "epam-agent-forge" \
     -e "Users/sergio_sisternes" \
     -e "EPAM All Rights Reserved" \
-  2>/dev/null || true)
+  2>/dev/null) || SCAN_RC=$?
+
+if [ "${SCAN_RC:-0}" -gt 1 ]; then
+  echo "Error: scanner failed with exit code ${SCAN_RC}." >&2
+  exit 2
+fi
 
 if [ -n "$HITS" ]; then
   echo "Private context found in:"

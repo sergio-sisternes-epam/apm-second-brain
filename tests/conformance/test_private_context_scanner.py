@@ -53,7 +53,12 @@ def mock_repo(tmp_path: Path) -> Path:
 
 def test_scanner_script_exists() -> None:
     """Guard: the shared scanner script must be present and executable."""
+    import os
     assert SCANNER.is_file(), f"Scanner script not found: {SCANNER}"
+    assert os.access(SCANNER, os.X_OK), (
+        f"Scanner script is not executable: {SCANNER}\n"
+        "Run: git update-index --chmod=+x scripts/scan-private-context.sh"
+    )
 
 
 def test_scanner_detects_marker_in_issue_template(mock_repo: Path) -> None:
