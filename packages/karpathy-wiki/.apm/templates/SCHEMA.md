@@ -128,7 +128,9 @@ okf_version: "0.1"
 
 Rules:
 - Newest date group first (descending order)
-- Each entry: `- [<event>] <summary> (<paths>)`
+- Each entry: `- [<event>] <summary>` with an optional `(<paths>)` suffix
+  when concept files are affected
+- The `(<paths>)` suffix is omitted for `init` (no concepts exist yet)
 - Events: `init`, `ingest`, `update`, `archive`
 - No frontmatter in log.md
 

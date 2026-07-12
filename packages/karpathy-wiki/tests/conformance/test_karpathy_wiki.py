@@ -35,18 +35,26 @@ INTERNAL_SKILL_NAMES = [
 
 
 def _parse_frontmatter(content: str) -> dict:
-    """Extract key: value pairs from the first YAML frontmatter block."""
+    """Extract key: value pairs from the first YAML frontmatter block.
+
+    Returns an empty dict if no valid frontmatter block is found (i.e.
+    no opening ``---``, or the closing ``---`` delimiter is missing).
+    This prevents body lines containing ``:`` from being misread as
+    frontmatter fields when the closing delimiter is absent.
+    """
     lines = content.splitlines()
     if not lines or lines[0].strip() != "---":
         return {}
     fields = {}
+    closed = False
     for line in lines[1:]:
         if line.strip() == "---":
+            closed = True
             break
         if ":" in line:
             key, _, val = line.partition(":")
             fields[key.strip()] = val.strip()
-    return fields
+    return fields if closed else {}
 
 
 # ---------------------------------------------------------------------------

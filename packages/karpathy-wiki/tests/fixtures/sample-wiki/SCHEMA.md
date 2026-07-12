@@ -39,5 +39,5 @@ modified: YYYY-MM-DD
 
 ## YYYY-MM-DD   (newest first)
 
-- [event] summary (paths)
+- [event] summary (paths)  # paths suffix optional; omitted for init
 ```

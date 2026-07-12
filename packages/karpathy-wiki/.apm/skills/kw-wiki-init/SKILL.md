@@ -58,8 +58,9 @@ does not yet contain a `wiki/` directory.
    - [init] wiki initialised at <wiki_root>
    ```
    Replace `YYYY-MM-DD` with today's ISO date.
-   The entry MUST follow the log format: `- [<event>] <summary> (<paths>)`.
-   For init, there are no concept paths, so the paths suffix may be omitted.
+   Log entries follow the format `- [<event>] <summary>`, with an optional
+   `(<paths>)` suffix when concept files are affected. The `init` event has
+   no concept files yet, so the paths suffix is omitted.
 5. **Copy SCHEMA.md** from the package template
    (`.apm/templates/SCHEMA.md`) to `<wiki_root>/SCHEMA.md`.
    SCHEMA.md must land alongside `wiki/`, never inside it.

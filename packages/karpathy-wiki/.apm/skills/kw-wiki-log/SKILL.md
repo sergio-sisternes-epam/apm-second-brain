@@ -24,7 +24,7 @@ Called automatically after any state-changing operation on the wiki.
 |------|----------|-------------|
 | `wiki_root` | yes | Path to the provider-project directory |
 | `event` | yes | Event type: `init`, `ingest`, `update`, `archive` |
-| `concept_paths` | yes | List of concept paths affected (relative to `wiki_root`) |
+| `concept_paths` | no | List of concept paths affected (relative to `wiki_root`); omit for `init` |
 | `summary` | yes | Human-readable description of what changed |
 
 ## Procedure
@@ -59,8 +59,9 @@ Called automatically after any state-changing operation on the wiki.
 - Heading: `# Knowledge Log`
 - Date groups: `## YYYY-MM-DD` (ISO 8601)
 - Newest date group first
-- Entries: `- [event] summary (paths)`
+- Entries: `- [event] summary` with an optional `(paths)` suffix when concept files are affected
 - No frontmatter in log.md
+- `init` entries omit the paths suffix (no concepts exist yet)
 
 ## Error conditions
 
