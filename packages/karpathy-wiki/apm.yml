@@ -6,10 +6,11 @@ author: Sergio Sisternes
 # Resolution order: --target flag > this field > auto-detect from filesystem.
 # Accepted values: agent-skills, antigravity, claude, codex, copilot, cursor, gemini, kiro, opencode, windsurf
 targets:
-- claude
-- copilot
+  - claude
+  - copilot
 dependencies:
-  apm: []
+  apm:
+    - ../open-knowledge-format
   mcp: []
 includes: auto
 scripts: {}

@@ -28,16 +28,19 @@ answer a question or populate a response.
 
 ## Procedure
 
-1. **Index scan**: Read `<wiki_root>/wiki/index.md`. Find all listed concept
-   entries whose titles or slugs match the query terms. Prefer exact matches,
-   then partial.
+1. **Index scan**: Read `<wiki_root>/wiki/index.md` first. Find all listed
+   concept entries whose titles or slugs match the query terms. Prefer exact
+   matches, then partial. Treat `<wiki_root>/wiki/concepts/index.md` as a
+   catalogue only; never return it as a concept result.
 
 2. **Concept retrieval**: For each matched entry, read the corresponding
    concept file from `<wiki_root>/wiki/concepts/`. Extract the summary and
    any relevant passages.
 
 3. **Full-text fallback**: If the index yields no matches, scan all `.md`
-   files under `<wiki_root>/wiki/concepts/` directly for keyword matches.
+   files under `<wiki_root>/wiki/concepts/` directly for keyword matches,
+   excluding `index.md` and skipping any concept whose frontmatter includes
+   `status: archived` unless the query explicitly asks for archived material.
 
 4. **Compose result**:
    ```
@@ -67,6 +70,8 @@ Never return raw file contents -- always excerpt and cite.
 
 - Only read files from `<wiki_root>/wiki/`. Never read from `raw/`.
 - Cite concept paths relative to `wiki_root`.
+- Archived tombstones stay available in the catalogue, but normal fallback
+  queries must not resurface them unless the query is archive-focused.
 
 ## Error conditions
 

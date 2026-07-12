@@ -40,7 +40,13 @@ does not yet contain a `wiki/` directory.
    - `<wiki_root>/raw/` -- immutable raw source store
    - `<wiki_root>/wiki/` -- OKF bundle root
    - `<wiki_root>/wiki/concepts/` -- concept sub-directory
-3. **Write OKF index.md** at `<wiki_root>/wiki/index.md`:
+3. **Write concepts/index.md** at `<wiki_root>/wiki/concepts/index.md`:
+   ```markdown
+   # Concepts
+
+   * No concept entries yet.
+   ```
+4. **Write OKF index.md** at `<wiki_root>/wiki/index.md`:
    ```markdown
    ---
    okf_version: "0.1"
@@ -49,7 +55,7 @@ does not yet contain a `wiki/` directory.
 
    * No entries yet.
    ```
-4. **Write OKF log.md** at `<wiki_root>/wiki/log.md` with a creation entry:
+5. **Write OKF log.md** at `<wiki_root>/wiki/log.md` with a creation entry:
    ```markdown
    # Knowledge Log
 
@@ -61,14 +67,15 @@ does not yet contain a `wiki/` directory.
    Log entries follow the format `- [<event>] <summary>`, with an optional
    `(<paths>)` suffix when concept files are affected. The `init` event has
    no concept files yet, so the paths suffix is omitted.
-5. **Copy SCHEMA.md** from the package template
+6. **Copy SCHEMA.md** from the package template
    (`.apm/templates/SCHEMA.md`) to `<wiki_root>/SCHEMA.md`.
    SCHEMA.md must land alongside `wiki/`, never inside it.
-6. **Report**: Confirm all paths created. List created files.
+7. **Report**: Confirm all paths created. List created files.
 
 ## OKF constraints
 
 - `wiki/index.md` root MUST have `okf_version: "0.1"` in frontmatter.
+- `wiki/concepts/index.md` MUST exist and remain the generated concept catalogue.
 - `wiki/log.md` MUST use `## YYYY-MM-DD` date headings (newest first).
 - Nothing Karpathy-specific (SCHEMA.md, raw/) goes inside `wiki/`.
 

@@ -57,13 +57,18 @@ concept file.
    ```
    Archived concepts are listed under a `## Archived` section at the bottom.
 
-5. **Preserve log.md**: Never touch `<wiki_root>/wiki/log.md`.
+5. **Write concepts/index.md**: Overwrite `<wiki_root>/wiki/concepts/index.md` with
+   the generated concept catalogue. This file never carries frontmatter and
+   mirrors the active/archived split used by the root index.
 
-6. **Report**: Return a count of indexed concepts (active / archived).
+6. **Preserve log.md**: Never touch `<wiki_root>/wiki/log.md`.
+
+7. **Report**: Return a count of indexed concepts (active / archived).
 
 ## OKF constraints
 
 - `index.md` root MUST preserve the `okf_version: "0.1"` frontmatter.
+- `wiki/concepts/index.md` is a generated catalogue only; it must not carry frontmatter.
 - Use standard Markdown links -- not wikilinks.
 - Do not add any Karpathy-specific metadata to `index.md`.
 
@@ -71,7 +76,7 @@ concept file.
 
 | Condition | Response |
 |-----------|----------|
-| No concept files found | Write minimal index with "No entries yet." |
+| No concept files found | Write minimal root and concepts indexes with "No entries yet." |
 | Concept missing frontmatter | Skip and warn; do not abort |
 | `wiki/` not found | Abort with error |
 

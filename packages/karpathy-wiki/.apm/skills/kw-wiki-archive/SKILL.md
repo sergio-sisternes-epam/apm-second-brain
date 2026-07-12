@@ -46,8 +46,9 @@ superseded, or no longer relevant.
    Optionally append an `> **Archived**: <reason>` blockquote at the top
    of the body to make the status visible to human readers.
 
-5. **Update index**: Call `kw-wiki-index` to rebuild `wiki/index.md`.
-   Archived concepts appear in a separate `## Archived` section.
+5. **Update indexes**: Call `kw-wiki-index` to rebuild `wiki/index.md` and
+   `wiki/concepts/index.md`. Archived concepts appear in a separate
+   `## Archived` section and remain excluded from normal fallback queries.
 
 6. **Append log entry**: Call `kw-wiki-log` with:
    - event: `archive`
@@ -61,6 +62,8 @@ superseded, or no longer relevant.
 - Concept files must retain all required frontmatter fields after archiving.
 - Never delete files -- provenance must be preserved.
 - Standard Markdown links only inside concept body.
+- Archived concepts remain queryable only through archive-focused lookups; the
+  default query fallback must not resurface tombstones.
 
 ## Error conditions
 

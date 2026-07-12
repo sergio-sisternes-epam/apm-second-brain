@@ -28,9 +28,14 @@ fragment to absorb into the wiki.
 
 ## Procedure
 
-1. **Validate source**: Confirm `source_file` exists. Copy it to
-   `<wiki_root>/raw/` as a read-only snapshot if not already present.
-   The raw copy is immutable -- never modify files under `raw/`.
+1. **Validate source**: Canonicalise `source_file` to an absolute path before
+   use. Reject non-regular inputs, reject symlink escapes, and reject any path
+   whose resolved target falls outside the approved source roots. The default
+   approved root is `<wiki_root>/raw/`; higher-level orchestrators may add
+   explicit roots, but the resolved source must always stay within an approved
+   root. Copy the canonical file to `<wiki_root>/raw/` as a read-only snapshot
+   if not already present. The raw copy is immutable -- never modify files
+   under `raw/`.
 
 2. **Extract concepts**: Read the source content and identify key concepts
    (terms, ideas, techniques, definitions) worth persisting.
@@ -65,12 +70,15 @@ fragment to absorb into the wiki.
 - All concept files MUST have `id`, `title`, `type`, `created`, `modified` in frontmatter.
 - Standard Markdown links only -- no wikilinks (`[[...]]`).
 - Nothing Karpathy-specific goes inside `wiki/`.
+- Source ingestion must resolve through an approved root before any copy into
+  `raw/`; symlink and traversal escapes are always rejected.
 
 ## Error conditions
 
 | Condition | Response |
 |-----------|----------|
 | Source file not found | Abort with error; do not create partial state |
+| Source path outside approved roots or not a regular file | Abort with error; do not create partial state |
 | No concepts extracted | Log a warning entry; do not create empty concept files |
 | Concept file write fails | Report error; roll back index update |
 

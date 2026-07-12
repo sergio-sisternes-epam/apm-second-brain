@@ -30,6 +30,7 @@ needs to validate wiki health.
 1. **Presence checks** (structural):
    - `<wiki_root>/wiki/` exists
    - `<wiki_root>/wiki/index.md` exists
+   - `<wiki_root>/wiki/concepts/index.md` exists
    - `<wiki_root>/wiki/log.md` exists
    - `<wiki_root>/raw/` exists
    - `<wiki_root>/SCHEMA.md` exists alongside `wiki/` (not inside it)
@@ -50,8 +51,9 @@ needs to validate wiki health.
    - `log.md` date headings match `## YYYY-MM-DD` pattern
    - Date headings are in newest-first (descending) order
 
-6. **Index check**:
+6. **Index checks**:
    - `index.md` contains `okf_version: "0.1"` in frontmatter
+   - `concepts/index.md` exists and does not carry frontmatter
 
 ## Report format
 
@@ -80,6 +82,7 @@ Return `PASS` only if there are zero errors (warnings do not affect pass/fail).
 | `kw-wikilink-found` | ERROR | [[...]] wikilink found in wiki/ file |
 | `kw-log-heading-format` | ERROR | log.md heading does not match YYYY-MM-DD |
 | `kw-log-order` | ERROR | log.md date headings not newest-first |
+| `kw-concepts-index-missing` | ERROR | concepts/index.md is required and missing |
 | `kw-index-missing-version` | WARN | index.md lacks okf_version frontmatter |
 | `kw-schema-missing` | WARN | SCHEMA.md not found alongside wiki/ |
 
