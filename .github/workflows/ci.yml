@@ -37,9 +37,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install test dependencies
+        run: pip install pytest pyyaml jsonschema
       - name: Run conformance suite
-        run: python -m pytest tests/conformance/ -v
-        continue-on-error: true  # remove when tests are implemented
+        run: python3 -m pytest tests/conformance/ -v
 
   apm-validate:
     name: APM package validation
@@ -47,12 +48,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install APM CLI
+        run: pip install "apm-cli==0.25.0"
+      - name: Enable marketplace authoring
+        run: apm experimental enable marketplace-authoring
+      - name: Validate marketplace entries
         run: |
-          pip install "apm-cli==0.25.0"
-      - name: Validate packages
-        run: |
-          for pkg in packages/*/; do
-            echo "-- $pkg"
-            (cd "$pkg" && apm targets 2>&1) || true
-          done
-        continue-on-error: true  # remove when all manifests are complete
+          # On PRs use offline mode (release tags may not exist yet).
+          # On push to main use full network validation.
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            apm marketplace check --offline
+          else
+            apm marketplace check
+          fi
+      - name: Dry-run pack
+        run: apm pack --dry-run
+      - name: Verify marketplace.json is committed and current
+        run: apm pack --dry-run --check-clean

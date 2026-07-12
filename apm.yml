@@ -3,10 +3,14 @@ version: 0.1.0
 description: >-
   Public APM demo: OKF knowledge format, Karpathy wiki, second-brain
   interfaces, local agent discovery, and an APM expert.
+license: Apache-2.0
 marketplace:
   owner:
     name: sergio-sisternes-epam
     url: https://github.com/sergio-sisternes-epam
+
+  versioning:
+    strategy: tag_pattern
 
   build:
     tagPattern: "{name}--v{version}"
