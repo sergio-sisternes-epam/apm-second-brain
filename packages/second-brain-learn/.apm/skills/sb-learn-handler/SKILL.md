@@ -118,7 +118,7 @@ A `second-brain.learn.v1` request envelope:
    b. **Resolve relative paths**: For each link destination that is a relative
       file path (does not start with `http://`, `https://`, `/`, or `#`),
       resolve it relative to the concept file's own directory. For example, a
-      concept at `wiki/concepts/sub/concept.md` with link `../../raw/abc123.md`
+      concept at `wiki/concepts/concept.md` with link `../../raw/abc123.md`
       resolves to `raw/abc123.md` relative to `wiki_root`.
    c. **Canonicalise**: Apply `realpathSync` / `os.path.realpath` to the
       resolved path to eliminate `..` traversals and symlinks. Do the same for
