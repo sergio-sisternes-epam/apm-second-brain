@@ -17,18 +17,27 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check for private context
         run: |
-          # Fail if any non-workflow file references internal paths or private markers.
-          # Exclude the entire .github/workflows/ directory: every workflow file embeds
-          # the scanner's own pattern strings and must not be falsely flagged.
-          if grep -rn \
-            -e "epam-agent-forge" \
-            -e "Users/sergio_sisternes" \
-            -e "EPAM All Rights Reserved" \
-            --include="*.md" --include="*.yml" --include="*.yaml" \
-            --include="*.json" --include="*.py" --include="*.mjs" \
-            --exclude-dir=".github" \
-            .; then
-            echo "Private context found -- remove before merging" && exit 1
+          # Scan for private-context markers in all source and doc files.
+          # .github/workflows/ is explicitly excluded -- those files legitimately embed
+          # the scanner's own pattern strings.  All OTHER .github/ content (issue/PR
+          # templates, CODEOWNERS, conventions files) IS scanned so leaks there are caught.
+          # apm_modules/ is the CLI dependency cache and is never committed.
+          HITS=$(find . \
+            -not -path './.github/workflows/*' \
+            -not -path './apm_modules/*' \
+            -type f \
+            \( -name "*.md" -o -name "*.yml" -o -name "*.yaml" \
+               -o -name "*.json" -o -name "*.py" -o -name "*.mjs" \) \
+            -print0 \
+          | xargs -0r grep -rl \
+              -e "epam-agent-forge" \
+              -e "Users/sergio_sisternes" \
+              -e "EPAM All Rights Reserved" \
+            2>/dev/null || true)
+          if [ -n "$HITS" ]; then
+            echo "Private context found in:"
+            echo "$HITS"
+            echo "Remove before merging." && exit 1
           fi
           echo "Clean"
 
