@@ -1,15 +1,18 @@
 name: second-brain
 version: 0.1.0
-description: Dependency-only meta-package installing a complete second-brain provider
+description: Dependency-only meta-package installing a complete second-brain 
+  provider
 author: Sergio Sisternes
 # Which agent platforms to deploy to.
 # Resolution order: --target flag > this field > auto-detect from filesystem.
 # Accepted values: agent-skills, antigravity, claude, codex, copilot, cursor, gemini, kiro, opencode, windsurf
 targets:
-- claude
-- copilot
+  - claude
+  - copilot
 dependencies:
-  apm: []
+  apm:
+    - sergio-sisternes-epam/apm-second-brain/packages/second-brain-learn#ab00290134a69a59f75700c40439ee9df14e4fcf
+    - sergio-sisternes-epam/apm-second-brain/packages/second-brain-think#ab00290134a69a59f75700c40439ee9df14e4fcf
   mcp: []
 includes: auto
 scripts: {}
