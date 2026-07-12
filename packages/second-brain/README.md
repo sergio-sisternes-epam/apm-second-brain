@@ -1,7 +1,9 @@
 # second-brain
 
-Convenience meta-package that installs a complete second-brain provider
-(both learn and think sides) in a single `apm install` command.
+> **Status: Experimental / Under Development**
+
+Convenience meta-package that installs the second-brain provider bundle
+(learn + think sides) in a single `apm install` command.
 
 Part of the [apm-second-brain](../../README.md) public demo monorepo.
 
@@ -23,14 +25,37 @@ This package contains **no skills, instructions, or other primitives of
 its own**. There is no `.apm/` directory. The value it provides is
 dependency resolution only.
 
-## Usage
+Dependency primitives deploy into generated target directories (`.agents/`,
+`.claude/`) in the consumer project. These generated outputs must not be
+edited or committed -- the source of truth is each dependency's `.apm/` directory.
 
-```bash
-apm install sergio-sisternes-epam/apm-second-brain/packages/second-brain
-```
+## What installing this package does NOT do
 
-This is equivalent to installing `second-brain-learn` and
-`second-brain-think` individually.
+Installing `second-brain` alone is not sufficient to run a provider. You must
+also:
+
+1. **Configure a transport** -- set up a Copilot App project ID or other
+   supported transport for your provider (see `agent-knowledge-network`).
+2. **Register the provider** -- run `akn-register` via `agent-knowledge-network`
+   to make the provider discoverable.
+3. **Initialise a wiki** -- run `kw-wiki-init` from `karpathy-wiki` to create
+   the wiki bundle at your chosen path.
+4. **Configure the wiki root** -- pass your wiki root to the provider handler
+   skills at invocation time.
+
+## User-facing skills
+
+After installing, consumers call the **public client skills** from
+`second-brain-interfaces` (not the internal handler skills directly):
+
+| Skill | Capability | Description |
+|-------|-----------|-------------|
+| `brain-think` | `second-brain.think.v1` | Ask a question; citation-backed answer |
+| `brain-learn` | `second-brain.learn.v1` | Ingest new knowledge |
+| `brain-forget` | `second-brain.forget.v1` | Tombstone/archive a concept (v1: archive only; no destructive deletion) |
+
+The internal handler skills (`sb-learn-handler`, `sb-think-handler`, etc.)
+are invoked by the framework -- direct user invocation is disabled on those.
 
 ## Dependencies
 
@@ -39,9 +64,11 @@ This is equivalent to installing `second-brain-learn` and
 | `second-brain-learn` | Provider write path |
 | `second-brain-think` | Provider read path |
 
-## Status
+## Source of truth
 
-Stable. See the root [CHANGELOG.md](../../CHANGELOG.md) for progress.
+This package's source of truth is `apm.yml` and `apm.lock.yaml` only.
+There is no `.apm/` directory. Generated deployment outputs (`.agents/`,
+`.claude/`, `apm_modules/`) are in `.gitignore`.
 
 ## Licence
 
