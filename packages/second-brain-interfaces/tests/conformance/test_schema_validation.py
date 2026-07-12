@@ -130,7 +130,7 @@ class TestLearnReceipt:
     def _make_valid(self) -> dict:
         return {
             "correlation_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
-            "source_id": "src-a1b2c3d4",
+            "source_id": "src-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "status": "accepted",
             "message": "Learning queued for ingestion."
         }
@@ -179,7 +179,7 @@ class TestForgetReceipt:
     def _make_valid(self) -> dict:
         return {
             "correlation_id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
-            "target_id": "src-a1b2c3d4",
+            "target_id": "src-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "status": "tombstoned",
             "message": "Entry archived and excluded from future think results."
         }

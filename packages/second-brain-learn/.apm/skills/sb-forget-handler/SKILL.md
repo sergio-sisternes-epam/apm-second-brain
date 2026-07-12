@@ -60,15 +60,34 @@ A `second-brain.forget.v1` request envelope:
 2. **Resolve target**: Interpret `target_id` using exactly one of these two
    forms (tried in order):
 
-   a. **source_id form** (pattern `src-[0-9a-f]{8}`): Scan the wiki index for
-      a concept whose frontmatter contains `source_id: <target_id>`. If found,
-      extract the concept slug for use in step 3.
+   a. **source_id form** (pattern `src-[0-9a-f]{64}`): Enumerate ALL concept
+      files under `wiki/concepts/` (NOT wiki/index.md -- it does not carry
+      provenance). For each concept, read its frontmatter `source_ids:` array.
+      Collect every concept whose `source_ids` array contains `target_id`.
+      This may match zero, one, or multiple concepts (multi-source concepts
+      accumulate provenance).
+
+      If no concept matches, return:
+
+      ```json
+      {
+        "correlation_id": "<matches request>",
+        "target_id": "<echoes request>",
+        "status": "not_found",
+        "message": "No active concept matched the given source_id."
+      }
+      ```
+
+      If one or more concepts match, proceed to step 3 for EACH matched concept.
+      Document the v1 conservative behaviour: a multi-source concept is
+      tombstoned as a whole because contribution-level subtraction is
+      unsupported in v1. Raw files remain immutable.
 
    b. **concept-path form** (all other strings): Treat as a forward-slash
       delimited path relative to `wiki/concepts/`. The path MUST be validated
       by `sb-forget-validate` before this step (no `..`, no absolute prefix,
       no symlink escape). Resolve the concept file at
-      `wiki/concepts/<validated_path>.md`. If found, read the `slug:` or `id:`
+      `wiki/concepts/<validated_path>.md`. If found, read the `id:`
       frontmatter field.
 
    If neither resolves to an existing, non-archived concept file, return:
@@ -82,29 +101,42 @@ A `second-brain.forget.v1` request envelope:
    }
    ```
 
-   **Already-archived idempotency**: If the concept exists but its status is
-   already `archived`, return `status: not_found` with message
-   `"Concept already archived."`.
+   **Already-archived idempotency**: If ALL matched concepts already have
+   `status: archived`, return `status: not_found` with message
+   `"Concept(s) already archived."` (idempotent).
 
-3. **Archive**: Call `kw-wiki-archive` with:
+3. **Archive ALL matched concepts**: For EACH concept slug resolved in step 2,
+   call `kw-wiki-archive` with:
    - `wiki_root`: the configured wiki root path
-   - `concept_id`: the resolved concept slug from step 2
+   - `concept_id`: the concept slug
    - `reason`: the `reason` field from the request
 
    `kw-wiki-archive` tombstones the concept (sets status to `archived`,
-   updates the index to exclude it from queries, and appends a log entry).
-   Do not call `kw-wiki-log` separately -- `kw-wiki-archive` handles logging.
+   updates the index, and appends a log entry). Do not call `kw-wiki-log`
+   separately. For source_id-form forget, all matched concepts are tombstoned
+   in sequence; the receipt reports all tombstoned slugs.
 
 4. **Return receipt**:
 
-```json
-{
-  "correlation_id": "<matches request>",
-  "target_id": "<resolved concept slug>",
-  "status": "tombstoned",
-  "message": "Concept archived. No data deleted."
-}
-```
+   Single-concept form:
+   ```json
+   {
+     "correlation_id": "<matches request>",
+     "target_id": "<resolved concept slug or source_id>",
+     "status": "tombstoned",
+     "message": "Concept archived. No data deleted."
+   }
+   ```
+
+   Multi-concept form (source_id matched N > 1 concepts):
+   ```json
+   {
+     "correlation_id": "<matches request>",
+     "target_id": "<source_id from request>",
+     "status": "tombstoned",
+     "message": "N concept(s) archived. No data deleted. Multi-source concept: all contributions tombstoned as a whole (v1 conservative behaviour; contribution-level subtraction is unsupported)."
+   }
+   ```
 
 ## Receipt status values
 

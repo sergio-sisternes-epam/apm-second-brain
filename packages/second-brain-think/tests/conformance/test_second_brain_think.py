@@ -295,3 +295,42 @@ def test_apm_pack_own_primitives_are_think_only() -> None:
             f"Pack output must not contain own write skill: {skill}. "
             "second-brain-think is a read-only package."
         )
+
+
+# ---------------------------------------------------------------------------
+# 13. Citations read source_ids array, not singular source_id field
+# ---------------------------------------------------------------------------
+
+def test_think_handler_reads_source_ids_array() -> None:
+    """sb-think-handler must read source_ids array (not singular source_id field).
+
+    kw-wiki-ingest does not write source_id to concept frontmatter.
+    The learn handler's post-ingest annotation writes source_ids array.
+    Citations must come from source_ids, not from a non-existent source_id field.
+    """
+    skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    assert "source_ids" in content, (
+        "sb-think-handler must reference source_ids (plural array) not source_id singular field"
+    )
+    # Must not say 'extract the source_id: field' (singular -- kw-wiki-ingest doesn't write it)
+    assert "source_ids:" in content.lower() or "source_ids array" in content.lower(), (
+        "sb-think-handler must explicitly document reading source_ids: array from frontmatter"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 14. Citations: answered quality requires at least one citation
+# ---------------------------------------------------------------------------
+
+def test_think_handler_answered_requires_citations() -> None:
+    """quality: answered must require at least one citation."""
+    skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8").lower()
+    has_invariant = (
+        "answered" in content and "citation" in content
+        and ("at least one" in content or "non-empty" in content)
+    )
+    assert has_invariant, (
+        "sb-think-handler must state that quality:answered requires at least one citation"
+    )

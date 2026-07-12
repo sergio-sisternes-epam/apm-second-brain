@@ -75,20 +75,26 @@ A `second-brain.think.v1` request envelope:
    present in the retrieved concepts. Do not hallucinate facts.
 
 5. **Build citations**: For each concept document used in the answer, read its
-   YAML frontmatter and extract the `source_id:` field (written there by the
-   learn handler during ingestion). Build a citation object:
+   YAML frontmatter `source_ids:` array (written by the learn handler during
+   post-ingest provenance annotation). Build one citation object per supporting
+   source ID in the array:
 
    ```json
    {
-     "source_id": "<value of source_id frontmatter field, e.g. src-a1b2c3d4>",
+     "source_id": "<one entry from source_ids array, e.g. src-<64-hex-chars>>",
      "label": "<value of title: frontmatter field>",
      "excerpt": "<relevant 1-3 sentence excerpt from the concept body>"
    }
    ```
 
-   Do NOT substitute concept slugs or file paths for `source_id`. If a concept
-   document lacks a `source_id:` frontmatter field, omit that document from
-   citations and note the gap.
+   Rules:
+   - If `source_ids` has N entries, emit N citation objects (one per source ID).
+   - The `source_id` field per citation object is singular (one ID per object)
+     as required by the `second-brain.think.v1.response` schema.
+   - If `source_ids` is absent or empty (concept pre-dates provenance annotation),
+     omit that concept from citations and note the gap in `knowledge_gaps`.
+   - Do NOT substitute concept slugs, file paths, or `id:` frontmatter values
+     for `source_id`. Only values from `source_ids:` are valid citation IDs.
 
 6. **Classify quality**:
    - `answered`: at least one relevant concept was found, the question is fully
@@ -99,7 +105,8 @@ A `second-brain.think.v1` request envelope:
      synthesised answer is possible.
 
    **Invariant**: `quality: answered` requires at least one citation.
-   If no concept yields a valid `source_id`, downgrade quality to `partial`.
+   If no concept yields any valid source IDs, downgrade quality to `partial`
+   and document the missing provenance in `knowledge_gaps`.
 
 7. **Identify knowledge gaps**: List topics or sub-questions that could not be
    answered from the wiki content.
@@ -113,7 +120,7 @@ A `second-brain.think.v1` request envelope:
   "answer": "<synthesised answer>",
   "citations": [
     {
-      "source_id": "src-a1b2c3d4",
+      "source_id": "src-<64 hex chars>",
       "label": "<concept title from frontmatter>",
       "excerpt": "<excerpt>"
     }

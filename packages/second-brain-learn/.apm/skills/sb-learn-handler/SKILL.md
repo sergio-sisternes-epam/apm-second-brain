@@ -16,8 +16,8 @@ learning into the Karpathy wiki.
 
 ## source_id derivation and lifecycle
 
-`source_id` is derived deterministically as `src-<SHA256(content)[0:8]>` (the
-hex string of the first 8 bytes of the SHA-256 digest of the raw `content`
+`source_id` is derived deterministically as `src-<SHA256(content)-full-hex-64-chars>` (the
+hex string of the full 256-bit of the SHA-256 digest of the raw `content`
 field). This derivation is content-addressed: the same content always produces
 the same `source_id`. Consequences:
 
@@ -68,7 +68,7 @@ A `second-brain.learn.v1` request envelope:
    Stop.
 
 2. **Derive source_id**: Compute SHA-256 of the raw `content` string. Take the
-   first 8 hex characters. Prepend `src-`. Result: `src-<8 hex chars>`.
+   full 64-character hex digest. Prepend `src-`. Result: `src-<64 hex chars>` (256 bits; full SHA-256).
 
 3. **Duplicate detection**: Check whether a file matching the derived
    `source_id` already exists under `raw/` (by scanning frontmatter or a
@@ -101,12 +101,33 @@ A `second-brain.learn.v1` request envelope:
    `kw-wiki-ingest` handles concept extraction, index rebuild, and log append
    internally. Do not call `kw-wiki-index` or `kw-wiki-log` again after this.
 
-6. **Return accepted receipt**:
+6. **Annotate concept provenance**: After `kw-wiki-ingest` completes, enumerate
+   all concept files under `wiki/concepts/`. For each concept whose Markdown body
+   contains a link to `raw/<correlation_id>.md` (the raw file written in step 4),
+   append or update a `source_ids` YAML frontmatter array:
+
+   ```yaml
+   source_ids:
+     - src-<64 hex chars>   # derived source_id from step 2
+   ```
+
+   Rules:
+   - If `source_ids` is absent, add it containing the new source_id.
+   - If `source_ids` is present, append the new source_id only if not already
+     present (deduplicate). Preserve all existing source_ids.
+   - If a concept is updated from a second ingest, add the new source_id to the
+     existing array (multi-source concept accumulates provenance).
+   - Update the `modified` frontmatter field to today's date.
+   - This annotation enables forget-by-source_id and citation source mapping.
+   - The `source_ids` field is a provider implementation detail written into
+     concept frontmatter; it is not part of the OKF v0.1 specification.
+
+7. **Return accepted receipt**:
 
 ```json
 {
   "correlation_id": "<matches request>",
-  "source_id": "src-<8 hex chars>",
+  "source_id": "src-<64 hex chars>",
   "status": "accepted",
   "message": "Learning ingested."
 }

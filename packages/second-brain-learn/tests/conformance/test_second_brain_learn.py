@@ -163,7 +163,7 @@ def test_response_schema_requires_source_id_for_accepted() -> None:
     valid_accepted = {
         "correlation_id": "a1b2c3d4-e5f6-4789-abcd-ef1234567890",
         "status": "accepted",
-        "source_id": "src-a1b2c3d4",
+        "source_id": "src-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "message": "Ingested.",
     }
     validate(instance=valid_accepted, schema=schema, cls=Draft202012Validator)
@@ -174,7 +174,7 @@ def test_response_schema_requires_source_id_for_duplicate() -> None:
     valid_duplicate = {
         "correlation_id": "a1b2c3d4-e5f6-4789-abcd-ef1234567890",
         "status": "duplicate",
-        "source_id": "src-a1b2c3d4",
+        "source_id": "src-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "message": "Already ingested.",
     }
     validate(instance=valid_duplicate, schema=schema, cls=Draft202012Validator)
@@ -185,7 +185,7 @@ def test_response_schema_invalid_must_omit_source_id() -> None:
     invalid_with_source_id = {
         "correlation_id": "a1b2c3d4-e5f6-4789-abcd-ef1234567890",
         "status": "invalid",
-        "source_id": "src-a1b2c3d4",
+        "source_id": "src-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "message": "Bad content.",
     }
     with pytest.raises(Exception):
@@ -317,7 +317,7 @@ def test_learn_duplicate_receipt_schema() -> None:
     # Simulate a duplicate receipt
     duplicate_receipt = {
         "correlation_id": "00000000-0000-0000-0000-000000000001",
-        "source_id": "src-a1b2c3d4",
+        "source_id": "src-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "status": "duplicate",
     }
     validate(instance=duplicate_receipt, schema=schema, cls=Draft202012Validator)
@@ -334,7 +334,7 @@ def test_learn_invalid_receipt_no_source_id() -> None:
     # source_id present on invalid receipt should fail validation (conditional schema)
     invalid_with_source = {
         "correlation_id": "00000000-0000-0000-0000-000000000001",
-        "source_id": "src-a1b2c3d4",
+        "source_id": "src-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "status": "invalid",
         "message": "validation failed",
     }
@@ -357,4 +357,97 @@ def test_apm_pack_dry_run_succeeds() -> None:
     )
     assert result.returncode == 0, (
         f"apm pack --dry-run failed for second-brain-learn:\n{result.stdout}\n{result.stderr}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 16. Provenance: learn handler documents post-ingest source_ids annotation
+# ---------------------------------------------------------------------------
+
+def test_learn_handler_documents_provenance_annotation() -> None:
+    """sb-learn-handler must document the post-ingest source_ids annotation step.
+
+    After kw-wiki-ingest, the handler must enumerate concept documents that
+    link to the raw file and append source_ids frontmatter array.
+    """
+    skill_path = SKILLS_DIR / "sb-learn-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    assert "source_ids" in content, (
+        "sb-learn-handler must document writing source_ids to concept frontmatter"
+    )
+    assert "Annotate concept provenance" in content or "provenance" in content.lower(), (
+        "sb-learn-handler must have a post-ingest provenance annotation step"
+    )
+    assert "deduplicate" in content.lower() or "dedup" in content.lower(), (
+        "sb-learn-handler must document deduplication of source_ids on multi-source concepts"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 17. Provenance: source_id is 64 hex chars (full SHA-256), not 8
+# ---------------------------------------------------------------------------
+
+def test_source_id_uses_full_sha256() -> None:
+    """source_id must be full SHA-256 (64 hex chars = 256 bits), not 8 chars (32 bits)."""
+    import re
+
+    schema = _load_schema("brain-learn", "response")
+    pattern = schema.get("properties", {}).get("source_id", {}).get("pattern", "")
+    assert re.search(r"\{64\}", pattern), (
+        f"source_id schema pattern must require 64 hex chars (full SHA-256). Got: {pattern!r}"
+    )
+
+    skill_path = SKILLS_DIR / "sb-learn-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    assert "64" in content and "8" not in content.split("64")[0].split("src-")[-1][:10], (
+        "sb-learn-handler must document 64-char source_id, not 8-char truncation"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 18. Forget: handler must enumerate concept docs (not index) for source_id
+# ---------------------------------------------------------------------------
+
+def test_forget_handler_enumerates_concept_docs() -> None:
+    """sb-forget-handler must enumerate concept documents to resolve source_id.
+
+    wiki/index.md does not carry source_ids frontmatter -- the handler
+    must scan individual concept files under wiki/concepts/.
+    """
+    skill_path = SKILLS_DIR / "sb-forget-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    # Must reference concept files enumeration
+    has_enumerate = (
+        "enumerate" in content.lower()
+        or "wiki/concepts" in content
+        or "concept files" in content.lower()
+    )
+    assert has_enumerate, (
+        "sb-forget-handler must document enumerating concept files "
+        "(NOT wiki/index.md) to find source_ids."
+    )
+    # Must NOT say scan wiki index for source_id lookup
+    # (wiki/index.md doesn't carry provenance)
+    lines_with_index_scan = [
+        l for l in content.splitlines()
+        if "wiki index" in l.lower() and "source_id" in l.lower()
+    ]
+    assert not lines_with_index_scan, (
+        f"sb-forget-handler must not say scan wiki index for source_id: {lines_with_index_scan}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 19. Forget: multi-source conservative tombstone documented
+# ---------------------------------------------------------------------------
+
+def test_forget_handler_documents_multi_source_conservative_tombstone() -> None:
+    """Forget must document that multi-source concepts are tombstoned as a whole in v1."""
+    skill_path = SKILLS_DIR / "sb-forget-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8").lower()
+    assert "multi-source" in content or "multiple" in content, (
+        "sb-forget-handler must document multi-source concept handling"
+    )
+    assert "conservative" in content or "as a whole" in content, (
+        "sb-forget-handler must document that multi-source concepts are tombstoned as a whole in v1"
     )
