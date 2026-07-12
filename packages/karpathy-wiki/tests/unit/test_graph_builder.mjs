@@ -66,16 +66,30 @@ assert(
 );
 
 // ---------------------------------------------------------------------------
-// Test 3: Edge from linked -> archived is absent (archived not in graph)
+// Test 3: Edge from linked -> archived is SILENTLY OMITTED (not broken warning)
 // ---------------------------------------------------------------------------
 
 console.log("\n[3] Edge to archived concept is absent in default graph");
-const archiveEdge = defaultGraph.edges.find(
-    (e) => e.to === "archived-concept"
+// Check by node ID (archived concept id from frontmatter)
+const archiveEdgeById = defaultGraph.edges.find((e) => e.to === "archived-concept");
+assert(
+    archiveEdgeById === undefined,
+    "No edge references the archived concept by node id in the default graph"
+);
+// Also check by path string -- previously broken edges used path strings as `to`.
+// This confirms the edge is fully omitted, not just masked.
+const archiveEdgeByPath = defaultGraph.edges.find(
+    (e) => typeof e.to === "string" && e.to.includes("archived")
 );
 assert(
-    archiveEdge === undefined,
-    "No edge references the archived concept as a target in the default graph"
+    archiveEdgeByPath === undefined,
+    "No broken-link edge with archived-concept path exists in the default graph"
+);
+// Confirm zero broken edges exist at all in the default graph (no spurious warnings).
+const anyBrokenEdge = defaultGraph.edges.find((e) => e.broken);
+assert(
+    anyBrokenEdge === undefined,
+    "Default graph contains zero broken-link edges (archived links are omitted, not broken)"
 );
 
 // ---------------------------------------------------------------------------

@@ -108,6 +108,10 @@ export function buildGraph(wikiRoot, { includeArchived = false } = {}) {
 
     const nodes = new Map(); // path -> node
     const rawLinks = [];     // { fromPath, toPath, label }
+    // Tracks archived concept paths excluded by includeArchived=false, so that
+    // links to those concepts can be silently omitted in edge construction
+    // rather than surfaced as misleading broken-link warnings in the active view.
+    const excludedArchivedPaths = new Set();
 
     for (const file of files) {
         if (STRUCTURAL_FILES.has(file)) continue;
@@ -131,7 +135,14 @@ export function buildGraph(wikiRoot, { includeArchived = false } = {}) {
 
         // Exclude archived concepts at build time so they are structurally
         // absent from edges, statistics, search, and orphan calculations.
-        if (!includeArchived && fm.status === "archived") continue;
+        // Record the path so edge construction can omit links to it silently
+        // rather than marking them as broken-link warnings.
+        if (fm.status === "archived") {
+            if (!includeArchived) {
+                excludedArchivedPaths.add(filePath);
+                continue;
+            }
+        }
 
         const node = {
             id: fm.id,
@@ -188,17 +199,25 @@ export function buildGraph(wikiRoot, { includeArchived = false } = {}) {
     for (const { fromPath, toPath, label } of rawLinks) {
         const fromNode = nodes.get(fromPath);
         const toNode = nodes.get(toPath);
-        const broken = !toNode;
 
         // Structural file source (index.md, log.md): no concept fromNode.
         // Their links count as inbound credit for target concepts without
         // adding a visible graph edge, preventing false orphan marking.
         if (!fromNode) {
-            if (!broken) {
+            if (toNode) {
                 inboundCount.set(toNode.id, (inboundCount.get(toNode.id) || 0) + 1);
             }
             continue;
         }
+
+        // When the link target resolves to an archived concept excluded from
+        // the active view, omit the edge silently.  This avoids surfacing
+        // intentional archive links as misleading "broken link" warnings.
+        // With includeArchived=true the archived node is present in `nodes`,
+        // so excludedArchivedPaths will not match and the edge is emitted normally.
+        if (!toNode && excludedArchivedPaths.has(toPath)) continue;
+
+        const broken = !toNode;
 
         edges.push({
             from: fromNode.id,
