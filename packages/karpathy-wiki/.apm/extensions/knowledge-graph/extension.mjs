@@ -5,8 +5,8 @@
 // Copilot-only in v1. Never modifies the wiki. All actions are read-only.
 
 import { createServer } from "node:http";
-import { statSync } from "node:fs";
-import { join, resolve, relative, normalize } from "node:path";
+import { statSync, realpathSync } from "node:fs";
+import { join, resolve, sep } from "node:path";
 import { joinSession, createCanvas, CanvasError } from "@github/copilot-sdk/extension";
 import { buildGraph, applyFilters, computeStatistics, GraphError } from "./graph.mjs";
 
@@ -21,22 +21,31 @@ function canonicalWikiRoot(inputPath) {
     if (!inputPath || typeof inputPath !== "string") {
         throw new CanvasError("invalid_path", "wiki_path must be a non-empty string.");
     }
-    const resolved = resolve(inputPath);
-    const wikiDir = join(resolved, "wiki");
+    // Resolve symlinks on the bundle root itself so the canonical real path is
+    // stored, displayed, and used for all subsequent containment checks.
+    // realpathSync throws if the path does not exist -- we surface that as a
+    // not_found error rather than falling back to the lexical resolved path.
+    let canonicalRoot;
+    try {
+        canonicalRoot = realpathSync(resolve(inputPath));
+    } catch {
+        throw new CanvasError("not_found", `Bundle root does not exist or cannot be resolved: ${inputPath}`);
+    }
+    const wikiDir = join(canonicalRoot, "wiki");
     let stat;
     try { stat = statSync(wikiDir); } catch {
-        throw new CanvasError("not_found", `No wiki/ directory found under: ${resolved}`);
+        throw new CanvasError("not_found", `No wiki/ directory found under: ${canonicalRoot}`);
     }
     if (!stat.isDirectory()) {
-        throw new CanvasError("not_found", `wiki/ exists but is not a directory: ${resolved}`);
+        throw new CanvasError("not_found", `wiki/ exists but is not a directory: ${canonicalRoot}`);
     }
     try { statSync(join(wikiDir, "index.md")); } catch {
-        throw new CanvasError("not_found", `wiki/index.md missing -- not a valid OKF bundle: ${resolved}`);
+        throw new CanvasError("not_found", `wiki/index.md missing -- not a valid OKF bundle: ${canonicalRoot}`);
     }
-    try { statSync(join(resolved, "SCHEMA.md")); } catch {
-        throw new CanvasError("not_found", `SCHEMA.md missing alongside wiki/ -- not a valid OKF bundle: ${resolved}`);
+    try { statSync(join(canonicalRoot, "SCHEMA.md")); } catch {
+        throw new CanvasError("not_found", `SCHEMA.md missing alongside wiki/ -- not a valid OKF bundle: ${canonicalRoot}`);
     }
-    return resolved;
+    return canonicalRoot;
 }
 
 // Convert GraphError (from pure graph.mjs functions) to CanvasError.

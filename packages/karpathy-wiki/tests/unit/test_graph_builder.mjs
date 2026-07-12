@@ -198,26 +198,46 @@ assert(
 );
 
 // ---------------------------------------------------------------------------
-// Test 8: Live-target symlink escaping containment is blocked (regression)
+// Test 8: Symlink to sibling-dir file (outside bundle) is blocked
 // ---------------------------------------------------------------------------
-// Skipped on platforms where symlink creation is genuinely unavailable.
+// The symlink target lives in a SEPARATE temp directory entirely outside the
+// bundle root. The target contains valid OKF frontmatter so that omission
+// from graph.nodes proves containment rejection, not parse failure.
+// containmentCheck is called against conceptsDir (not bundle root) so that
+// even a symlink to raw/ (bundle-root sibling of wiki/) is rejected.
 
-console.log("\n[8] Symlink path traversal (live target) is blocked");
+console.log("\n[8] Symlink to file outside bundle is blocked");
 {
     let canSymlink = true;
-    let tmpDir;
+    let bundleDir, siblingDir;
     try {
-        tmpDir = mkdtempSync(join(tmpdir(), "kg-symlink-test-"));
-        const wikiDir = join(tmpDir, "wiki");
+        // Two completely separate temp directories.
+        bundleDir = mkdtempSync(join(tmpdir(), "kg-bundle-"));
+        siblingDir = mkdtempSync(join(tmpdir(), "kg-sibling-"));
+
+        const wikiDir = join(bundleDir, "wiki");
         const conceptsDir = join(wikiDir, "concepts");
         mkdirSync(conceptsDir, { recursive: true });
-        writeFileSync(join(tmpDir, "SCHEMA.md"), "# Schema");
+        writeFileSync(join(bundleDir, "SCHEMA.md"), "# Schema");
         writeFileSync(join(wikiDir, "index.md"), "# Index");
-        const sensitiveFile = join(tmpDir, "secret.txt");
-        writeFileSync(sensitiveFile, "SENSITIVE");
-        // Symlink inside wiki/concepts/ pointing to a file OUTSIDE wiki/ (but inside bundle root).
-        // realpathSync resolves this to the real path; containmentCheck must detect escape.
-        symlinkSync(sensitiveFile, join(conceptsDir, "escape.md"));
+
+        // Valid OKF concept file in the sibling dir (OUTSIDE bundle root).
+        const validConceptContent = [
+            "---",
+            "id: escaped-concept",
+            "title: Escaped Concept",
+            "type: concept",
+            "created: 2026-01-01",
+            "modified: 2026-01-01",
+            "---",
+            "",
+            "This file is outside the bundle root.",
+        ].join("\n");
+        const externalFile = join(siblingDir, "escaped-concept.md");
+        writeFileSync(externalFile, validConceptContent);
+
+        // Symlink from inside wiki/concepts/ to the external valid file.
+        symlinkSync(externalFile, join(conceptsDir, "escape.md"));
     } catch {
         canSymlink = false;
     }
@@ -228,22 +248,77 @@ console.log("\n[8] Symlink path traversal (live target) is blocked");
         let graph;
         let threw = false;
         try {
-            graph = buildGraph(tmpDir);
+            graph = buildGraph(bundleDir);
         } catch {
             threw = true;
         }
         if (threw) {
-            // Throwing is also acceptable -- either way the escape is rejected.
-            assert(true, "buildGraph threw on symlink escape (escape rejected)");
+            assert(true, "buildGraph threw on external symlink (escape rejected)");
         } else {
-            // If buildGraph completed, the escaping symlink target must NOT appear as a node.
-            const hasSensitiveNode = graph.nodes.some(
-                (n) => (n.path && (n.path.includes("escape") || n.path.includes("secret")))
-                     || n.id === "escape"
+            // The external concept has valid frontmatter id="escaped-concept".
+            // If containment works correctly it must NOT appear as a graph node.
+            const hasEscapedNode = graph.nodes.some(
+                (n) => n.id === "escaped-concept"
+                     || (n.path && n.path.includes("escape"))
             );
-            assert(!hasSensitiveNode, "Escaping symlink target is NOT surfaced as a graph node");
+            assert(!hasEscapedNode,
+                "Symlink to valid external concept is NOT surfaced as a graph node " +
+                "(containment checked against conceptsDir, not bundle root)"
+            );
         }
-        try { rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+        try { rmSync(bundleDir, { recursive: true, force: true }); } catch {}
+        try { rmSync(siblingDir, { recursive: true, force: true }); } catch {}
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Test 8b: Symlink to raw/ (bundle-root sibling of wiki/) is also blocked
+// ---------------------------------------------------------------------------
+// Even though raw/ is inside the bundle root, concept candidates must be
+// contained within conceptsDir. A symlink pointing to raw/ must be rejected.
+
+console.log("\n[8b] Symlink to raw/ sibling of wiki/ is also blocked");
+{
+    let canSymlink = true;
+    let bundleDir;
+    try {
+        bundleDir = mkdtempSync(join(tmpdir(), "kg-raw-symlink-"));
+        const wikiDir = join(bundleDir, "wiki");
+        const conceptsDir = join(wikiDir, "concepts");
+        const rawDir = join(bundleDir, "raw");
+        mkdirSync(conceptsDir, { recursive: true });
+        mkdirSync(rawDir, { recursive: true });
+        writeFileSync(join(bundleDir, "SCHEMA.md"), "# Schema");
+        writeFileSync(join(wikiDir, "index.md"), "# Index");
+
+        // Valid concept file in raw/ (inside bundle but outside wiki/concepts/).
+        const validConcept = [
+            "---", "id: raw-concept", "title: Raw Concept", "type: concept",
+            "created: 2026-01-01", "modified: 2026-01-01", "---", "",
+        ].join("\n");
+        writeFileSync(join(rawDir, "raw-concept.md"), validConcept);
+        // Symlink from concepts/ into raw/.
+        symlinkSync(join(rawDir, "raw-concept.md"), join(conceptsDir, "via-raw.md"));
+    } catch {
+        canSymlink = false;
+    }
+
+    if (!canSymlink) {
+        console.log("  SKIP: symlink creation not available on this platform");
+    } else {
+        let graph;
+        let threw = false;
+        try { graph = buildGraph(bundleDir); } catch { threw = true; }
+        if (threw) {
+            assert(true, "buildGraph threw on raw/ symlink (escape rejected)");
+        } else {
+            const hasRawNode = graph.nodes.some((n) => n.id === "raw-concept");
+            assert(!hasRawNode,
+                "Symlink from concepts/ to raw/ is NOT surfaced as a graph node " +
+                "(conceptsDir containment prevents raw/ sibling escapes)"
+            );
+        }
+        try { rmSync(bundleDir, { recursive: true, force: true }); } catch {}
     }
 }
 

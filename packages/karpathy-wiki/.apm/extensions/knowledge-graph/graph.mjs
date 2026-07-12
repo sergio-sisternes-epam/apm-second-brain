@@ -123,11 +123,12 @@ export function buildGraph(wikiRoot, { includeArchived = false } = {}) {
         if (STRUCTURAL_FILES.has(file)) continue;
         const filePath = join(conceptsDir, file);
 
-        // Enforce containment on the real resolved path before reading.
-        // A symlink under concepts/ whose target is outside wikiRoot is skipped
-        // silently rather than crashing the whole graph build.
+        // Enforce containment: the resolved concept file must sit inside
+        // conceptsDir (not merely inside wikiRoot). This prevents a symlink
+        // in concepts/ that targets raw/, another wiki subdirectory, or any
+        // bundle sibling from becoming a concept node.
         try {
-            containmentCheck(filePath, wikiRoot);
+            containmentCheck(filePath, conceptsDir);
         } catch (e) {
             if (e instanceof GraphError) continue;
             throw e;

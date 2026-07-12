@@ -238,3 +238,52 @@ def test_archived_exclusion_functional():
         f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
     )
 
+
+
+# ---------------------------------------------------------------------------
+# 9. actions.mjs exists (SDK-independent action layer for testability)
+# ---------------------------------------------------------------------------
+
+ACTIONS_MODULE_PATH = PKG_ROOT / ".apm" / "extensions" / "knowledge-graph" / "actions.mjs"
+ACTIONS_TEST_PATH = PKG_ROOT / "tests" / "unit" / "test_actions.mjs"
+
+def test_actions_module_exists():
+    assert ACTIONS_MODULE_PATH.exists(), (
+        f"actions.mjs not found at: {ACTIONS_MODULE_PATH} -- required for SDK-independent testing"
+    )
+
+def test_actions_module_has_no_sdk_import():
+    content = ACTIONS_MODULE_PATH.read_text(encoding="utf-8")
+    import re; has_sdk_import = bool(re.search(r"^import.*@github/copilot-sdk", content, re.MULTILINE)); assert not has_sdk_import, (
+        "actions.mjs must not import @github/copilot-sdk -- it must be SDK-independent "
+        "so unit tests can run without the SDK runtime."
+    )
+
+def test_actions_module_exports_make_actions():
+    content = ACTIONS_MODULE_PATH.read_text(encoding="utf-8")
+    assert "makeActions" in content, (
+        "actions.mjs must export makeActions() for test injection"
+    )
+
+def test_actions_module_exports_all_seven_actions():
+    content = ACTIONS_MODULE_PATH.read_text(encoding="utf-8")
+    for action in ["open_graph", "refresh_graph", "get_statistics", "search_nodes",
+                   "set_filter", "clear_filters", "focus_node"]:
+        assert action in content, f"actions.mjs must implement action: {action}"
+
+def test_actions_test_suite_exists():
+    assert ACTIONS_TEST_PATH.exists(), (
+        f"test_actions.mjs not found at: {ACTIONS_TEST_PATH}"
+    )
+
+def test_actions_test_suite_passes():
+    """Run the 7-action + isolation test suite via Node.js."""
+    import subprocess
+    result = subprocess.run(
+        ["node", str(ACTIONS_TEST_PATH)],
+        capture_output=True, text=True, timeout=30,
+    )
+    assert result.returncode == 0, (
+        f"test_actions.mjs failed (exit {result.returncode}):\n"
+        f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+    )

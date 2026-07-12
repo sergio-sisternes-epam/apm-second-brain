@@ -78,8 +78,19 @@ All actions are **read-only**. The canvas never modifies the wiki.
 **`open_graph` / `refresh_graph`**: Build or rebuild the active graph from disk.
 By default, concepts with `status: archived` in their OKF frontmatter are
 excluded at parse time -- they are absent from the graph data, not merely hidden.
-Pass `includeArchived: true` to include archived concepts alongside active ones
-(useful for auditing or reviewing archived knowledge).
+
+**`set_filter`**: Narrows the visible graph view without rebuilding from disk,
+except when `includeArchived` changes (see below). `clear_filters` resets ALL
+active filters including focus state, directory prefix, type, tag, status,
+orphan/connected flags, free-text search, and `includeArchived` (which is reset
+to false, restoring the default archived-excluded view).
+
+**`includeArchived` (passed to `set_filter`, default: false)**: Controls whether
+archived concepts are included in the graph. When toggled from false to true (or
+true to false), the graph is **rebuilt from disk** to add or remove archived
+concepts at the data level -- this is not a view filter. Archived concepts absent
+from the active graph are also absent from statistics, search results, focus
+neighbourhood, and orphan calculations.
 
 **`focus_node`**: Narrows the visible graph to the focused concept node and its
 direct neighbourhood (concepts it links to and concepts that link to it). All
@@ -87,31 +98,28 @@ other nodes are dimmed or hidden. The focused node is highlighted with a blue
 border and a "focus" badge. Calling `clear_filters` restores the full active
 graph and clears the focus state.
 
-**`set_filter` / `clear_filters`**: Filters narrow the graph view without
-rebuilding it from disk. `clear_filters` resets ALL active filters including
-focus state, directory prefix, type, tag, status, orphan/connected flags, and
-free-text search. After `clear_filters` the full active (non-archived) graph
-is visible.
-
 **`get_statistics`**: Returns counts and rankings computed over the active graph
-only. Archived concepts (excluded at parse time unless `includeArchived: true`)
-are not counted in node totals, orphan counts, or most-connected rankings.
+only. Archived concepts (excluded at parse time unless `includeArchived: true`
+is set via `set_filter`) are not counted in node totals, orphan counts, or
+most-connected rankings.
 
 **Multi-instance isolation**: Each canvas instance is bound to a single wiki
-bundle path for its lifetime. Filter state, focus state, and graph data are
-instance-local and do not bleed between instances targeting different wikis.
+bundle path for its lifetime. Filter state (including `includeArchived`), focus
+state, and graph data are instance-local and do not bleed between instances
+targeting different wikis.
 
 ### Filter fields for `set_filter`
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `type` | string | OKF concept type (e.g. `concept`, `term`, `note`). |
-| `tag` | string | Require this tag on the concept. |
-| `status` | string | Concept status (e.g. `draft`, `stable`). |
-| `directory` | string | Prefix filter on the concept file path. |
-| `onlyOrphans` | boolean | Show only concepts with no links. |
-| `onlyConnected` | boolean | Show only concepts with at least one link. |
-| `text` | string | Free-text search across title, description, path, and tags. |
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `type` | string | — | OKF concept type (e.g. `concept`, `term`, `note`). |
+| `tag` | string | — | Require this tag on the concept. |
+| `status` | string | — | Concept status (e.g. `draft`, `stable`). |
+| `directory` | string | — | Prefix filter on the concept file path. |
+| `onlyOrphans` | boolean | false | Show only concepts with no links. |
+| `onlyConnected` | boolean | false | Show only concepts with at least one link. |
+| `text` | string | — | Free-text search across title, description, path, and tags. |
+| `includeArchived` | boolean | false | Include archived concepts; **triggers graph rebuild from disk** when changed. |
 
 ---
 
