@@ -78,14 +78,19 @@ jobs:
           else
             apm marketplace check
           fi
-      - name: Compile all packages (dry-run)
+      - name: Dry-run pack each standalone package
         run: |
-          # Validate each package independently to catch per-package compile errors
-          # that a root-level pack might absorb or skip.
+          # Validate each package that has no local-path dependencies.
+          # Packages with local-path deps (e.g. "../other-pkg") cannot be
+          # packed in isolation; they are covered by the root-level apm pack below.
           find . -mindepth 2 -name "apm.yml" ! -path "*/.apm/*" -exec dirname {} \; \
             | sort -u \
             | while read pkg_dir; do
-                echo "--- compiling $pkg_dir ---"
+                if grep -qE '^\s+- \.\.' "$pkg_dir/apm.yml" 2>/dev/null; then
+                  echo "--- skipping $pkg_dir (local-path dependencies; validated by root pack) ---"
+                  continue
+                fi
+                echo "--- dry-run pack: $pkg_dir ---"
                 (cd "$pkg_dir" && apm pack --dry-run) || exit 1
               done
       - name: Pack and verify marketplace.json is current
