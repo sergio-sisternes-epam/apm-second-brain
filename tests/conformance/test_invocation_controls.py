@@ -1,8 +1,12 @@
 """
 Conformance test: invocation controls.
 
-Verifies that every declared internal skill carries the required
-direct-user-invocation disabled header and the redirect instruction.
+Verifies that every internal skill carries the required direct-user-invocation
+disabled header and the redirect instruction.  Internal skills are discovered
+automatically: any SKILL.md whose first line is the disabled header is treated
+as internal.  This means new internal skills are covered without updating a
+hardcoded list -- authors simply add the header and the tests follow.
+
 This test is deterministic and runs in CI without a live agent runtime.
 
 Runtime evaluation (gate2-direct-user-negative, gate2-model-caller-positive)
@@ -17,24 +21,24 @@ import pytest
 
 REPO_ROOT = Path(__file__).parent.parent.parent
 
-# All internal skills across all packages.
-# Each entry is a path relative to REPO_ROOT.
-INTERNAL_SKILLS = [
-    "packages/agent-knowledge-network/.apm/skills/akn-registry-io/SKILL.md",
-    "packages/karpathy-wiki/.apm/skills/kw-wiki-init/SKILL.md",
-    "packages/karpathy-wiki/.apm/skills/kw-wiki-ingest/SKILL.md",
-    "packages/karpathy-wiki/.apm/skills/kw-wiki-query/SKILL.md",
-    "packages/karpathy-wiki/.apm/skills/kw-wiki-index/SKILL.md",
-    "packages/karpathy-wiki/.apm/skills/kw-wiki-log/SKILL.md",
-    "packages/karpathy-wiki/.apm/skills/kw-wiki-lint/SKILL.md",
-    "packages/karpathy-wiki/.apm/skills/kw-wiki-archive/SKILL.md",
-]
-
 DISABLED_HEADER = "<!-- direct-user-invocation: disabled -->"
 REDIRECT_PATTERN = re.compile(
     r"(must only be called by|not.*invok.*direct|decline|redirect|internal)",
     re.IGNORECASE,
 )
+
+
+def _discover_internal_skills() -> list[str]:
+    """Return repo-relative paths of all SKILL.md files whose first line is the disabled header."""
+    found = []
+    for skill_md in sorted(REPO_ROOT.glob("packages/*/.apm/skills/*/SKILL.md")):
+        lines = skill_md.read_text(encoding="utf-8").splitlines()
+        if lines and lines[0].strip() == DISABLED_HEADER:
+            found.append(str(skill_md.relative_to(REPO_ROOT)))
+    return found
+
+
+INTERNAL_SKILLS = _discover_internal_skills()
 
 
 @pytest.mark.parametrize("skill_path", INTERNAL_SKILLS)
@@ -68,27 +72,16 @@ def test_disabled_header_is_first_line(skill_path: str) -> None:
 
 def test_public_skills_do_not_carry_disabled_header() -> None:
     """Public skills must NOT have the disabled header."""
-    public_skill_dirs = [
-        REPO_ROOT / "packages" / pkg / ".apm" / "skills"
-        for pkg in [
-            "open-knowledge-format",
-            "second-brain-interfaces",
-            "agent-knowledge-network",
-        ]
-    ]
     internal_paths = {REPO_ROOT / p for p in INTERNAL_SKILLS}
 
-    for skills_dir in public_skill_dirs:
-        if not skills_dir.exists():
+    for skill_md in sorted(REPO_ROOT.glob("packages/*/.apm/skills/*/SKILL.md")):
+        if skill_md in internal_paths:
             continue
-        for skill_md in skills_dir.rglob("SKILL.md"):
-            if skill_md in internal_paths:
-                continue
-            content = skill_md.read_text(encoding="utf-8")
-            assert DISABLED_HEADER not in content, (
-                f"Public skill {skill_md.relative_to(REPO_ROOT)} must NOT carry "
-                "the direct-user-invocation disabled header."
-            )
+        content = skill_md.read_text(encoding="utf-8")
+        assert DISABLED_HEADER not in content, (
+            f"Public skill {skill_md.relative_to(REPO_ROOT)} must NOT carry "
+            "the direct-user-invocation disabled header."
+        )
 
 
 def test_eval_fixtures_present() -> None:

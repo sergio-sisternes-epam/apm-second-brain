@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    # Include ready_for_review so converting a draft to ready re-triggers CI
+    # even when no new commits are pushed.
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   lint:
@@ -15,15 +18,15 @@ jobs:
       - name: Check for private context
         run: |
           # Fail if any non-workflow file references internal paths or private markers.
-          # The workflow file itself is excluded to avoid false positives from the
-          # scanner's own pattern strings.
+          # Exclude the entire .github/workflows/ directory: every workflow file embeds
+          # the scanner's own pattern strings and must not be falsely flagged.
           if grep -rn \
             -e "epam-agent-forge" \
             -e "Users/sergio_sisternes" \
             -e "EPAM All Rights Reserved" \
             --include="*.md" --include="*.yml" --include="*.yaml" \
             --include="*.json" --include="*.py" --include="*.mjs" \
-            --exclude="ci.yml" \
+            --exclude-dir=".github" \
             .; then
             echo "Private context found -- remove before merging" && exit 1
           fi
@@ -40,7 +43,13 @@ jobs:
       - name: Install test dependencies
         run: pip install pytest pyyaml jsonschema
       - name: Run conformance suite
-        run: python3 -m pytest tests/conformance/ -v
+        run: |
+          # Collect root conformance tests plus every package-level conformance dir.
+          DIRS="tests/conformance/"
+          for pkg_tests in packages/*/tests/conformance; do
+            [ -d "$pkg_tests" ] && DIRS="$DIRS $pkg_tests"
+          done
+          python3 -m pytest $DIRS -v
 
   apm-validate:
     name: APM package validation
