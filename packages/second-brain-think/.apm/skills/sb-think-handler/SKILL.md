@@ -44,8 +44,17 @@ A `second-brain.think.v1` request envelope:
 ## Procedure
 
 1. **Validate envelope**: Call `sb-think-validate` with the request envelope.
-   If `valid` is false, return an error envelope with the validation messages.
-   Stop.
+   If `valid` is false, return a schema-valid error envelope:
+
+   ```json
+   {
+     "correlation_id": "<from request, or generated UUID if request malformed>",
+     "code": "VALIDATION_ERROR",
+     "message": "<validation error details as human-readable string>"
+   }
+   ```
+
+   Stop. Do not proceed to retrieval.
 
 2. **Retrieve concepts**: Call `kw-wiki-query` with:
    - `wiki_root`: the configured wiki root path
@@ -105,11 +114,14 @@ A `second-brain.think.v1` request envelope:
 
 ## Error conditions
 
-| Condition            | Response                                               |
-|----------------------|--------------------------------------------------------|
-| Validation fails     | Return error envelope with validation messages         |
-| kw-wiki-query error  | Return `unanswered` with knowledge gap note            |
-| Empty question       | Caught by validation; return error envelope            |
+| Condition            | Error code        | Response                                               |
+|----------------------|-------------------|--------------------------------------------------------|
+| Validation fails     | `VALIDATION_ERROR`| Return error envelope with validation messages         |
+| kw-wiki-query error  | `PROVIDER_ERROR`  | Return `unanswered` quality response with gap note     |
+| Empty question       | `VALIDATION_ERROR`| Caught by validation; return error envelope            |
+| Transient failure    | `TRANSIENT`       | Return error envelope; caller may safely retry         |
+
+Error envelopes must match the `second-brain.error` schema (fields: `correlation_id`, `code`, `message`, optional `detail`).
 
 ## References
 

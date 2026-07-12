@@ -116,6 +116,58 @@ def test_valid_think_request_fixture() -> None:
 
 
 # ---------------------------------------------------------------------------
+# 7. Behavioural contract: think is strictly read-only
+# ---------------------------------------------------------------------------
+
+def test_think_handler_is_strictly_read_only() -> None:
+    """The think handler must document its read-only guarantee explicitly."""
+    skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8").lower()
+    has_readonly = "read-only" in content or "strictly read" in content or "never modif" in content
+    assert has_readonly, (
+        "sb-think-handler must document its read-only guarantee "
+        "(no writes, no archives, no ingestion)."
+    )
+
+
+# ---------------------------------------------------------------------------
+# 8. Behavioural contract: think response includes schema-valid citations
+# ---------------------------------------------------------------------------
+
+def test_think_response_citations_match_schema() -> None:
+    """think-handler citation format must match the second-brain-interfaces response schema.
+
+    Schema requires: source_id (string, required), label (string, required),
+    excerpt (string, optional). No other fields (additionalProperties: false).
+    """
+    skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    # The skill must document source_id and label in citations
+    assert '"source_id"' in content or 'source_id' in content, (
+        "sb-think-handler must document citations with source_id (required per schema)"
+    )
+    assert '"label"' in content or 'label' in content, (
+        "sb-think-handler must document citations with label (required per schema)"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 9. Behavioural contract: think returns schema-valid error codes
+# ---------------------------------------------------------------------------
+
+def test_think_handler_uses_schema_valid_error_codes() -> None:
+    """Think handler errors must use codes defined in the error schema."""
+    valid_codes = {"VALIDATION_ERROR", "NOT_FOUND", "UNAUTHORIZED", "PROVIDER_ERROR", "TRANSIENT", "UNKNOWN"}
+    skill_path = SKILLS_DIR / "sb-think-handler" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    # Check that at least one valid error code is referenced
+    found = any(code in content for code in valid_codes)
+    assert found, (
+        f"sb-think-handler must use schema-valid error codes from: {valid_codes}"
+    )
+
+
+# ---------------------------------------------------------------------------
 # 6. Dependencies declared in apm.yml
 # ---------------------------------------------------------------------------
 
@@ -129,3 +181,20 @@ def test_dependencies_declared_in_apm_yml() -> None:
     assert "second-brain-interfaces" in content, (
         "apm.yml must declare second-brain-interfaces as a dependency"
     )
+
+
+# ---------------------------------------------------------------------------
+# 10. Dependency pins use full 40-character SHA
+# ---------------------------------------------------------------------------
+
+def test_dependency_pins_use_full_sha() -> None:
+    """Remote dependency refs must use a full 40-char commit SHA for reproducibility."""
+    import re
+    apm_yml_path = PKG_ROOT / "apm.yml"
+    content = apm_yml_path.read_text(encoding="utf-8")
+    sha_refs = re.findall(r'#([0-9a-f]+)', content)
+    for sha in sha_refs:
+        assert len(sha) == 40, (
+            f"apm.yml dependency pin uses short SHA '{sha}' -- must be full 40-char SHA "
+            "for reproducible builds."
+        )

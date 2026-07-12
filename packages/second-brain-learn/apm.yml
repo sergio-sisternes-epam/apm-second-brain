@@ -11,8 +11,8 @@ targets:
   - copilot
 dependencies:
   apm:
-    - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki#c4a074f1
-    - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces#c4a074f1
+    - sergio-sisternes-epam/apm-second-brain/packages/karpathy-wiki#c4a074f18cbe25c1c1c4f12caae732210cd7c860
+    - sergio-sisternes-epam/apm-second-brain/packages/second-brain-interfaces#c4a074f18cbe25c1c1c4f12caae732210cd7c860
   mcp: []
 includes: auto
 scripts: {}

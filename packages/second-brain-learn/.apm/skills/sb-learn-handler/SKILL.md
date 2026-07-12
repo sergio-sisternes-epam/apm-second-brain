@@ -64,6 +64,13 @@ A `second-brain.learn.v1` request envelope:
 
 4. **Write raw snapshot**: Write `content` to a file in `raw/` using the
    `correlation_id` as the filename stem (e.g. `raw/<correlation_id>.md`).
+   This file is the immutable raw source record.
+
+   The `source_id` returned in the receipt is the filename stem of this raw
+   file -- i.e. the `correlation_id`. This is the stable, caller-visible
+   identifier for the learning. It is predictable (UUID-v4 guarantees
+   uniqueness), directly maps to the raw file on disk, and is the value
+   a caller passes as `target_id` in a future forget request.
 
 5. **Ingest**: Call `kw-wiki-ingest` with:
    - `wiki_root`: the configured wiki root path
@@ -77,7 +84,7 @@ A `second-brain.learn.v1` request envelope:
 ```json
 {
   "correlation_id": "<matches request>",
-  "source_id": "<assigned identifier>",
+  "source_id": "<equals correlation_id -- the raw filename stem and stable forget target>",
   "status": "accepted",
   "message": "<human-readable confirmation>"
 }

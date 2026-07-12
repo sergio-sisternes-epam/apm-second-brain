@@ -43,15 +43,32 @@ A `second-brain.forget.v1` request envelope:
 
 ## Procedure
 
-1. **Resolve target**: Interpret `target_id` as either:
-   - A `source_id` previously returned in a learn receipt (e.g. `src-a1b2c3d4`).
-     Locate the corresponding raw file and concept documents via the wiki index.
+1. **Validate envelope**: Call `sb-learn-validate` (or an equivalent validation
+   step) to confirm the forget request matches the `second-brain.forget.v1`
+   schema. If validation fails, return a receipt with `status: not_found` and
+   a descriptive error message. Stop.
+
+2. **Containment check for concept path inputs**: If `target_id` looks like a
+   concept path (contains `/` or `.md`), canonicalise the path and confirm it
+   resolves within `wiki/concepts/` of the configured wiki root. Reject any
+   `target_id` that would traverse outside the wiki root (e.g. `../../etc`).
+   Return `status: not_found` if containment fails.
+
+3. **Resolve target**: Interpret `target_id` as either:
+   - A `source_id` (equals `correlation_id` from a learn receipt). Locate the
+     raw file at `raw/<source_id>.md` and the corresponding concept documents
+     via the wiki index.
    - A concept path (e.g. `infra/kubernetes/pull-policy`). Locate the concept
      document directly at `wiki/concepts/<target_id>.md`.
 
    If neither resolves, return a receipt with `status: not_found`.
 
-2. **Archive**: Call `kw-wiki-archive` with:
+4. **Idempotency check**: Read the concept document's frontmatter. If
+   `status: archived` is already set, the concept is already tombstoned.
+   Return a receipt with `status: tombstoned` and a message noting it was
+   already archived. Do not call `kw-wiki-archive` again (idempotent).
+
+5. **Archive**: Call `kw-wiki-archive` with:
    - `wiki_root`: the configured wiki root path
    - `concept_id`: the resolved concept slug (e.g. `kubernetes-pull-policy`)
    - `reason`: the `reason` field from the request
@@ -61,7 +78,7 @@ A `second-brain.forget.v1` request envelope:
    without deleting the file. Do not call `kw-wiki-log` separately after
    this step -- `kw-wiki-archive` handles logging internally.
 
-3. **Return receipt**:
+6. **Return receipt**:
 
 ```json
 {
