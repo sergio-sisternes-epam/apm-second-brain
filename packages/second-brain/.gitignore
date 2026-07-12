@@ -1,0 +1,9 @@
+# APM dependency cache -- never commit
+apm_modules/
+
+# Generated deployment targets from apm install.
+# This meta-package has no .apm/ of its own; all generated content
+# comes from its dependencies and must not be edited or committed.
+.agents/
+.claude/
+.github/

@@ -93,3 +93,10 @@ jobs:
             exit 1
           fi
           echo "marketplace.json is current."
+      - name: second-brain external consumer integration test
+        run: |
+          # Proves that installing the pinned second-brain package in an isolated
+          # empty workspace materialises both learn and think dependency trees.
+          # APM CLI is installed in this job; GITHUB_SHA pins the exact commit
+          # under test (not a mutable branch tip). Fails CI on any failure.
+          python3 scripts/test-second-brain-consumer-install.py "${{ github.sha }}"
